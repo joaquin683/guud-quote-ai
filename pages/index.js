@@ -6,9 +6,9 @@ const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: '
 const AGENT_LABELS = {
   branding:   { label: 'Especialista Branding',  color: '#E8FF00' },
   web:        { label: 'Especialista Web',        color: '#E8FF00' },
-  campana:    { label: 'Especialista Campaña',    color: '#E8FF00' },
+  campana:    { label: 'Especialista CampaÃ±a',    color: '#E8FF00' },
   contenido:  { label: 'Especialista Contenido',  color: '#E8FF00' },
-  estrategia: { label: 'Consultor Estratégico',   color: '#E8FF00' },
+  estrategia: { label: 'Consultor EstratÃ©gico',   color: '#E8FF00' },
 }
 
 const INITIAL_CHIPS = [
@@ -16,11 +16,11 @@ const INITIAL_CHIPS = [
   'Necesito renovar mi identidad visual',
   'Quiero una web que venda',
   'Necesito contenido para mis redes',
-  'Quiero una campaña que impacte',
-  'No sé por dónde empezar',
+  'Quiero una campaÃ±a que impacte',
+  'No sÃ© por dÃ³nde empezar',
 ]
 
-const WELCOME_MSG = '¡Hola! Soy la IA creativa de GÜÜD Company. Estoy aquí para ayudarte a cotizar tu próximo proyecto y conectarte con el mejor talento creativo. ¿Qué tienes en mente?'
+const WELCOME_MSG = 'Â¡Hola! Soy la IA creativa de GÃÃD Company. Estoy aquÃ­ para ayudarte a cotizar tu prÃ³ximo proyecto y conectarte con el mejor talento creativo. Â¿QuÃ© tienes en mente?'
 
 export default function Home() {
   const [fase, setFase]             = useState('inicio')
@@ -43,7 +43,7 @@ export default function Home() {
   const rafRef    = useRef(null)
   const wtRef     = useRef(0)
 
-  // Mensaje de bienvenida automático
+  // Mensaje de bienvenida automÃ¡tico
   useEffect(() => {
     if (welcomeDone) return
     setWelcomeDone(true)
@@ -126,7 +126,7 @@ export default function Home() {
           setFase('chat')
         }
       } catch (e) {
-        addMsg('Error de conexión. Recarga e intenta de nuevo.', 'ai')
+        addMsg('Error de conexiÃ³n. Recarga e intenta de nuevo.', 'ai')
         setFase('inicio')
       }
       setCargando(false); setWaveActive(false)
@@ -146,7 +146,7 @@ export default function Home() {
           addMsg(d.reply, 'ai')
           setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
         }
-      } catch (e) { addMsg('Error de conexión.', 'ai') }
+      } catch (e) { addMsg('Error de conexiÃ³n.', 'ai') }
       setCargando(false); setWaveActive(false)
     }
   }
@@ -186,7 +186,7 @@ export default function Home() {
     setTimeout(() => {
       const s = [
         'I need a brand identity for my new startup',
-        'Necesito una campaña de lanzamiento para mi nueva marca',
+        'Necesito una campaÃ±a de lanzamiento para mi nueva marca',
         'Preciso de uma identidade visual completa',
         'Je veux redesigner mon packaging',
       ]
@@ -201,9 +201,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>GÜÜD Quote AI — Global Creative HÜB</title>
+        <title>GÃÃD Quote AI â Global Creative HÃB</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Cotiza tu próximo proyecto creativo con IA. GÜÜD Company — Global Creative HÜB." />
+        <meta name="description" content="Cotiza tu prÃ³ximo proyecto creativo con IA. GÃÃD Company â Global Creative HÃB." />
       </Head>
 
       <div style={S.app}>
@@ -214,13 +214,13 @@ export default function Home() {
           <div style={S.logoWrap}>
             <img
               src="/logo.gif"
-              alt="GÜÜD"
+              alt="GÃÃD"
               style={S.logoImg}
               onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
             />
             <div style={{ display: 'none', flexDirection: 'column', gap: 1 }}>
-              <div style={S.logoText}>GÜÜD</div>
-              <div style={S.logoSub}>Global Creative HÜB</div>
+              <div style={S.logoText}>GÃÃD</div>
+              <div style={S.logoSub}>Global Creative HÃB</div>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -229,7 +229,7 @@ export default function Home() {
                 {agenteInfo.label}
               </div>
             )}
-            <a href="/admin" style={S.badge}>Admin →</a>
+            <a href="/admin" style={S.badge}>Admin â</a>
           </div>
         </header>
 
@@ -242,9 +242,9 @@ export default function Home() {
               <canvas ref={canvasRef} width={92} height={92} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
             </div>
           </div>
-          {!mini && <div style={S.heroTitle}>Tu próxima gran idea empieza aquí</div>}
-          {!mini && <div style={S.heroSub}>La IA creativa de GÜÜD te ayuda a cotizar y conectar con el mejor talento.</div>}
-          {mini && <div style={S.miniTitle}>GÜÜD Quote AI</div>}
+          {!mini && <div style={S.heroTitle}>Tu prÃ³xima gran idea empieza aquÃ­</div>}
+          {!mini && <div style={S.heroSub}>La IA creativa de GÃÃD te ayuda a cotizar y conectar con el mejor talento.</div>}
+          {mini && <div style={S.miniTitle}>GÃÃD Quote AI</div>}
         </div>
 
         {/* CHAT */}
@@ -252,7 +252,7 @@ export default function Home() {
           {mensajes.map(m => (
             <div key={m.id} style={{ ...S.row, ...(m.rol === 'user' ? S.rowUser : {}) }}>
               <div style={{ ...S.av, ...(m.rol === 'ai' ? S.avAi : S.avU) }}>
-                {m.rol === 'ai' ? 'GÜ' : 'TÚ'}
+                {m.rol === 'ai' ? 'GÃ' : 'TÃ'}
               </div>
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} />
@@ -268,7 +268,7 @@ export default function Home() {
 
           {cargando && (
             <div style={S.row}>
-              <div style={{ ...S.av, ...S.avAi }}>GÜ</div>
+              <div style={{ ...S.av, ...S.avAi }}>GÃ</div>
               <div style={{ ...S.bub, ...S.bubAi, padding: 0 }}>
                 <div style={S.dots}>
                   {[0, .18, .36].map((d, i) => <span key={i} style={{ ...S.dot, animationDelay: `${d}s` }} />)}
@@ -279,13 +279,13 @@ export default function Home() {
 
           {agendando && (
             <div style={S.row}>
-              <div style={{ ...S.av, ...S.avAi }}>GÜ</div>
+              <div style={{ ...S.av, ...S.avAi }}>GÃ</div>
               <div style={S.agendarCard}>
-                <div style={S.agendarTitle}>Agendar reunión · Joaquín Labbe</div>
+                <div style={S.agendarTitle}>Agendar reuniÃ³n Â· JoaquÃ­n Labbe</div>
                 <input style={S.formInput} placeholder="Tu nombre" value={contacto.nombre} onChange={e => setContacto(p => ({ ...p, nombre: e.target.value }))} />
                 <input style={{ ...S.formInput, marginTop: 8 }} placeholder="Tu email" type="email" value={contacto.email} onChange={e => setContacto(p => ({ ...p, email: e.target.value }))} />
                 <button style={{ ...S.btnP, width: '100%', marginTop: 12 }} onClick={confirmarReunion} disabled={!contacto.nombre || !contacto.email || cargando}>
-                  Confirmar reunión →
+                  Confirmar reuniÃ³n â
                 </button>
               </div>
             </div>
@@ -308,7 +308,7 @@ export default function Home() {
               <textarea
                 ref={inputRef}
                 style={S.textarea}
-                placeholder="Write in any language · Escribe en cualquier idioma…"
+                placeholder="Write in any language Â· Escribe en cualquier idiomaâ¦"
                 rows={1}
                 value={input}
                 onChange={e => {
@@ -334,7 +334,7 @@ export default function Home() {
                 </svg>
               </button>
             </div>
-            <div style={S.inputFooter}>GÜÜD Company · Global Creative HÜB · Available in all languages</div>
+            <div style={S.inputFooter}>GÃÃD Company Â· Global Creative HÃB Â· Available in all languages</div>
           </div>
         )}
       </div>
@@ -374,7 +374,7 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
       <div style={S.qcard}>
         <div style={S.qhdr}>
-          <div style={S.qtag}>Estimación · GÜÜD Company</div>
+          <div style={S.qtag}>EstimaciÃ³n Â· GÃÃD Company</div>
           <div style={S.qname}>{quote.proyecto}</div>
           <div style={{ fontSize: 11.5, color: 'var(--t2)', marginTop: 2 }}>{quote.servicio}</div>
         </div>
@@ -383,7 +383,7 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
             ['Entregables', quote.entregables],
             ['Tiempo estimado', quote.tiempo],
             ['Equipo sugerido', quote.talentos_sugeridos?.join(', ')],
-            ['Director Creativo', 'Joaquín Labbe'],
+            ['Director Creativo', 'JoaquÃ­n Labbe'],
           ].filter(([, v]) => v).map(([k, v]) => (
             <div key={k} style={S.qrow}>
               <span style={{ color: 'var(--t2)', flexShrink: 0, marginRight: 12 }}>{k}</span>
@@ -392,17 +392,17 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
           ))}
           {quote.recomendacion && (
             <div style={S.qrow}>
-              <span style={{ color: 'var(--t2)', flexShrink: 0, marginRight: 12 }}>GÜÜD dice</span>
+              <span style={{ color: 'var(--t2)', flexShrink: 0, marginRight: 12 }}>GÃÃD dice</span>
               <span style={{ color: 'var(--acc)', fontStyle: 'italic', fontSize: 12, textAlign: 'right' }}>"{quote.recomendacion}"</span>
             </div>
           )}
         </div>
         <div style={S.qprice}>
           <span style={{ fontSize: 11, color: 'var(--t2)' }}>Rango estimado (CLP)</span>
-          <span style={S.qpval}>{fmt(quote.min)} – {fmt(quote.max)}</span>
+          <span style={S.qpval}>{fmt(quote.min)} â {fmt(quote.max)}</span>
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
-          <button className="btn-p" style={S.btnP} onClick={onAceptar}>Aceptar estimación</button>
+          <button className="btn-p" style={S.btnP} onClick={onAceptar}>Aceptar estimaciÃ³n</button>
           <button className="btn-s" style={S.btnS} onClick={onAjustar}>Ajustar alcance</button>
         </div>
       </div>
@@ -420,18 +420,18 @@ function ConfirmCard({ contacto }) {
           </svg>
         </div>
         <div style={{ fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>
-          ¡Reunión confirmada!
+          Â¡ReuniÃ³n confirmada!
         </div>
         <div style={{ fontSize: 12.5, color: 'var(--t2)', lineHeight: 1.55 }}>
-          {contacto.nombre}, Joaquín te contactará a{' '}
+          {contacto.nombre}, JoaquÃ­n te contactarÃ¡ a{' '}
           <strong style={{ color: 'var(--t1)' }}>{contacto.email}</strong>{' '}
-          en las próximas horas.
+          en las prÃ³ximas horas.
         </div>
         <div style={S.jlCard}>
           <div style={S.jlAvatar}>JL</div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 500 }}>Joaquín Labbe</div>
-            <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>Director Creativo Ejecutivo · GÜÜD Company</div>
+            <div style={{ fontSize: 13, fontWeight: 500 }}>JoaquÃ­n Labbe</div>
+            <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>Director Creativo Ejecutivo Â· GÃÃD Company</div>
           </div>
         </div>
       </div>
@@ -443,12 +443,12 @@ const S = {
   app: { display: 'flex', flexDirection: 'column', height: '100svh', maxWidth: 720, margin: '0 auto', position: 'relative', zIndex: 2 },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' },
 
-  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 22px', borderBottom: '0.5px solid var(--b1)', flexShrink: 0 },
+  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 22px', borderBottom: '0.5px solid #E8FF00', flexShrink: 0, background: '#E8FF00' },
   logoWrap: { display: 'flex', alignItems: 'center' },
-  logoImg: { height: 36, width: 'auto', objectFit: 'contain', filter: 'invert(1)' },
+  logoImg: { height: 36, width: 'auto', objectFit: 'contain' },
   logoText: { fontFamily: 'Unbounded, sans-serif', fontWeight: 900, fontSize: 20, letterSpacing: '0.04em', color: 'var(--t1)', lineHeight: 1 },
   logoSub: { fontSize: 9, color: 'var(--t3)', letterSpacing: '0.12em', textTransform: 'uppercase' },
-  badge: { fontSize: 10, color: 'var(--t3)', border: '0.5px solid var(--b2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', background: 'none', cursor: 'pointer' },
+  badge: { fontSize: 10, color: '#080808', border: '0.5px solid rgba(0,0,0,0.2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', background: 'rgba(0,0,0,0.1)', cursor: 'pointer' },
 
   hero: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '22px 0 10px', flexShrink: 0, transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
   heroMini: { padding: '7px 0 4px' },
