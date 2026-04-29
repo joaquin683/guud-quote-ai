@@ -12,13 +12,15 @@ const AGENT_LABELS = {
 }
 
 const INITIAL_CHIPS = [
-  'Necesito una campaña de lanzamiento',
-  'Quiero rediseñar mi packaging',
-  'Identidad visual completa',
-  'Quiero una web o e-commerce',
-  'Contenido para redes con IA',
-  'Estrategia creativa',
+  'Quiero lanzar una marca desde cero',
+  'Necesito renovar mi identidad visual',
+  'Quiero una web que venda',
+  'Necesito contenido para mis redes',
+  'Quiero una campaña que impacte',
+  'No sé por dónde empezar',
 ]
+
+const WELCOME_MSG = '¡Hola! Soy la IA creativa de GÜÜD Company. Estoy aquí para ayudarte a cotizar tu próximo proyecto y conectarte con el mejor talento creativo. ¿Qué tienes en mente?'
 
 export default function Home() {
   const [fase, setFase]             = useState('inicio')
@@ -27,20 +29,33 @@ export default function Home() {
   const [mensajes, setMensajes]     = useState([])
   const [input, setInput]           = useState('')
   const [cargando, setCargando]     = useState(false)
-  const [quote, setQuote]           = useState(null)
   const [micActivo, setMicActivo]   = useState(false)
   const [mini, setMini]             = useState(false)
   const [waveActive, setWaveActive] = useState(false)
   const [agendando, setAgendando]   = useState(false)
   const [contacto, setContacto]     = useState({ nombre: '', email: '' })
   const [proyectoId, setProyectoId] = useState(null)
+  const [welcomeDone, setWelcomeDone] = useState(false)
 
-  const chatRef  = useRef(null)
-  const inputRef = useRef(null)
+  const chatRef   = useRef(null)
+  const inputRef  = useRef(null)
   const canvasRef = useRef(null)
-  const rafRef   = useRef(null)
-  const wtRef    = useRef(0)
+  const rafRef    = useRef(null)
+  const wtRef     = useRef(0)
 
+  // Mensaje de bienvenida automático
+  useEffect(() => {
+    if (welcomeDone) return
+    setWelcomeDone(true)
+    setWaveActive(true)
+    const timer = setTimeout(() => {
+      setMensajes([{ texto: WELCOME_MSG, rol: 'ai', extra: null, id: 'welcome' }])
+      setWaveActive(false)
+    }, 1200)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Canvas wave
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -102,9 +117,18 @@ export default function Home() {
           body: JSON.stringify({ agente: ag, historial: hist }),
         })
         const d2 = await r2.json()
-        if (d2.quote) { setQuote(d2.quote); setFase('cotizado'); addMsg(null, 'ai', { type: 'quote', quote: d2.quote }) }
-        else { addMsg(d2.reply, 'ai'); setHistorial(p => [...p, { role: 'assistant', content: d2.reply }]); setFase('chat') }
-      } catch (e) { addMsg('Error de conexión. Recarga e intenta de nuevo.', 'ai'); setFase('inicio') }
+        if (d2.quote) {
+          setFase('cotizado')
+          addMsg(null, 'ai', { type: 'quote', quote: d2.quote })
+        } else {
+          addMsg(d2.reply, 'ai')
+          setHistorial(p => [...p, { role: 'assistant', content: d2.reply }])
+          setFase('chat')
+        }
+      } catch (e) {
+        addMsg('Error de conexión. Recarga e intenta de nuevo.', 'ai')
+        setFase('inicio')
+      }
       setCargando(false); setWaveActive(false)
     } else {
       const hist = [...historial, { role: 'user', content: msg }]
@@ -115,8 +139,13 @@ export default function Home() {
           body: JSON.stringify({ agente, historial: hist }),
         })
         const d = await r.json()
-        if (d.quote) { setQuote(d.quote); setFase('cotizado'); addMsg(null, 'ai', { type: 'quote', quote: d.quote }) }
-        else { addMsg(d.reply, 'ai'); setHistorial(p => [...p, { role: 'assistant', content: d.reply }]) }
+        if (d.quote) {
+          setFase('cotizado')
+          addMsg(null, 'ai', { type: 'quote', quote: d.quote })
+        } else {
+          addMsg(d.reply, 'ai')
+          setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
+        }
       } catch (e) { addMsg('Error de conexión.', 'ai') }
       setCargando(false); setWaveActive(false)
     }
@@ -142,18 +171,25 @@ export default function Home() {
     addMsg(msg, 'user')
     const hist = [...historial, { role: 'user', content: msg }]
     setHistorial(hist); setFase('chat'); setCargando(true); setWaveActive(true)
-    fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agente, historial: hist }) })
-      .then(r => r.json()).then(d => {
-        addMsg(d.reply, 'ai')
-        setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
-        setCargando(false); setWaveActive(false)
-      })
+    fetch('/api/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agente, historial: hist })
+    }).then(r => r.json()).then(d => {
+      addMsg(d.reply, 'ai')
+      setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
+      setCargando(false); setWaveActive(false)
+    })
   }
 
   const toggleMic = () => {
     setMicActivo(true)
     setTimeout(() => {
-      const s = ['Necesito una campaña de lanzamiento para mi nueva marca', 'Quiero rediseñar el packaging de mis productos', 'Necesito identidad visual para mi startup', 'Quiero un e-commerce para mi tienda']
+      const s = [
+        'I need a brand identity for my new startup',
+        'Necesito una campaña de lanzamiento para mi nueva marca',
+        'Preciso de uma identidade visual completa',
+        'Je veux redesigner mon packaging',
+      ]
       setInput(s[Math.floor(Math.random() * s.length)])
       setMicActivo(false)
       inputRef.current?.focus()
@@ -165,8 +201,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title> GÜÜD COMPANY — Cotiza tu proyecto creativo en tiempo real y agenda una reunión con el mejor talento </title>
+        <title>GÜÜD Quote AI — Global Creative HÜB</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Cotiza tu próximo proyecto creativo con IA. GÜÜD Company — Global Creative HÜB." />
       </Head>
 
       <div style={S.app}>
@@ -175,8 +212,16 @@ export default function Home() {
         {/* HEADER */}
         <header style={S.hdr}>
           <div style={S.logoWrap}>
-            <div style={S.logoText}>GÜÜD</div>
-            <div style={S.logoSub}>Global Creative HÜB</div>
+            <img
+              src="/logo.gif"
+              alt="GÜÜD"
+              style={S.logoImg}
+              onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+            />
+            <div style={{ display: 'none', flexDirection: 'column', gap: 1 }}>
+              <div style={S.logoText}>GÜÜD</div>
+              <div style={S.logoSub}>Global Creative HÜB</div>
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {agenteInfo && (
@@ -197,9 +242,9 @@ export default function Home() {
               <canvas ref={canvasRef} width={92} height={92} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
             </div>
           </div>
-          {!mini && <div style={S.heroTitle}>Cotiza tu próximo proyecto creativo</div>}
-          {!mini && <div style={S.heroSub}>Cuéntanos qué necesitas y nuestra IA te entrega una estimación inmediata.</div>}
-          {mini && <div style={{ fontFamily: 'Unbounded', fontWeight: 700, fontSize: 13, marginTop: 8, letterSpacing: '0.02em' }}>GÜÜD Quote AI</div>}
+          {!mini && <div style={S.heroTitle}>Tu próxima gran idea empieza aquí</div>}
+          {!mini && <div style={S.heroSub}>La IA creativa de GÜÜD te ayuda a cotizar y conectar con el mejor talento.</div>}
+          {mini && <div style={S.miniTitle}>GÜÜD Quote AI</div>}
         </div>
 
         {/* CHAT */}
@@ -236,9 +281,7 @@ export default function Home() {
             <div style={S.row}>
               <div style={{ ...S.av, ...S.avAi }}>GÜ</div>
               <div style={S.agendarCard}>
-                <div style={{ fontSize: 10, color: 'var(--acc)', fontFamily: 'Unbounded', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 }}>
-                  Agendar reunión · Joaquín Labbe
-                </div>
+                <div style={S.agendarTitle}>Agendar reunión · Joaquín Labbe</div>
                 <input style={S.formInput} placeholder="Tu nombre" value={contacto.nombre} onChange={e => setContacto(p => ({ ...p, nombre: e.target.value }))} />
                 <input style={{ ...S.formInput, marginTop: 8 }} placeholder="Tu email" type="email" value={contacto.email} onChange={e => setContacto(p => ({ ...p, email: e.target.value }))} />
                 <button style={{ ...S.btnP, width: '100%', marginTop: 12 }} onClick={confirmarReunion} disabled={!contacto.nombre || !contacto.email || cargando}>
@@ -265,25 +308,33 @@ export default function Home() {
               <textarea
                 ref={inputRef}
                 style={S.textarea}
-                placeholder="Ej: Necesito una campaña para lanzar una marca…"
+                placeholder="Write in any language · Escribe en cualquier idioma…"
                 rows={1}
                 value={input}
-                onChange={e => { setInput(e.target.value); e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px' }}
+                onChange={e => {
+                  setInput(e.target.value)
+                  e.target.style.height = 'auto'
+                  e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px'
+                }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }}
               />
-              <button style={{ ...S.icoBtn, ...S.mic, ...(micActivo ? S.micOn : {}) }} onClick={toggleMic} title="Voz (simulado)">
+              <button style={{ ...S.icoBtn, ...S.mic, ...(micActivo ? S.micOn : {}) }} onClick={toggleMic} title="Voice (simulated)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
                 </svg>
               </button>
-              <button style={{ ...S.icoBtn, ...S.snd, ...(!input.trim() || cargando ? S.sndDis : {}) }} onClick={() => enviar()} disabled={!input.trim() || cargando}>
+              <button
+                style={{ ...S.icoBtn, ...S.snd, ...(!input.trim() || cargando ? S.sndDis : {}) }}
+                onClick={() => enviar()}
+                disabled={!input.trim() || cargando}
+              >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </button>
             </div>
-            <div style={S.inputFooter}>Powered by GÜÜD Company · Global Creative HÜB</div>
+            <div style={S.inputFooter}>GÜÜD Company · Global Creative HÜB · Available in all languages</div>
           </div>
         )}
       </div>
@@ -294,6 +345,25 @@ export default function Home() {
         @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes mpulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,255,0,.2)} 50%{box-shadow:0 0 0 6px transparent} }
         @keyframes orbglow { 0%,100%{box-shadow:0 0 20px rgba(232,255,0,.1)} 50%{box-shadow:0 0 35px rgba(232,255,0,.2)} }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+        .chip:hover { border-color: rgba(232,255,0,0.35) !important; color: #E8FF00 !important; background: rgba(232,255,0,0.06) !important; }
+        .btn-p:hover { opacity: 0.88; transform: translateY(-1px); }
+        .btn-s:hover { border-color: rgba(232,255,0,0.3); color: #E8FF00; }
+        textarea::placeholder { color: #484644; }
+        textarea:focus { outline: none; }
+
+        @media (max-width: 600px) {
+          .guud-app { max-width: 100vw !important; }
+          .guud-hdr { padding: 12px 16px !important; }
+          .guud-hero-title { font-size: 17px !important; }
+          .guud-chat { padding: 12px 14px !important; }
+          .guud-chips { padding: 0 14px 8px !important; }
+          .guud-input-area { padding: 8px 14px 16px !important; }
+          .guud-bub { max-width: 90% !important; font-size: 13px !important; }
+          .guud-orb { width: 72px !important; height: 72px !important; }
+          .guud-hero { padding: 16px 0 8px !important; }
+        }
       `}</style>
     </>
   )
@@ -332,8 +402,8 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
           <span style={S.qpval}>{fmt(quote.min)} – {fmt(quote.max)}</span>
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
-          <button style={S.btnP} onClick={onAceptar}>Aceptar estimación</button>
-          <button style={S.btnS} onClick={onAjustar}>Ajustar alcance</button>
+          <button className="btn-p" style={S.btnP} onClick={onAceptar}>Aceptar estimación</button>
+          <button className="btn-s" style={S.btnS} onClick={onAjustar}>Ajustar alcance</button>
         </div>
       </div>
     </div>
@@ -349,12 +419,16 @@ function ConfirmCard({ contacto }) {
             <polyline points="20 6 9 17 4 12"/>
           </svg>
         </div>
-        <div style={{ fontFamily: 'Unbounded', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>¡Reunión confirmada!</div>
-        <div style={{ fontSize: 12.5, color: 'var(--t2)', lineHeight: 1.55 }}>
-          {contacto.nombre}, Joaquín te contactará a <strong style={{ color: 'var(--t1)' }}>{contacto.email}</strong> en las próximas horas.
+        <div style={{ fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>
+          ¡Reunión confirmada!
         </div>
-        <div style={{ marginTop: 14, padding: '10px 12px', background: 'var(--bg3)', borderRadius: 10, border: '0.5px solid var(--b2)', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#111', border: '1.5px solid var(--acc)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Unbounded', fontWeight: 900, fontSize: 11, color: 'var(--acc)', flexShrink: 0 }}>JL</div>
+        <div style={{ fontSize: 12.5, color: 'var(--t2)', lineHeight: 1.55 }}>
+          {contacto.nombre}, Joaquín te contactará a{' '}
+          <strong style={{ color: 'var(--t1)' }}>{contacto.email}</strong>{' '}
+          en las próximas horas.
+        </div>
+        <div style={S.jlCard}>
+          <div style={S.jlAvatar}>JL</div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 500 }}>Joaquín Labbe</div>
             <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>Director Creativo Ejecutivo · GÜÜD Company</div>
@@ -366,46 +440,48 @@ function ConfirmCard({ contacto }) {
 }
 
 const S = {
-  app: { display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: 720, margin: '0 auto', position: 'relative', zIndex: 2 },
+  app: { display: 'flex', flexDirection: 'column', height: '100svh', maxWidth: 720, margin: '0 auto', position: 'relative', zIndex: 2 },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' },
 
-  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '0.5px solid var(--b1)', flexShrink: 0 },
-  logoWrap: { display: 'flex', flexDirection: 'column', gap: 1 },
-  logoText: { fontFamily: 'Unbounded', fontWeight: 900, fontSize: 20, letterSpacing: '0.04em', color: 'var(--t1)', lineHeight: 1 },
-  logoSub: { fontSize: 9, color: 'var(--t3)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'DM Sans' },
-  badge: { fontSize: 10, color: 'var(--t3)', border: '0.5px solid var(--b2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', fontFamily: 'DM Sans', background: 'none' },
+  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 22px', borderBottom: '0.5px solid var(--b1)', flexShrink: 0 },
+  logoWrap: { display: 'flex', alignItems: 'center' },
+  logoImg: { height: 36, width: 'auto', objectFit: 'contain', filter: 'invert(1)' },
+  logoText: { fontFamily: 'Unbounded, sans-serif', fontWeight: 900, fontSize: 20, letterSpacing: '0.04em', color: 'var(--t1)', lineHeight: 1 },
+  logoSub: { fontSize: 9, color: 'var(--t3)', letterSpacing: '0.12em', textTransform: 'uppercase' },
+  badge: { fontSize: 10, color: 'var(--t3)', border: '0.5px solid var(--b2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', background: 'none', cursor: 'pointer' },
 
-  hero: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0 12px', flexShrink: 0, transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
-  heroMini: { padding: '8px 0 4px' },
-  heroTitle: { fontFamily: 'Unbounded', fontWeight: 700, fontSize: 20, marginTop: 18, textAlign: 'center', letterSpacing: '-0.01em', lineHeight: 1.2 },
-  heroSub: { fontSize: 13, color: 'var(--t2)', textAlign: 'center', marginTop: 8, maxWidth: 320, lineHeight: 1.6 },
+  hero: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '22px 0 10px', flexShrink: 0, transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
+  heroMini: { padding: '7px 0 4px' },
+  heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 19, marginTop: 16, textAlign: 'center', letterSpacing: '-0.01em', lineHeight: 1.25, padding: '0 20px' },
+  heroSub: { fontSize: 13, color: 'var(--t2)', textAlign: 'center', marginTop: 7, maxWidth: 300, lineHeight: 1.6, padding: '0 20px' },
+  miniTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 12, marginTop: 7, letterSpacing: '0.02em' },
 
   orbWrap: { width: 92, height: 92, position: 'relative', transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
-  orbMini: { width: 44, height: 44 },
+  orbMini: { width: 42, height: 42 },
   ring1: { position: 'absolute', inset: -9, borderRadius: '50%', border: '0.5px solid rgba(232,255,0,0.15)', animation: 'spin 10s linear infinite' },
   ring2: { position: 'absolute', inset: -17, borderRadius: '50%', border: '0.5px solid rgba(232,255,0,0.06)', animation: 'spin 16s linear infinite reverse' },
   orb: { position: 'absolute', inset: 0, borderRadius: '50%', background: '#0C0C0C', border: '1px solid rgba(232,255,0,0.2)', overflow: 'hidden', transition: 'all .3s' },
   orbLive: { borderColor: 'rgba(232,255,0,0.6)', animation: 'orbglow 2s ease-in-out infinite' },
 
-  chat: { flex: 1, overflowY: 'auto', padding: '14px 22px', display: 'flex', flexDirection: 'column', gap: 12, scrollbarWidth: 'thin', scrollbarColor: 'var(--b2) transparent' },
+  chat: { flex: 1, overflowY: 'auto', padding: '12px 20px', display: 'flex', flexDirection: 'column', gap: 11, WebkitOverflowScrolling: 'touch' },
   row: { display: 'flex', gap: 10, animation: 'up .28s ease' },
   rowUser: { flexDirection: 'row-reverse' },
-  av: { width: 28, height: 28, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, fontWeight: 900, fontFamily: 'Unbounded', marginTop: 2 },
+  av: { width: 28, height: 28, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 7, fontWeight: 900, fontFamily: 'Unbounded, sans-serif', marginTop: 2 },
   avAi: { background: '#0C0C0C', border: '1px solid rgba(232,255,0,0.3)', color: 'var(--acc)' },
   avU: { background: 'var(--bg3)', border: '0.5px solid var(--b2)', color: 'var(--t2)' },
-  bub: { maxWidth: '84%', padding: '11px 15px', borderRadius: 14, fontSize: 13.5, lineHeight: 1.65, color: 'var(--t1)' },
+  bub: { maxWidth: '84%', padding: '11px 14px', borderRadius: 14, fontSize: 13.5, lineHeight: 1.65, color: 'var(--t1)' },
   bubAi: { background: '#111', border: '0.5px solid var(--b1)', borderTopLeftRadius: 3 },
   bubUser: { background: '#181818', border: '0.5px solid var(--b2)', borderTopRightRadius: 3 },
-  dots: { display: 'flex', gap: 4, padding: '13px 15px' },
+  dots: { display: 'flex', gap: 4, padding: '13px 14px' },
   dot: { width: 5, height: 5, borderRadius: '50%', background: 'var(--acc)', opacity: .3, display: 'inline-block', animation: 'dot 1.1s ease-in-out infinite' },
 
-  chips: { padding: '0 22px 10px', display: 'flex', flexWrap: 'wrap', gap: 7, flexShrink: 0 },
-  chip: { padding: '7px 14px', borderRadius: 20, border: '0.5px solid var(--b2)', background: 'var(--bg2)', fontSize: 12, color: 'var(--t2)', cursor: 'pointer', fontFamily: 'DM Sans', transition: 'all .15s' },
+  chips: { padding: '0 20px 8px', display: 'flex', flexWrap: 'wrap', gap: 6, flexShrink: 0 },
+  chip: { padding: '7px 13px', borderRadius: 20, border: '0.5px solid var(--b2)', background: 'var(--bg2)', fontSize: 12, color: 'var(--t2)', cursor: 'pointer', transition: 'all .15s', fontFamily: 'DM Sans, sans-serif' },
 
-  inputArea: { padding: '8px 22px 20px', flexShrink: 0 },
-  inputBox: { display: 'flex', alignItems: 'flex-end', gap: 9, background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 22, padding: '10px 10px 10px 18px', transition: 'border-color .2s' },
-  textarea: { flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'DM Sans', fontSize: 14, lineHeight: 1.5, resize: 'none', maxHeight: 96, minHeight: 22, padding: '1px 0' },
-  inputFooter: { textAlign: 'center', fontSize: 10, color: 'var(--t3)', marginTop: 8, letterSpacing: '0.05em' },
+  inputArea: { padding: '8px 20px 18px', flexShrink: 0 },
+  inputBox: { display: 'flex', alignItems: 'flex-end', gap: 8, background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 22, padding: '10px 10px 10px 16px' },
+  textarea: { flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, lineHeight: 1.5, resize: 'none', maxHeight: 96, minHeight: 22, padding: '1px 0' },
+  inputFooter: { textAlign: 'center', fontSize: 10, color: 'var(--t3)', marginTop: 7, letterSpacing: '0.04em' },
   icoBtn: { width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .2s', border: 'none' },
   mic: { background: 'none', border: '0.5px solid var(--b2)', color: 'var(--t3)' },
   micOn: { background: 'rgba(232,255,0,0.1)', borderColor: 'rgba(232,255,0,0.3)', color: 'var(--acc)', animation: 'mpulse 1s ease-in-out infinite' },
@@ -413,18 +489,21 @@ const S = {
   sndDis: { background: 'var(--bg3)', color: 'var(--t3)', cursor: 'not-allowed' },
 
   qcard: { border: '0.5px solid rgba(232,255,0,.2)', borderRadius: 16, overflow: 'hidden', background: '#0E0E0E', width: '100%' },
-  qhdr: { padding: '15px 17px 11px', borderBottom: '0.5px solid var(--b1)' },
-  qtag: { fontSize: 9, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--acc)', fontFamily: 'Unbounded', marginBottom: 6 },
-  qname: { fontFamily: 'Unbounded', fontWeight: 700, fontSize: 15, color: 'var(--t1)', marginBottom: 3, lineHeight: 1.3 },
+  qhdr: { padding: '14px 16px 10px', borderBottom: '0.5px solid var(--b1)' },
+  qtag: { fontSize: 9, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--acc)', fontFamily: 'Unbounded, sans-serif', marginBottom: 5 },
+  qname: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 14, color: 'var(--t1)', marginBottom: 3, lineHeight: 1.3 },
   qrow: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '6px 0', borderBottom: '0.5px solid var(--b1)', fontSize: 12.5 },
-  qprice: { padding: '13px 17px', borderTop: '0.5px solid rgba(232,255,0,.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(232,255,0,.03)' },
-  qpval: { fontFamily: 'Unbounded', fontWeight: 800, fontSize: 18, color: 'var(--acc)' },
-  btnP: { flex: 1, padding: '11px 16px', background: 'var(--acc)', color: '#080808', border: 'none', borderRadius: 10, fontFamily: 'Unbounded', fontWeight: 700, fontSize: 11.5, cursor: 'pointer', letterSpacing: '0.02em', transition: 'all .2s' },
-  btnS: { flex: 1, padding: '11px 16px', background: 'none', color: 'var(--t2)', border: '0.5px solid var(--b2)', borderRadius: 10, fontSize: 12.5, cursor: 'pointer', fontFamily: 'DM Sans', transition: 'all .2s' },
+  qprice: { padding: '12px 16px', borderTop: '0.5px solid rgba(232,255,0,.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(232,255,0,.03)' },
+  qpval: { fontFamily: 'Unbounded, sans-serif', fontWeight: 800, fontSize: 17, color: 'var(--acc)' },
+  btnP: { flex: 1, padding: '11px 14px', background: 'var(--acc)', color: '#080808', border: 'none', borderRadius: 10, fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 11, cursor: 'pointer', letterSpacing: '0.02em', transition: 'all .2s' },
+  btnS: { flex: 1, padding: '11px 14px', background: 'none', color: 'var(--t2)', border: '0.5px solid var(--b2)', borderRadius: 10, fontSize: 12, cursor: 'pointer', transition: 'all .2s' },
 
-  ccard: { border: '1px solid rgba(232,255,0,.3)', borderRadius: 16, padding: '20px 18px', textAlign: 'center', background: 'rgba(232,255,0,.03)', width: '100%' },
+  ccard: { border: '1px solid rgba(232,255,0,.3)', borderRadius: 16, padding: '20px 16px', textAlign: 'center', background: 'rgba(232,255,0,.03)', width: '100%' },
   cicon: { width: 44, height: 44, borderRadius: '50%', background: 'var(--acc)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' },
+  jlCard: { marginTop: 12, padding: '10px 12px', background: 'var(--bg3)', borderRadius: 10, border: '0.5px solid var(--b2)', display: 'flex', alignItems: 'center', gap: 10, textAlign: 'left' },
+  jlAvatar: { width: 38, height: 38, borderRadius: '50%', background: '#111', border: '1.5px solid var(--acc)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Unbounded, sans-serif', fontWeight: 900, fontSize: 11, color: 'var(--acc)', flexShrink: 0 },
 
-  agendarCard: { flex: 1, border: '0.5px solid rgba(232,255,0,.2)', borderRadius: 16, padding: '16px 17px', background: '#0E0E0E', minWidth: 0 },
-  formInput: { width: '100%', background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 10, padding: '10px 13px', fontSize: 13, color: 'var(--t1)', outline: 'none', fontFamily: 'DM Sans' },
+  agendarCard: { flex: 1, border: '0.5px solid rgba(232,255,0,.2)', borderRadius: 16, padding: '15px 16px', background: '#0E0E0E', minWidth: 0 },
+  agendarTitle: { fontSize: 10, color: 'var(--acc)', fontFamily: 'Unbounded, sans-serif', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', marginBottom: 12 },
+  formInput: { width: '100%', background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 10, padding: '10px 13px', fontSize: 13, color: 'var(--t1)', outline: 'none' },
 }
