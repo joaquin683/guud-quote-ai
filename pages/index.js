@@ -167,7 +167,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>GÜÜD Quote AI — Cotiza tu proyecto creativo</title>
+        <title> GÜÜD COMPANY — Cotiza tu proyecto creativo en tiempo real y agenda una reunión con el mejor talento </title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
