@@ -206,7 +206,6 @@ export default function Home() {
 
       <div style={S.app}>
         <div style={S.amb} />
-
         <header style={S.hdr}>
           <div style={S.logoWrap}>
             <img
@@ -229,7 +228,7 @@ export default function Home() {
             <a href="/admin" style={S.badge}>Admin →</a>
           </div>
         </header>
-
+        <div style={S.inner}>
         <div style={{ ...S.hero, ...(mini ? S.heroMini : {}) }}>
           <div style={{ ...S.orbWrap, ...(mini ? S.orbMini : {}) }}>
             <div style={S.ring1} />
@@ -330,6 +329,7 @@ export default function Home() {
             <div style={S.inputFooter}>GÜÜD Company · Global Creative HÜB · Available in all languages</div>
           </div>
         )}
+        </div>
       </div>
 
       <style>{`
@@ -420,11 +420,11 @@ function ConfirmCard({ contacto }) {
 }
 
 const S = {
-  app: { display: 'flex', flexDirection: 'column', height: '100svh', maxWidth: 720, margin: '0 auto', position: 'relative', zIndex: 2 },
-  amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' },
-  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 22px', borderBottom: '0.5px solid #E8FF00', flexShrink: 0, background: '#E8FF00' },
+  app: { display: 'flex', flexDirection: 'column', height: '100svh', position: 'relative', zIndex: 2 },
+  amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' }, inner: { display: 'flex', flexDirection: 'column', flex: 1, maxWidth: 720, margin: '0 auto', width: '100%', overflow: 'hidden' },
+  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 40px', borderBottom: 'none', flexShrink: 0, background: '#E8FF00', width: '100%' },
   logoWrap: { display: 'flex', alignItems: 'center' },
-  logoImg: { height: 36, width: 'auto', objectFit: 'contain' },
+  logoImg: { height: 54, width: 'auto', objectFit: 'contain' },
   logoText: { fontFamily: 'Unbounded, sans-serif', fontWeight: 900, fontSize: 20, letterSpacing: '0.04em', color: '#080808', lineHeight: 1 },
   logoSub: { fontSize: 9, color: '#333', letterSpacing: '0.12em', textTransform: 'uppercase' },
   badge: { fontSize: 10, color: '#080808', border: '0.5px solid rgba(0,0,0,0.2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', background: 'rgba(0,0,0,0.1)', cursor: 'pointer' },
