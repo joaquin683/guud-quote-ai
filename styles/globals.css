@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:    #0A0A0B;
+  --bg2:   #111113;
+  --bg3:   #18181C;
+  --bg4:   #1E1E24;
+  --b1:    rgba(255,255,255,0.06);
+  --b2:    rgba(255,255,255,0.11);
+  --b3:    rgba(255,255,255,0.20);
+  --t1:    #EDEBE5;
+  --t2:    #8F8D89;
+  --t3:    #4E4D4A;
+  --acc:   #C8F135;
+  --acc2:  rgba(200,241,53,0.08);
+  --acc3:  rgba(200,241,53,0.22);
+  --coral: #FF6B6B;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--acc); color: #0a0a0b; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 4px; }
+
+button { cursor: pointer; font-family: inherit; }
+input, textarea { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
