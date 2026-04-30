@@ -219,7 +219,7 @@ export default function Home() {
               <div style={S.logoSub}>Global Creative HÜB</div>
             </div>
           </div>
-          <div style={{ position: 'absolute', right: 40, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {agenteInfo && (
               <div style={{ ...S.badge, borderColor: 'rgba(0,0,0,0.2)', color: '#080808', background: 'rgba(0,0,0,0.1)' }}>
                 {agenteInfo.label}
@@ -234,7 +234,14 @@ export default function Home() {
             <div style={S.ring1} />
             <div style={S.ring2} />
             <div style={{ ...S.orb, ...(waveActive ? S.orbLive : {}) }}>
-              <canvas ref={canvasRef} width={92} height={92} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+              <video
+                src="/orb.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             </div>
           </div>
           {!mini && <div style={S.heroTitle}>Tu próxima gran idea empieza aquí</div>}
@@ -420,12 +427,12 @@ function ConfirmCard({ contacto }) {
 const S = {
   app: { display: 'flex', flexDirection: 'column', height: '100svh', position: 'relative', zIndex: 2 },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' }, inner: { display: 'flex', flexDirection: 'column', flex: 1, maxWidth: 720, margin: '0 auto', width: '100%', overflow: 'hidden' },
-  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px 32px', borderBottom: 'none', flexShrink: 0, background: '#E8FF00', width: '100%', position: 'relative' },
+  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative', borderBottom: '1px solid rgba(232,255,0,0.15)' },
   logoWrap: { display: 'flex', alignItems: 'center' },
-  logoImg: { height: 88, width: 'auto', objectFit: 'contain' },
+  logoImg: { height: 52, width: 'auto', objectFit: 'contain', filter: 'invert(1)' },
   logoText: { fontFamily: 'Unbounded, sans-serif', fontWeight: 900, fontSize: 20, letterSpacing: '0.04em', color: '#080808', lineHeight: 1 },
   logoSub: { fontSize: 9, color: '#333', letterSpacing: '0.12em', textTransform: 'uppercase' },
-  badge: { fontSize: 10, color: '#080808', border: '0.5px solid rgba(0,0,0,0.2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', background: 'rgba(0,0,0,0.1)', cursor: 'pointer' },
+  badge: { fontSize: 10, color: 'var(--t3)', border: '0.5px solid var(--b2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', background: 'none', cursor: 'pointer' },
   hero: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '22px 0 10px', flexShrink: 0, transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
   heroMini: { padding: '7px 0 4px' },
   heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 19, marginTop: 16, textAlign: 'center', letterSpacing: '-0.01em', lineHeight: 1.25, padding: '0 20px' },
