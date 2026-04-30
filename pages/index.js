@@ -51,6 +51,13 @@ export default function Home() {
   const [micActivo, setMicActivo]   = useState(false)
   const [mini, setMini]             = useState(false)
   const [hasStartedChat, setHasStartedChat] = useState(false)
+  // Refocus when not in chat
+  useEffect(() => {
+    if (!hasStartedChat) {
+      const t = setTimeout(() => inputRef.current?.focus(), 150)
+      return () => clearTimeout(t)
+    }
+  }, [hasStartedChat])
   const [waveActive, setWaveActive] = useState(false)
   const [agendando, setAgendando]   = useState(false)
   const [contacto, setContacto]     = useState({ nombre: '', email: '' })
@@ -82,6 +89,12 @@ export default function Home() {
   const canvasRef = useRef(null)
   const rafRef    = useRef(null)
   const wtRef     = useRef(0)
+
+  // Autofocus input on mount
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 100)
+    return () => clearTimeout(t)
+  }, [])
 
   // Welcome message removed — clean start
 
