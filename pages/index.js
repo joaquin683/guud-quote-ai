@@ -236,8 +236,8 @@ export default function Home() {
               />
             </div>
           </div>
-          {!mini && <div style={S.heroTitle}>Tu próxima gran idea empieza aquí</div>}
-          {!mini && <div style={S.heroSub}>La IA creativa de GÜÜD te ayuda a cotizar y conectar con el mejor talento.</div>}
+          {!mini && <div style={S.heroTitle}>¡Hola! Soy la IA creativa de GÜÜD Company</div>}
+          {!mini && <div style={S.heroSub}>Existe para ayudarte a cotizar tu próximo proyecto en vivo y conectarte con el mejor talento creativo ¿Qué tienes en mente?</div>}
           {mini && <div style={S.miniTitle}>GÜÜD Quote AI</div>}
         </div>
 
