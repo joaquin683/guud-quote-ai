@@ -287,9 +287,9 @@ export default function Home() {
             <div style={S.heroInputWrap}>
               <div style={S.inputBox}>
                 {!input && !voiceInterim && (
-                  <div style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1 }}>
-                    <span className="fake-caret" style={{ marginRight: 4, marginLeft: 0 }} />
-                    <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: 1.5 }}>¿Qué te gustaría cotizar?</span>
+                  <div style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1, lineHeight: '1' }}>
+                    <span className="fake-caret" style={{ marginRight: 4, marginLeft: 0, verticalAlign: 'middle' }} />
+                    <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: '1', verticalAlign: 'middle' }}>¿Qué te gustaría cotizar?</span>
                   </div>
                 )}
                 <textarea
@@ -975,7 +975,7 @@ const S = {
   chip: { padding: '7px 13px', borderRadius: 20, border: '0.5px solid var(--b2)', background: 'var(--bg2)', fontSize: 12, color: 'var(--t2)', cursor: 'pointer', transition: 'all .15s', fontFamily: 'DM Sans, sans-serif' },
   inputArea: { padding: '8px 20px 18px', flexShrink: 0 },
   inputBox: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 22, padding: '14px 12px 14px 20px' },
-  textarea: { flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, lineHeight: 1.5, resize: 'none', maxHeight: 96, minHeight: 22, padding: '0', display: 'block' },
+  textarea: { flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, lineHeight: '22px', resize: 'none', maxHeight: 96, minHeight: 22, padding: '0', display: 'block', verticalAlign: 'middle' },
   inputFooter: { fontSize: 10, color: '#E8FF00', letterSpacing: '0.04em' },
   icoBtn: { width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .2s', border: 'none' },
   mic: { background: 'none', border: '0.5px solid var(--b2)', color: 'var(--t3)' },
