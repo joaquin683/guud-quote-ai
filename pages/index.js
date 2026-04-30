@@ -43,16 +43,7 @@ export default function Home() {
   const rafRef    = useRef(null)
   const wtRef     = useRef(0)
 
-  useEffect(() => {
-    if (welcomeDone) return
-    setWelcomeDone(true)
-    setWaveActive(true)
-    const timer = setTimeout(() => {
-      setMensajes([{ texto: WELCOME_MSG, rol: 'ai', extra: null, id: 'welcome' }])
-      setWaveActive(false)
-    }, 1200)
-    return () => clearTimeout(timer)
-  }, [])
+  // Welcome message removed — clean start
 
   useEffect(() => {
     const canvas = canvasRef.current
