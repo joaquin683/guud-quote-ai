@@ -283,6 +283,54 @@ export default function Home() {
               </div>
             </div>
             <div style={S.heroTitle}>¡Hola! ¿Estás listo para cotizar tu próximo proyecto creativo?</div>
+            {/* Input centered below title */}
+            <div style={S.heroInputWrap}>
+              <div style={S.inputBox}>
+                {!input && !voiceInterim && (
+                  <div style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1 }}>
+                    <span className="fake-caret" style={{ marginRight: 4, marginLeft: 0 }} />
+                    <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: 1.5 }}>¿Qué te gustaría cotizar?</span>
+                  </div>
+                )}
+                <textarea
+                  ref={inputRef}
+                  style={S.textarea}
+                  placeholder=""
+                  rows={1}
+                  value={input}
+                  onChange={e => {
+                    setInput(e.target.value)
+                    e.target.style.height = 'auto'
+                    e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px'
+                    setIntentDetected(detectIntent(e.target.value))
+                  }}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }}
+                />
+                <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} />
+                <button
+                  id="send-btn"
+                  style={{ ...S.icoBtn, ...S.snd, ...(!input.trim() || cargando ? S.sndDis : {}) }}
+                  onClick={() => enviar()}
+                  disabled={!input.trim() || cargando}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, minHeight: 16 }}>
+                <div style={{ fontSize: 11, color: '#E8FF00', letterSpacing: '0.04em', transition: 'all 0.3s ease', opacity: intentDetected ? 1 : 0.6 }}>
+                  {intentDetected ? `Detectando: ${intentDetected}` : input.length > 2 ? 'Detectando tipo de proyecto…' : ''}
+                </div>
+                <div style={S.inputFooter}>GÜÜD Company · Global Creative HÜB</div>
+              </div>
+            </div>
+            {/* Chips centered */}
+            <div style={S.chipsHero}>
+              {INITIAL_CHIPS.map((chip, i) => (
+                <SuggestionChip key={i} label={chip} index={i} onClick={() => enviar(chip)} />
+              ))}
+            </div>
           </div>
         )}
                 {hasStartedChat && <div ref={chatRef} style={S.chat}>
@@ -333,16 +381,10 @@ export default function Home() {
 
 
 
-        {fase === 'inicio' && !hasStartedChat && (
-          <div style={S.chips}>
-            {INITIAL_CHIPS.map((c, i) => (
-              <SuggestionChip key={i} label={c} index={i} onClick={() => enviar(c)} />
-            ))}
-          </div>
-        )}
 
-        {fase !== 'confirmado' && (
-          <div style={{ ...S.inputArea, ...(hasStartedChat ? {} : { maxWidth: 760, width: '100%', margin: '0 auto', padding: '0 20px 16px' }) }}>
+
+        {fase !== 'confirmado' && hasStartedChat && (
+          <div style={S.inputArea}>
             <div style={{ ...S.inputBox, position: 'relative' }}>
               {!input && !voiceInterim && (
                 <div style={{
@@ -904,6 +946,8 @@ const S = {
   heroCenter: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '0 20px 40px', animation: 'fadeUp .4s ease', gap: 0 },
   heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 28, marginTop: 20, textAlign: 'center', letterSpacing: '-0.02em', lineHeight: 1.25, padding: '0 24px', maxWidth: 700, color: '#F2F0E8' },
   heroSub: { fontSize: 14, color: 'var(--t2)', textAlign: 'center', marginTop: 10, maxWidth: 480, lineHeight: 1.6, padding: '0 32px' },
+  heroInputWrap: { width: '100%', maxWidth: 760, marginTop: 28, padding: '0 20px', position: 'relative' },
+  chipsHero: { display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 760, margin: '14px auto 0', padding: '0 20px' },
   heroSub: { fontSize: 13.5, color: 'var(--t2)', textAlign: 'center', marginTop: 10, maxWidth: 480, lineHeight: 1.7, padding: '0 32px' },
   miniTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 12, marginTop: 7, letterSpacing: '0.02em' },
   orbWrap: { width: 92, height: 92, position: 'relative', transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
