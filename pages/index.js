@@ -362,8 +362,6 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
           {[
             ['Entregables', quote.entregables],
             ['Tiempo estimado', quote.tiempo],
-            ['Equipo sugerido', quote.talentos_sugeridos?.join(', ')],
-            ['Director Creativo', 'Joaquín Labbe'],
           ].filter(([, v]) => v).map(([k, v]) => (
             <div key={k} style={S.qrow}>
               <span style={{ color: 'var(--t2)', flexShrink: 0, marginRight: 12 }}>{k}</span>
@@ -372,7 +370,7 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
           ))}
           {quote.recomendacion && (
             <div style={S.qrow}>
-              <span style={{ color: 'var(--t2)', flexShrink: 0, marginRight: 12 }}>GÜÜD dice</span>
+              <span style={{ color: 'var(--t2)', flexShrink: 0, marginRight: 12 }}>Resumen GÜÜD</span>
               <span style={{ color: 'var(--acc)', fontStyle: 'italic', fontSize: 12, textAlign: 'right' }}>"{quote.recomendacion}"</span>
             </div>
           )}
@@ -411,7 +409,7 @@ function ConfirmCard({ contacto }) {
           <div style={S.jlAvatar}>JL</div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 500 }}>Joaquín Labbe</div>
-            <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>Director Creativo Ejecutivo · GÜÜD Company</div>
+            <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>GÜÜD Company</div>
           </div>
         </div>
       </div>
