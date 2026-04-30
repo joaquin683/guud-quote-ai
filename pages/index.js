@@ -729,8 +729,8 @@ function RelatedCredentialsBlock({ agente, projectType }) {
         rel="noopener noreferrer"
         style={{
           fontSize: 11.5,
-          color: 'var(--t2)',
-          border: '0.5px solid var(--b2)',
+          color: '#080808',
+          border: '0.5px solid #E8FF00',
           borderRadius: 8,
           padding: '7px 13px',
           whiteSpace: 'nowrap',
@@ -738,9 +738,11 @@ function RelatedCredentialsBlock({ agente, projectType }) {
           transition: 'all .18s',
           fontFamily: 'DM Sans, sans-serif',
           flexShrink: 0,
+          background: '#E8FF00',
+          fontWeight: 600,
         }}
-        onMouseEnter={e => { e.target.style.borderColor = 'rgba(232,255,0,0.35)'; e.target.style.color = '#E8FF00'; }}
-        onMouseLeave={e => { e.target.style.borderColor = 'var(--b2)'; e.target.style.color = 'var(--t2)'; }}
+        onMouseEnter={e => { e.target.style.background = '#d4f040'; e.target.style.borderColor = '#d4f040'; }}
+        onMouseLeave={e => { e.target.style.background = '#E8FF00'; e.target.style.borderColor = '#E8FF00'; }}
       >
         Ver proyectos similares
       </a>
