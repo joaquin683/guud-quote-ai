@@ -12,12 +12,12 @@ const AGENT_LABELS = {
 }
 
 const INITIAL_CHIPS = [
-  'Quiero lanzar una marca desde cero',
-  'Necesito renovar mi identidad visual',
-  'Quiero una web que venda',
-  'Necesito contenido para mis redes',
-  'Quiero una campaña que impacte',
-  'No sé por dónde empezar',
+  'Cotizar una marca desde cero',
+  'Estimar rediseño de identidad visual',
+  'Cotizar una web que convierta',
+  'Presupuestar contenido mensual',
+  'Cotizar campaña de lanzamiento',
+  'No sé qué necesito aún',
 ]
 
 
