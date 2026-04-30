@@ -20,6 +20,25 @@ const INITIAL_CHIPS = [
   'No sé por dónde empezar',
 ]
 
+
+// Detección de intención en tiempo real
+const INTENT_MAP = [
+  { label: 'Branding',    keys: ['marca', 'brand', 'logo', 'identidad', 'naming', 'nombre', 'rebranding', 'rediseño'] },
+  { label: 'Web',         keys: ['web', 'landing', 'ecommerce', 'página', 'sitio', 'tienda', 'pág', 'wordpress', 'shopify'] },
+  { label: 'Campaña', keys: ['campaña', 'lanzamiento', 'ads', 'publicidad', 'anuncio', 'key visual', 'kv', 'pauta'] },
+  { label: 'Contenido',   keys: ['redes', 'contenido', 'social', 'posts', 'instagram', 'tiktok', 'reels', 'stories'] },
+  { label: 'Estrategia',  keys: ['estrategia', 'consultoría', 'posicionamiento', 'plan', 'consultoria', 'asesoría'] },
+]
+
+function detectIntent(text) {
+  if (!text || text.trim().length < 3) return null
+  const lower = text.toLowerCase()
+  const found = INTENT_MAP.filter(cat =>
+    cat.keys.some(k => lower.includes(k))
+  ).map(cat => cat.label)
+  return found.length > 0 ? found.join(' / ') : null
+}
+
 const WELCOME_MSG = 'Cotiza tu próximo proyecto creativo en segundos'
 
 export default function Home() {
@@ -36,6 +55,7 @@ export default function Home() {
   const [contacto, setContacto]     = useState({ nombre: '', email: '' })
   const [proyectoId, setProyectoId] = useState(null)
   const [welcomeDone, setWelcomeDone] = useState(false)
+  const [intentDetected, setIntentDetected] = useState(null)
 
   const chatRef   = useRef(null)
   const inputRef  = useRef(null)
@@ -313,6 +333,7 @@ export default function Home() {
                   setInput(e.target.value)
                   e.target.style.height = 'auto'
                   e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px'
+                  setIntentDetected(detectIntent(e.target.value))
                 }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }}
               />
@@ -332,7 +353,18 @@ export default function Home() {
                 </svg>
               </button>
             </div>
-            <div style={S.inputFooter}>GÜÜD Company · Global Creative HÜB · Available in all languages</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, minHeight: 16 }}>
+              <div style={{
+                fontSize: 11,
+                color: intentDetected ? 'rgba(232,255,0,0.7)' : 'var(--t3)',
+                letterSpacing: '0.04em',
+                transition: 'all 0.3s ease',
+                opacity: intentDetected ? 1 : 0.6,
+              }}>
+                {intentDetected ? `Detectando: ${intentDetected}` : input.length > 2 ? 'Detectando tipo de proyecto…' : ''}
+              </div>
+              <div style={S.inputFooter}>GÜÜD Company · Global Creative HÜB</div>
+            </div>
           </div>
         )}
         </div>
@@ -575,7 +607,7 @@ const S = {
   inputArea: { padding: '8px 20px 18px', flexShrink: 0 },
   inputBox: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 22, padding: '14px 12px 14px 20px' },
   textarea: { flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, lineHeight: 1.5, resize: 'none', maxHeight: 96, minHeight: 22, padding: '1px 0' },
-  inputFooter: { textAlign: 'center', fontSize: 10, color: 'var(--t3)', marginTop: 7, letterSpacing: '0.04em' },
+  inputFooter: { fontSize: 10, color: 'var(--t3)', letterSpacing: '0.04em' },
   icoBtn: { width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .2s', border: 'none' },
   mic: { background: 'none', border: '0.5px solid var(--b2)', color: 'var(--t3)' },
   micOn: { background: 'rgba(232,255,0,0.1)', borderColor: 'rgba(232,255,0,0.3)', color: 'var(--acc)', animation: 'mpulse 1s ease-in-out infinite' },
