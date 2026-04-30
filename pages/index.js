@@ -237,7 +237,7 @@ export default function Home() {
             </div>
           </div>
           {!mini && <div style={S.heroTitle}>¡Hola! Soy la IA creativa de GÜÜD Company</div>}
-          {!mini && <div style={S.heroSub}>Existe para ayudarte a cotizar tu próximo proyecto en vivo y conectarte con el mejor talento creativo ¿Qué tienes en mente?</div>}
+          {!mini && <div style={S.heroSub}>Soy una agencia que te ayudará a cotizar tu próximo proyecto en vivo y conectarte con el mejor talento creativo al rededor del mundo para llevar acabo tu proyecto, idea o servicio, todo en un mismo lugar</div>}
           {mini && <div style={S.miniTitle}>GÜÜD Quote AI</div>}
         </div>
 
@@ -543,8 +543,8 @@ const S = {
   badge: { fontSize: 10, color: 'var(--t3)', border: '0.5px solid var(--b2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', background: 'none', cursor: 'pointer' },
   hero: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '22px 0 10px', flexShrink: 0, transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
   heroMini: { padding: '7px 0 4px' },
-  heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 19, marginTop: 16, textAlign: 'center', letterSpacing: '-0.01em', lineHeight: 1.25, padding: '0 20px' },
-  heroSub: { fontSize: 13, color: 'var(--t2)', textAlign: 'center', marginTop: 7, maxWidth: 300, lineHeight: 1.6, padding: '0 20px' },
+  heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 20, marginTop: 18, textAlign: 'center', letterSpacing: '-0.01em', lineHeight: 1.3, padding: '0 32px', maxWidth: 560 },
+  heroSub: { fontSize: 13.5, color: 'var(--t2)', textAlign: 'center', marginTop: 10, maxWidth: 480, lineHeight: 1.7, padding: '0 32px' },
   miniTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 12, marginTop: 7, letterSpacing: '0.02em' },
   orbWrap: { width: 92, height: 92, position: 'relative', transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
   orbMini: { width: 42, height: 42 },
