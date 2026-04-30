@@ -341,12 +341,22 @@ export default function Home() {
 
         {fase !== 'confirmado' && (
           <div style={S.inputArea}>
-            <div style={S.inputBox}>
+            <div style={{ ...S.inputBox, position: 'relative' }}>
+              {!input && !voiceInterim && (
+                <div style={{
+                  position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+                  display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1,
+                }}>
+                  <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: 1.5 }}>¿Qué te gustaría cotizar?</span>
+                  <span className="fake-caret" />
+                </div>
+              )}
               <textarea
                 ref={inputRef}
                 style={S.textarea}
-                placeholder={voiceInterim ? voiceInterim : '¿Qué te gustaría cotizar?'}
+                placeholder={voiceInterim ? voiceInterim : ''}
                 rows={1}
+                autoFocus
                 value={input}
                 onChange={e => {
                   setInput(e.target.value)
@@ -390,6 +400,10 @@ export default function Home() {
         @keyframes dot { 0%,80%,100%{transform:scale(1);opacity:.3} 40%{transform:scale(1.4);opacity:1} }
         @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes mpulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,255,0,.2)} 50%{box-shadow:0 0 0 6px transparent} }
+        @keyframes caretPulse { 0%,100%{opacity:1} 50%{opacity:0} }
+        textarea { caret-color: #E8FF00 !important; }
+        textarea::placeholder { transition: opacity .2s; }
+        .fake-caret { display:inline-block; width:2px; height:16px; background:#E8FF00; border-radius:1px; animation:caretPulse 1s step-end infinite; vertical-align:middle; margin-left:2px; }
         @keyframes orbglow { 0%,100%{box-shadow:0 0 20px rgba(232,255,0,.1)} 50%{box-shadow:0 0 35px rgba(232,255,0,.2)} }
         .chip:hover { border-color: #E8FF00 !important; color: #080808 !important; background: #E8FF00 !important; transition: all .15s ease !important; }
         textarea::placeholder { color: #484644; }
