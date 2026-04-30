@@ -677,6 +677,77 @@ function OrbCanvas({ state = 'idle' }) {
   )
 }
 
+
+// ─── getCredentialsUrl helper ─────────────────────────────────────────
+function getCredentialsUrl(agente, industria = null) {
+  const map = {
+    branding:   'branding',
+    web:        'web',
+    campana:    'campana',
+    contenido:  'contenido',
+    estrategia: 'estrategia',
+  }
+  const servicio = map[agente] || null
+  if (!servicio) return '/credenciales'
+  const base = `/credenciales?servicio=${servicio}`
+  return industria ? `${base}&industria=${encodeURIComponent(industria)}` : base
+}
+
+// ─── RelatedCredentialsBlock component ───────────────────────────────
+function RelatedCredentialsBlock({ agente, projectType }) {
+  const url = getCredentialsUrl(agente)
+  const labels = {
+    branding:   'branding e identidad visual',
+    web:        'web y digital',
+    campana:    'campaña creativa',
+    contenido:  'contenido para redes',
+    estrategia: 'estrategia creativa',
+  }
+  const label = labels[agente] || 'proyectos creativos'
+
+  return (
+    <div style={{
+      borderTop: '0.5px solid var(--b1)',
+      padding: '12px 16px 14px',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 12,
+      flexWrap: 'wrap',
+    }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--t3)', fontFamily: 'Unbounded, sans-serif', marginBottom: 3 }}>
+          Proyectos similares
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--t2)', lineHeight: 1.45 }}>
+          Hemos trabajado desaïos similares de {label}. Revísa referencias antes de avanzar.
+        </div>
+      </div>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          fontSize: 11.5,
+          color: 'var(--t2)',
+          border: '0.5px solid var(--b2)',
+          borderRadius: 8,
+          padding: '7px 13px',
+          whiteSpace: 'nowrap',
+          textDecoration: 'none',
+          transition: 'all .18s',
+          fontFamily: 'DM Sans, sans-serif',
+          flexShrink: 0,
+        }}
+        onMouseEnter={e => { e.target.style.borderColor = 'rgba(232,255,0,0.35)'; e.target.style.color = '#E8FF00'; }}
+        onMouseLeave={e => { e.target.style.borderColor = 'var(--b2)'; e.target.style.color = 'var(--t2)'; }}
+      >
+        Ver proyectos similares
+      </a>
+    </div>
+  )
+}
+
 function QuoteCard({ quote, onAceptar, onAjustar }) {
   return (
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
@@ -707,6 +778,7 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
             </div>
           )}
         </div>
+        <RelatedCredentialsBlock agente={quote.agente} projectType={quote.servicio} />
         <div style={S.qprice}>
           <span style={{ fontSize: 11, color: 'var(--t2)' }}>Rango estimado (CLP)</span>
           <span style={S.qpval}>{fmt(quote.min)} – {fmt(quote.max)}</span>
