@@ -233,15 +233,8 @@ export default function Home() {
           <div style={{ ...S.orbWrap, ...(mini ? S.orbMini : {}) }}>
             <div style={S.ring1} />
             <div style={S.ring2} />
-            <div style={{ ...S.orb, ...(waveActive ? S.orbLive : {}) }}>
-              <video
-                src="/orb.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-              />
+            <div style={{ ...S.orb }}>
+              <OrbCanvas state={waveActive ? 'processing' : input.length > 0 ? 'listening' : 'idle'} />
             </div>
           </div>
           {!mini && <div style={S.heroTitle}>Tu próxima gran idea empieza aquí</div>}
@@ -356,6 +349,122 @@ export default function Home() {
   )
 }
 
+
+function OrbCanvas({ state = 'idle' }) {
+  const canvasRef = useRef(null)
+  const rafRef = useRef(null)
+  const tRef = useRef(0)
+  const noiseRef = useRef([])
+  const stateRef = useRef(state)
+
+  useEffect(() => { stateRef.current = state }, [state])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const W = canvas.width
+    const H = canvas.height
+    const cx = W / 2
+    const cy = H / 2
+
+    // Perlin-like noise using multiple sine waves with irrational frequencies
+    const noise = (x, t, seed = 0) => {
+      const f1 = 0.013, f2 = 0.021, f3 = 0.037, f4 = 0.053
+      const t1 = 0.0071, t2 = 0.0113, t3 = 0.0197, t4 = 0.0317
+      return (
+        Math.sin(x * f1 + t * t1 + seed) * 0.38 +
+        Math.sin(x * f2 + t * t2 + seed * 1.7) * 0.27 +
+        Math.sin(x * f3 + t * t3 + seed * 2.3) * 0.19 +
+        Math.sin(x * f4 + t * t4 + seed * 3.1) * 0.16
+      )
+    }
+
+    const draw = () => {
+      const s = stateRef.current
+      tRef.current += s === 'processing' ? 1.4 : s === 'listening' ? 0.9 : 0.45
+
+      const t = tRef.current
+      ctx.clearRect(0, 0, W, H)
+
+      // Background glow
+      const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.48)
+      const glowAlpha = s === 'processing' ? 0.18 : s === 'listening' ? 0.12 : 0.07
+      bgGlow.addColorStop(0, `rgba(200,255,30,${glowAlpha})`)
+      bgGlow.addColorStop(0.6, `rgba(120,220,0,${glowAlpha * 0.4})`)
+      bgGlow.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = bgGlow
+      ctx.fillRect(0, 0, W, H)
+
+      // Draw multiple fluid wave layers
+      const layers = s === 'processing' ? 5 : s === 'listening' ? 4 : 3
+
+      for (let layer = 0; layer < layers; layer++) {
+        const seed = layer * 4.71
+        const layerT = t + layer * 23.7
+        const amp = s === 'processing'
+          ? 18 + layer * 4 + Math.sin(t * 0.023 + seed) * 6
+          : s === 'listening'
+          ? 12 + layer * 3 + Math.sin(t * 0.017 + seed) * 4
+          : 7 + layer * 2 + Math.sin(t * 0.011 + seed) * 2.5
+
+        const yOffset = (layer - layers / 2) * (s === 'processing' ? 8 : s === 'listening' ? 5 : 3)
+        const alpha = (1 - layer / layers) * (s === 'processing' ? 0.85 : s === 'listening' ? 0.7 : 0.55)
+
+        ctx.beginPath()
+        const pts = 120
+        for (let i = 0; i <= pts; i++) {
+          const x = (i / pts) * W
+          const nx = noise(i * 2.5, layerT, seed)
+          const nx2 = noise(i * 1.3, layerT * 0.7, seed + 10)
+          const y = cy + yOffset + nx * amp + nx2 * amp * 0.4
+
+          if (i === 0) ctx.moveTo(x, y)
+          else ctx.lineTo(x, y)
+        }
+
+        // Color shift by layer and state
+        const hue = s === 'processing' ? 75 + layer * 8 : s === 'listening' ? 80 + layer * 6 : 85 + layer * 4
+        const sat = s === 'processing' ? 100 : s === 'listening' ? 95 : 88
+        const lum = s === 'processing' ? 60 + layer * 5 : 65 + layer * 3
+        const lw = s === 'processing' ? 2.5 - layer * 0.3 : s === 'listening' ? 2 - layer * 0.25 : 1.5 - layer * 0.2
+
+        ctx.strokeStyle = `hsla(${hue},${sat}%,${lum}%,${alpha})`
+        ctx.lineWidth = Math.max(0.4, lw)
+        ctx.shadowColor = `hsla(${hue},100%,70%,0.6)`
+        ctx.shadowBlur = s === 'processing' ? 12 : s === 'listening' ? 8 : 4
+        ctx.stroke()
+      }
+
+      // Core pulse — subtle breathing
+      const pulse = 0.5 + Math.sin(t * 0.019) * 0.1 + Math.sin(t * 0.031) * 0.06
+      const coreR = (s === 'processing' ? 8 : s === 'listening' ? 5 : 3) * pulse
+      const coreGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 3)
+      coreGlow.addColorStop(0, `rgba(220,255,80,${s === 'processing' ? 0.9 : 0.5})`)
+      coreGlow.addColorStop(1, 'rgba(180,255,0,0)')
+      ctx.fillStyle = coreGlow
+      ctx.beginPath()
+      ctx.arc(cx, cy, coreR * 3, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.shadowBlur = 0
+      rafRef.current = requestAnimationFrame(draw)
+    }
+
+    draw()
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={200}
+      height={200}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+    />
+  )
+}
+
 function QuoteCard({ quote, onAceptar, onAjustar }) {
   return (
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
@@ -443,7 +552,7 @@ const S = {
   ring1: { position: 'absolute', inset: -9, borderRadius: '50%', border: '0.5px solid rgba(232,255,0,0.15)', animation: 'spin 10s linear infinite' },
   ring2: { position: 'absolute', inset: -17, borderRadius: '50%', border: '0.5px solid rgba(232,255,0,0.06)', animation: 'spin 16s linear infinite reverse' },
   orb: { position: 'absolute', inset: 0, borderRadius: '50%', background: '#0C0C0C', border: '1px solid rgba(232,255,0,0.2)', overflow: 'hidden', transition: 'all .3s' },
-  orbLive: { borderColor: 'rgba(232,255,0,0.6)', animation: 'orbglow 2s ease-in-out infinite' },
+  orbLive: { borderColor: 'rgba(232,255,0,0.5)' },
   chat: { flex: 1, overflowY: 'auto', padding: '12px 20px', display: 'flex', flexDirection: 'column', gap: 11, WebkitOverflowScrolling: 'touch' },
   row: { display: 'flex', gap: 10, animation: 'up .28s ease' },
   rowUser: { flexDirection: 'row-reverse' },
