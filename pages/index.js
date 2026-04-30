@@ -376,7 +376,7 @@ export default function Home() {
         @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes mpulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,255,0,.2)} 50%{box-shadow:0 0 0 6px transparent} }
         @keyframes orbglow { 0%,100%{box-shadow:0 0 20px rgba(232,255,0,.1)} 50%{box-shadow:0 0 35px rgba(232,255,0,.2)} }
-        .chip:hover { border-color: rgba(232,255,0,0.35) !important; color: #E8FF00 !important; background: rgba(232,255,0,0.06) !important; }
+        .chip:hover { border-color: #E8FF00 !important; color: #080808 !important; background: #E8FF00 !important; transition: all .15s ease !important; }
         textarea::placeholder { color: #484644; }
         @media (max-width: 600px) {
           .guud-app { max-width: 100vw !important; }
