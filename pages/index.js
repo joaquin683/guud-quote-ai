@@ -234,7 +234,15 @@ export default function Home() {
             <div style={S.ring1} />
             <div style={S.ring2} />
             <div style={{ ...S.orb }}>
-              <OrbCanvas state={waveActive ? 'processing' : input.length > 0 ? 'listening' : 'idle'} />
+              <video
+                key="orb-video"
+                src="/orb.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+              />
             </div>
           </div>
           {!mini && <div style={S.heroTitle}>Tu próxima gran idea empieza aquí</div>}
