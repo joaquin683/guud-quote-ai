@@ -20,7 +20,7 @@ const INITIAL_CHIPS = [
   'No sé por dónde empezar',
 ]
 
-const WELCOME_MSG = '¡Hola! Soy la IA creativa de GÜÜD Company. Estoy aquí para ayudarte a cotizar tu próximo proyecto y conectarte con el mejor talento creativo. ¿Qué tienes en mente?'
+const WELCOME_MSG = 'Cotiza tu próximo proyecto creativo en segundos. Estoy aquí para ayudarte a cotizar tu próximo proyecto y conectarte con el mejor talento creativo. ¿Qué tienes en mente?'
 
 export default function Home() {
   const [fase, setFase]             = useState('inicio')
@@ -244,7 +244,7 @@ export default function Home() {
             </div>
           </div>
           {!mini && <div style={S.heroTitle}>¡Hola! Soy la IA creativa de GÜÜD Company</div>}
-          {!mini && <div style={S.heroSub}>Soy una agencia que te ayudará a cotizar tu próximo proyecto en vivo y conectarte con el mejor talento creativo al rededor del mundo para llevar acabo tu proyecto, idea o servicio, todo en un mismo lugar</div>}
+          {!mini && <div style={S.heroSub}>Cuéntame qué necesitas y te entrego un rango de presupuesto + próximos pasos en segundos</div>}
           {mini && <div style={S.miniTitle}>GÜÜD Quote AI</div>}
         </div>
 
