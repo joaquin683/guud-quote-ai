@@ -523,9 +523,13 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
             </div>
           ))}
           {quote.recomendacion && (
-            <div style={S.qrow}>
-              <span style={{ color: 'var(--t2)', flexShrink: 0, marginRight: 12 }}>Resumen GÜÜD</span>
-              <span style={{ color: 'var(--acc)', fontStyle: 'italic', fontSize: 12, textAlign: 'right' }}>"{quote.recomendacion}"</span>
+            <div style={{ borderTop: '0.5px solid var(--b1)', marginTop: 4, paddingTop: 12, paddingBottom: 4 }}>
+              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--acc)', fontFamily: 'Unbounded, sans-serif', marginBottom: 8 }}>
+                Asesoría GÜÜD
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--t1)', lineHeight: 1.7, fontStyle: 'normal' }}>
+                {quote.recomendacion}
+              </div>
             </div>
           )}
         </div>
