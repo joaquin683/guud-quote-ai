@@ -331,20 +331,7 @@ export default function Home() {
 
         }
 
-        {!hasStartedChat && (
-          <div style={{
-            maxWidth: 780, width: '100%', margin: '12px auto 0',
-            padding: '0 20px 32px',
-          }}>
-            <div style={{
-              background: '#0A0A0A',
-              border: '0.5px solid rgba(255,255,255,0.06)',
-              borderRadius: 18,
-              height: 200,
-              width: '100%',
-            }} />
-          </div>
-        )}
+
 
         {fase === 'inicio' && !hasStartedChat && (
           <div style={S.chips}>
