@@ -246,7 +246,7 @@ export default function Home() {
           {mensajes.map(m => (
             <div key={m.id} style={{ ...S.row, ...(m.rol === 'user' ? S.rowUser : {}) }}>
               <div style={{ ...S.av, ...(m.rol === 'ai' ? S.avAi : S.avU) }}>
-                {m.rol === 'ai' ? <img src="/avatar.png" alt="GÜÜD" style={{width:'100%',height:'100%',objectFit:'cover'}} /> : 'TÚ'}
+                {m.rol === 'ai' ? <img src="/avatar.svg" alt="GÜÜD" style={{width:'100%',height:'100%',objectFit:'cover'}} /> : 'TÚ'}
               </div>
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} />
@@ -262,7 +262,7 @@ export default function Home() {
 
           {cargando && (
             <div style={S.row}>
-              <div style={{ ...S.av, ...S.avAi }}><img src="/avatar.png" alt="GÜÜD" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
+              <div style={{ ...S.av, ...S.avAi }}><img src="/avatar.svg" alt="GÜÜD" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
               <div style={{ ...S.bub, ...S.bubAi, padding: 0 }}>
                 <div style={S.dots}>
                   {[0, .18, .36].map((d, i) => <span key={i} style={{ ...S.dot, animationDelay: `${d}s` }} />)}
@@ -273,7 +273,7 @@ export default function Home() {
 
           {agendando && (
             <div style={S.row}>
-              <div style={{ ...S.av, ...S.avAi }}><img src="/avatar.png" alt="GÜÜD" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
+              <div style={{ ...S.av, ...S.avAi }}><img src="/avatar.svg" alt="GÜÜD" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
               <div style={S.agendarCard}>
                 <div style={S.agendarTitle}>Agendar reunión · Joaquín Labbe</div>
                 <input style={S.formInput} placeholder="Tu nombre" value={contacto.nombre} onChange={e => setContacto(p => ({ ...p, nombre: e.target.value }))} />
