@@ -50,6 +50,7 @@ export default function Home() {
   const [cargando, setCargando]     = useState(false)
   const [micActivo, setMicActivo]   = useState(false)
   const [mini, setMini]             = useState(false)
+  const [hasStartedChat, setHasStartedChat] = useState(false)
   const [waveActive, setWaveActive] = useState(false)
   const [agendando, setAgendando]   = useState(false)
   const [contacto, setContacto]     = useState({ nombre: '', email: '' })
@@ -126,6 +127,7 @@ export default function Home() {
     setInput('')
     if (inputRef.current) inputRef.current.style.height = 'auto'
     setMini(true)
+    setHasStartedChat(true)
     addMsg(msg, 'user')
 
     if (fase === 'inicio') {
@@ -266,32 +268,25 @@ export default function Home() {
           </div>
         </header>
         <div style={S.inner}>
-        <div style={{ ...S.hero, ...(mini ? S.heroMini : {}) }}>
-          <div style={{ ...S.orbWrap, ...(mini ? S.orbMini : {}) }}>
-            <div style={S.ring1} />
-            <div style={S.ring2} />
-            <div style={S.ripple1} />
-            <div style={S.ripple2} />
-            <div style={S.ripple3} />
-            <div style={S.ripple4} />
-            <div style={{ ...S.orb }}>
-              <video
-                key="orb-video"
-                src="/orb.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-              />
+        {!hasStartedChat && (
+          <div style={S.heroCenter}>
+            <div style={S.orbWrap}>
+              <div style={S.ring1} />
+              <div style={S.ring2} />
+              <div style={S.ripple1} />
+              <div style={S.ripple2} />
+              <div style={S.ripple3} />
+              <div style={S.ripple4} />
+              <div style={S.orb}>
+                <video key="orb-video" src="/orb.mp4" autoPlay loop muted playsInline
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              </div>
             </div>
+            <div style={S.heroTitle}>Cotiza tu próximo proyecto creativo</div>
+            <div style={S.heroSub}>Describe lo que necesitas y recibe una estimación inicial en segundos.</div>
           </div>
-          {!mini && <div style={S.heroTitle}>¡Hola! ¿Listo para cotizar tu próximo proyecto creativo en segundos?</div>}
-
-          {mini && <div style={S.miniTitle}>GÜÜD Quote AI</div>}
-        </div>
-
-        <div ref={chatRef} style={S.chat}>
+        )}
+                {hasStartedChat && <div ref={chatRef} style={S.chat}>
           {mensajes.map(m => (
             <div key={m.id} style={{ ...S.row, ...(m.rol === 'user' ? S.rowUser : {}) }}>
               <div style={{ ...S.av, ...(m.rol === 'ai' ? S.avAi : S.avU) }}>
@@ -335,7 +330,9 @@ export default function Home() {
           )}
         </div>
 
-        {fase === 'inicio' && (
+        }
+
+        {fase === 'inicio' && !hasStartedChat && (
           <div style={S.chips}>
             {INITIAL_CHIPS.map((c, i) => (
               <SuggestionChip key={i} label={c} onClick={() => enviar(c)} />
@@ -344,7 +341,7 @@ export default function Home() {
         )}
 
         {fase !== 'confirmado' && (
-          <div style={S.inputArea}>
+          <div style={{ ...S.inputArea, ...(hasStartedChat ? {} : { maxWidth: 680, width: '100%', margin: '0 auto', paddingBottom: 32 }) }}>
             <div style={{ ...S.inputBox, position: 'relative' }}>
               {!input && !voiceInterim && (
                 <div style={{
@@ -404,6 +401,8 @@ export default function Home() {
         @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes mpulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,255,0,.2)} 50%{box-shadow:0 0 0 6px transparent} }
         @keyframes caretPulse { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes chipSweep { from{background-position:100% 0} to{background-position:-100% 0} }
         @keyframes rippleWave {
           0%   { transform: scale(0.85); opacity: 0.5; }
@@ -882,7 +881,7 @@ function ConfirmCard({ contacto }) {
 }
 
 const S = {
-  app: { display: 'flex', flexDirection: 'column', height: '100svh', position: 'relative', zIndex: 2 },
+  app: { display: 'flex', flexDirection: 'column', height: '100svh', position: 'relative', zIndex: 2, transition: 'all .4s ease' },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' }, inner: { display: 'flex', flexDirection: 'column', flex: 1, maxWidth: 720, margin: '0 auto', width: '100%', overflow: 'hidden' },
   hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative' },
   logoWrap: { display: 'flex', alignItems: 'center' },
@@ -892,7 +891,9 @@ const S = {
   badge: { fontSize: 10, color: 'var(--t3)', border: '0.5px solid var(--b2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', background: 'none', cursor: 'pointer' },
   hero: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '22px 0 10px', flexShrink: 0, transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
   heroMini: { padding: '7px 0 4px' },
+  heroCenter: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '0 20px', animation: 'fadeUp .4s ease' },
   heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 20, marginTop: 18, textAlign: 'center', letterSpacing: '-0.01em', lineHeight: 1.3, padding: '0 32px', maxWidth: 560 },
+  heroSub: { fontSize: 14, color: 'var(--t2)', textAlign: 'center', marginTop: 10, maxWidth: 480, lineHeight: 1.6, padding: '0 32px' },
   heroSub: { fontSize: 13.5, color: 'var(--t2)', textAlign: 'center', marginTop: 10, maxWidth: 480, lineHeight: 1.7, padding: '0 32px' },
   miniTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 12, marginTop: 7, letterSpacing: '0.02em' },
   orbWrap: { width: 92, height: 92, position: 'relative', transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
@@ -916,7 +917,7 @@ const S = {
   bubUser: { background: '#181818', border: '0.5px solid var(--b2)', borderTopRightRadius: 3 },
   dots: { display: 'flex', gap: 4, padding: '13px 14px' },
   dot: { width: 5, height: 5, borderRadius: '50%', background: 'var(--acc)', opacity: .3, display: 'inline-block', animation: 'dot 1.1s ease-in-out infinite' },
-  chips: { padding: '0 20px 8px', display: 'flex', flexWrap: 'wrap', gap: 6, flexShrink: 0 },
+  chips: { padding: '0 20px 16px', display: 'flex', flexWrap: 'wrap', gap: 6, flexShrink: 0, justifyContent: 'center', maxWidth: 680, margin: '0 auto', width: '100%' },
   chip: { padding: '7px 13px', borderRadius: 20, border: '0.5px solid var(--b2)', background: 'var(--bg2)', fontSize: 12, color: 'var(--t2)', cursor: 'pointer', transition: 'all .15s', fontFamily: 'DM Sans, sans-serif' },
   inputArea: { padding: '8px 20px 18px', flexShrink: 0 },
   inputBox: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 22, padding: '14px 12px 14px 20px' },
