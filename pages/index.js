@@ -356,7 +356,7 @@ export default function Home() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, minHeight: 16 }}>
               <div style={{
                 fontSize: 11,
-                color: intentDetected ? 'rgba(232,255,0,0.7)' : 'var(--t3)',
+                color: '#E8FF00',
                 letterSpacing: '0.04em',
                 transition: 'all 0.3s ease',
                 opacity: intentDetected ? 1 : 0.6,
@@ -611,7 +611,7 @@ const S = {
   inputArea: { padding: '8px 20px 18px', flexShrink: 0 },
   inputBox: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 22, padding: '14px 12px 14px 20px' },
   textarea: { flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, lineHeight: 1.5, resize: 'none', maxHeight: 96, minHeight: 22, padding: '1px 0' },
-  inputFooter: { fontSize: 10, color: 'var(--t3)', letterSpacing: '0.04em' },
+  inputFooter: { fontSize: 10, color: '#E8FF00', letterSpacing: '0.04em' },
   icoBtn: { width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .2s', border: 'none' },
   mic: { background: 'none', border: '0.5px solid var(--b2)', color: 'var(--t3)' },
   micOn: { background: 'rgba(232,255,0,0.1)', borderColor: 'rgba(232,255,0,0.3)', color: 'var(--acc)', animation: 'mpulse 1s ease-in-out infinite' },
