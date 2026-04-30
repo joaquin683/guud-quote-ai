@@ -400,8 +400,9 @@ export default function Home() {
         @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes mpulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,255,0,.2)} 50%{box-shadow:0 0 0 6px transparent} }
         @keyframes caretPulse { 0%,100%{opacity:1} 50%{opacity:0} }
-        textarea { caret-color: #E8FF00 !important; }
-        textarea::placeholder { transition: opacity .2s; }
+        textarea { caret-color: transparent; }
+        textarea:focus { caret-color: #E8FF00; }
+        textarea::placeholder { transition: opacity .2s; color: transparent !important; }
         .fake-caret { display:inline-block; width:2px; height:16px; background:#E8FF00; border-radius:1px; animation:caretPulse 1s step-end infinite; vertical-align:middle; margin-left:2px; }
         @keyframes orbglow { 0%,100%{box-shadow:0 0 20px rgba(232,255,0,.1)} 50%{box-shadow:0 0 35px rgba(232,255,0,.2)} }
         .chip:hover { border-color: #E8FF00 !important; color: #080808 !important; background: #E8FF00 !important; transition: all .15s ease !important; }
