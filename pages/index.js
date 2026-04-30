@@ -282,8 +282,7 @@ export default function Home() {
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
               </div>
             </div>
-            <div style={S.heroTitle}>Cotiza tu próximo proyecto creativo</div>
-            <div style={S.heroSub}>Describe lo que necesitas y recibe una estimación inicial en segundos.</div>
+            <div style={S.heroTitle}>¡Hola! ¿Estás listo para cotizar tu próximo proyecto creativo?</div>
           </div>
         )}
                 {hasStartedChat && <div ref={chatRef} style={S.chat}>
@@ -332,16 +331,31 @@ export default function Home() {
 
         }
 
+        {!hasStartedChat && (
+          <div style={{
+            maxWidth: 780, width: '100%', margin: '12px auto 0',
+            padding: '0 20px 32px',
+          }}>
+            <div style={{
+              background: '#0A0A0A',
+              border: '0.5px solid rgba(255,255,255,0.06)',
+              borderRadius: 18,
+              height: 200,
+              width: '100%',
+            }} />
+          </div>
+        )}
+
         {fase === 'inicio' && !hasStartedChat && (
           <div style={S.chips}>
             {INITIAL_CHIPS.map((c, i) => (
-              <SuggestionChip key={i} label={c} onClick={() => enviar(c)} />
+              <SuggestionChip key={i} label={c} index={i} onClick={() => enviar(c)} />
             ))}
           </div>
         )}
 
         {fase !== 'confirmado' && (
-          <div style={{ ...S.inputArea, ...(hasStartedChat ? {} : { maxWidth: 680, width: '100%', margin: '0 auto', paddingBottom: 32 }) }}>
+          <div style={{ ...S.inputArea, ...(hasStartedChat ? {} : { maxWidth: 760, width: '100%', margin: '0 auto', padding: '0 20px 16px' }) }}>
             <div style={{ ...S.inputBox, position: 'relative' }}>
               {!input && !voiceInterim && (
                 <div style={{
@@ -404,6 +418,10 @@ export default function Home() {
         @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
         @keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes chipSweep { from{background-position:100% 0} to{background-position:-100% 0} }
+        @keyframes chipIdleGlow {
+          0%,100% { box-shadow: 0 0 0 0.5px rgba(232,255,0,0.15); }
+          50%      { box-shadow: 0 0 0 0.5px rgba(232,255,0,0.4), 0 0 8px rgba(232,255,0,0.12); }
+        }
         @keyframes rippleWave {
           0%   { transform: scale(0.85); opacity: 0.5; }
           70%  { transform: scale(1.5);  opacity: 0.12; }
@@ -419,6 +437,9 @@ export default function Home() {
         @media (max-width: 600px) {
           .guud-app { max-width: 100vw !important; }
           .guud-hdr { padding: 12px 16px !important; }
+        }
+        @media (max-width: 768px) {
+          .hero-title-initial { font-size: 22px !important; }
         }
       `}</style>
     </>
@@ -691,8 +712,9 @@ function OrbCanvas({ state = 'idle' }) {
 // ─── getCredentialsUrl helper ─────────────────────────────────────────
 
 // ─── SuggestionChip component ─────────────────────────────────────────
-function SuggestionChip({ label, onClick }) {
+function SuggestionChip({ label, onClick, index = 0 }) {
   const [hovered, setHovered] = useState(false)
+  const idleDelay = `${(index % 4) * 1.2}s`
 
   return (
     <button
@@ -714,8 +736,9 @@ function SuggestionChip({ label, onClick }) {
         zIndex: 0,
         // Fake border via box-shadow — glow animado
         boxShadow: hovered
-          ? '0 0 0 0.5px #E8FF00, 0 0 8px rgba(232,255,0,0.25), 0 0 16px rgba(232,255,0,0.1)'
-          : '0 0 0 0.5px rgba(255,255,255,0.11)',
+          ? '0 0 0 0.5px #E8FF00, 0 0 10px rgba(232,255,0,0.3), 0 0 20px rgba(232,255,0,0.12)'
+          : '0 0 0 0.5px rgba(232,255,0,0.18)',
+        animation: hovered ? 'none' : `chipIdleGlow 5s ease-in-out ${idleDelay} infinite`,
       }}
     >
       {/* Gradient sweep effect on hover */}
@@ -891,8 +914,8 @@ const S = {
   badge: { fontSize: 10, color: 'var(--t3)', border: '0.5px solid var(--b2)', padding: '3px 10px', borderRadius: 20, letterSpacing: '.06em', textTransform: 'uppercase', background: 'none', cursor: 'pointer' },
   hero: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '22px 0 10px', flexShrink: 0, transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
   heroMini: { padding: '7px 0 4px' },
-  heroCenter: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '0 20px', animation: 'fadeUp .4s ease' },
-  heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 20, marginTop: 18, textAlign: 'center', letterSpacing: '-0.01em', lineHeight: 1.3, padding: '0 32px', maxWidth: 560 },
+  heroCenter: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '0 20px 40px', animation: 'fadeUp .4s ease', gap: 0 },
+  heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 28, marginTop: 20, textAlign: 'center', letterSpacing: '-0.02em', lineHeight: 1.25, padding: '0 24px', maxWidth: 700, color: '#F2F0E8' },
   heroSub: { fontSize: 14, color: 'var(--t2)', textAlign: 'center', marginTop: 10, maxWidth: 480, lineHeight: 1.6, padding: '0 32px' },
   heroSub: { fontSize: 13.5, color: 'var(--t2)', textAlign: 'center', marginTop: 10, maxWidth: 480, lineHeight: 1.7, padding: '0 32px' },
   miniTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 12, marginTop: 7, letterSpacing: '0.02em' },
@@ -917,7 +940,7 @@ const S = {
   bubUser: { background: '#181818', border: '0.5px solid var(--b2)', borderTopRightRadius: 3 },
   dots: { display: 'flex', gap: 4, padding: '13px 14px' },
   dot: { width: 5, height: 5, borderRadius: '50%', background: 'var(--acc)', opacity: .3, display: 'inline-block', animation: 'dot 1.1s ease-in-out infinite' },
-  chips: { padding: '0 20px 16px', display: 'flex', flexWrap: 'wrap', gap: 6, flexShrink: 0, justifyContent: 'center', maxWidth: 680, margin: '0 auto', width: '100%' },
+  chips: { padding: '8px 20px 0', display: 'flex', flexWrap: 'wrap', gap: 8, flexShrink: 0, justifyContent: 'center', maxWidth: 780, margin: '0 auto', width: '100%' },
   chip: { padding: '7px 13px', borderRadius: 20, border: '0.5px solid var(--b2)', background: 'var(--bg2)', fontSize: 12, color: 'var(--t2)', cursor: 'pointer', transition: 'all .15s', fontFamily: 'DM Sans, sans-serif' },
   inputArea: { padding: '8px 20px 18px', flexShrink: 0 },
   inputBox: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 22, padding: '14px 12px 14px 20px' },
