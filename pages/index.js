@@ -289,7 +289,7 @@ export default function Home() {
                 {!input && !voiceInterim && (
                   <div style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1, lineHeight: '1' }}>
                     <span className="fake-caret" style={{ marginRight: 4, marginLeft: 0, verticalAlign: 'middle' }} />
-                    <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: '1', verticalAlign: 'middle' }}>¿Qué te gustaría cotizar?</span>
+                    <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: '21px', display: 'block' }}>¿Qué te gustaría cotizar?</span>
                   </div>
                 )}
                 <textarea
@@ -459,7 +459,7 @@ export default function Home() {
         @keyframes chipGlowPulse { 0%,100%{box-shadow:0 0 0 0.5px #E8FF00, 0 0 8px rgba(232,255,0,0.25)} 50%{box-shadow:0 0 0 0.5px #E8FF00, 0 0 14px rgba(232,255,0,0.4), 0 0 24px rgba(232,255,0,0.15)} }
         textarea { caret-color: transparent !important; }
         textarea::placeholder { color: transparent !important; }
-        .fake-caret { display:inline-block; width:2px; height:16px; background:#E8FF00; border-radius:1px; animation:caretPulse 1s step-end infinite; vertical-align:middle; margin-left:2px; }
+        .fake-caret { display:inline-block; width:2px; height:14px; background:#E8FF00; border-radius:1px; animation:caretPulse 1s step-end infinite; vertical-align:middle; flex-shrink:0; }
         @keyframes orbglow { 0%,100%{box-shadow:0 0 20px rgba(232,255,0,.1)} 50%{box-shadow:0 0 35px rgba(232,255,0,.2)} }
         
         textarea::placeholder { color: #484644; }
@@ -975,7 +975,7 @@ const S = {
   chip: { padding: '7px 13px', borderRadius: 20, border: '0.5px solid var(--b2)', background: 'var(--bg2)', fontSize: 12, color: 'var(--t2)', cursor: 'pointer', transition: 'all .15s', fontFamily: 'DM Sans, sans-serif' },
   inputArea: { padding: '8px 20px 18px', flexShrink: 0 },
   inputBox: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 22, padding: '0 12px', minHeight: 54, position: 'relative' },
-  textarea: { flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, lineHeight: 1.5, resize: 'none', maxHeight: 80, minHeight: 22, padding: '0', alignSelf: 'center' },
+  textarea: { flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, lineHeight: '21px', resize: 'none', maxHeight: 80, height: 21, padding: '0', margin: '0', display: 'block' },
   inputFooter: { fontSize: 10, color: '#E8FF00', letterSpacing: '0.04em' },
   icoBtn: { width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .2s', border: 'none' },
   mic: { background: 'none', border: '0.5px solid var(--b2)', color: 'var(--t3)' },
