@@ -97,6 +97,13 @@ export default function Home() {
           body: JSON.stringify({ mensaje: msg }),
         })
         const d1 = await r1.json()
+        // Si el orquestador detecta contenido inapropiado
+        if (d1.agente === 'filtro') {
+          addMsg('¿Te gustaría agregar algún otro detalle para llevar en consideración en el presupuesto?', 'ai')
+          setFase('inicio')
+          setCargando(false); setWaveActive(false)
+          return
+        }
         const ag = d1.agente || 'estrategia'
         setAgente(ag)
         const hist = [{ role: 'user', content: msg }]
