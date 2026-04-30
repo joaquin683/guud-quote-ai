@@ -342,21 +342,20 @@ export default function Home() {
         {fase !== 'confirmado' && (
           <div style={S.inputArea}>
             <div style={{ ...S.inputBox, position: 'relative' }}>
-              {!input && !voiceInterim && (
+              {!input && !voiceInterim && document.activeElement !== inputRef.current && (
                 <div style={{
                   position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
                   display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1,
                 }}>
+                  <span className="fake-caret" style={{ marginRight: 4, marginLeft: 0 }} />
                   <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: 1.5 }}>¿Qué te gustaría cotizar?</span>
-                  <span className="fake-caret" />
                 </div>
               )}
               <textarea
                 ref={inputRef}
                 style={S.textarea}
-                placeholder={voiceInterim ? voiceInterim : ''}
+                placeholder={voiceInterim ? voiceInterim : '¿Qué te gustaría cotizar?'}
                 rows={1}
-                autoFocus
                 value={input}
                 onChange={e => {
                   setInput(e.target.value)
