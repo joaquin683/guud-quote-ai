@@ -39,7 +39,7 @@ function detectIntent(text) {
   return found.length > 0 ? found.join(' / ') : null
 }
 
-const WELCOME_MSG = 'Cotiza tu próximo proyecto creativo en segundos'
+const WELCOME_MSG = '¡Hola! ¿Listo para cotizar tu próximo proyecto creativo en segundos?'
 
 export default function Home() {
   const [fase, setFase]             = useState('inicio')
