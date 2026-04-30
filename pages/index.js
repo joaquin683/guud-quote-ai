@@ -270,6 +270,10 @@ export default function Home() {
           <div style={{ ...S.orbWrap, ...(mini ? S.orbMini : {}) }}>
             <div style={S.ring1} />
             <div style={S.ring2} />
+            <div style={S.ripple1} />
+            <div style={S.ripple2} />
+            <div style={S.ripple3} />
+            <div style={S.ripple4} />
             <div style={{ ...S.orb }}>
               <video
                 key="orb-video"
@@ -401,6 +405,11 @@ export default function Home() {
         @keyframes mpulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,255,0,.2)} 50%{box-shadow:0 0 0 6px transparent} }
         @keyframes caretPulse { 0%,100%{opacity:1} 50%{opacity:0} }
         @keyframes chipSweep { from{background-position:100% 0} to{background-position:-100% 0} }
+        @keyframes rippleWave {
+          0%   { transform: scale(0.85); opacity: 0.5; }
+          70%  { transform: scale(1.5);  opacity: 0.12; }
+          100% { transform: scale(1.7);  opacity: 0; }
+        }
         @keyframes chipGlowPulse { 0%,100%{box-shadow:0 0 0 0.5px #E8FF00, 0 0 8px rgba(232,255,0,0.25)} 50%{box-shadow:0 0 0 0.5px #E8FF00, 0 0 14px rgba(232,255,0,0.4), 0 0 24px rgba(232,255,0,0.15)} }
         textarea { caret-color: transparent !important; }
         textarea::placeholder { color: transparent !important; }
@@ -890,6 +899,10 @@ const S = {
   orbMini: { width: 42, height: 42 },
   ring1: { position: 'absolute', inset: -9, borderRadius: '50%', border: '0.5px solid rgba(232,255,0,0.15)', animation: 'spin 10s linear infinite' },
   ring2: { position: 'absolute', inset: -17, borderRadius: '50%', border: '0.5px solid rgba(232,255,0,0.06)', animation: 'spin 16s linear infinite reverse' },
+  ripple1: { position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(232,255,0,0.35)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '0s', pointerEvents: 'none' },
+  ripple2: { position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(232,255,0,0.28)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '0.75s', pointerEvents: 'none' },
+  ripple3: { position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(232,255,0,0.2)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '1.5s', pointerEvents: 'none' },
+  ripple4: { position: 'absolute', inset: 0, borderRadius: '50%', border: '0.5px solid rgba(232,255,0,0.14)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '2.25s', pointerEvents: 'none' },
   orb: { position: 'absolute', inset: 0, borderRadius: '50%', background: '#0C0C0C', border: '1px solid rgba(232,255,0,0.2)', overflow: 'hidden', transition: 'all .3s' },
   orbLive: { borderColor: 'rgba(232,255,0,0.5)' },
   chat: { flex: 1, overflowY: 'auto', padding: '12px 20px', display: 'flex', flexDirection: 'column', gap: 11, WebkitOverflowScrolling: 'touch' },
