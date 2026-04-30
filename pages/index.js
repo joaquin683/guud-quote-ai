@@ -57,6 +57,20 @@ export default function Home() {
   const [welcomeDone, setWelcomeDone] = useState(false)
   const [intentDetected, setIntentDetected] = useState(null)
 
+  const { voiceState, supported: voiceSupported, start: startVoice, stop: stopVoice } = useVoiceInput({
+    lang: 'es-CL',
+    autoSend: true,
+    onResult: (text, autoSend) => {
+      if (autoSend) {
+        enviar(text)
+      } else {
+        setInput(text)
+        inputRef.current?.focus()
+      }
+    },
+    onError: () => {},
+  })
+
   const chatRef   = useRef(null)
   const inputRef  = useRef(null)
   const canvasRef = useRef(null)
@@ -337,12 +351,7 @@ export default function Home() {
                 }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }}
               />
-              <button style={{ ...S.icoBtn, ...S.mic, ...(micActivo ? S.micOn : {}) }} onClick={toggleMic} title="Voice (simulated)">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
-                </svg>
-              </button>
+              <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} />
               <button
                 style={{ ...S.icoBtn, ...S.snd, ...(!input.trim() || cargando ? S.sndDis : {}) }}
                 onClick={() => enviar()}
@@ -387,6 +396,130 @@ export default function Home() {
   )
 }
 
+
+
+// ─── useVoiceInput hook ───────────────────────────────────────────────
+function useVoiceInput({ onResult, onError, lang = 'es-CL', autoSend = true }) {
+  const [voiceState, setVoiceState] = useStateRef('idle')
+  const recogRef = useRef(null)
+
+  const supported = typeof window !== 'undefined' &&
+    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
+
+  const start = () => {
+    if (!supported) { setVoiceState('unsupported'); return }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    const recog = new SR()
+    recog.lang = lang
+    recog.continuous = false
+    recog.interimResults = false
+    recogRef.current = recog
+
+    setVoiceState('requesting-permission')
+    recog.onstart = () => setVoiceState('listening')
+    recog.onresult = (e) => {
+      setVoiceState('transcribing')
+      const text = e.results[0][0].transcript
+      if (text) { onResult(text, autoSend) }
+      setTimeout(() => setVoiceState('idle'), 400)
+    }
+    recog.onerror = (e) => {
+      if (e.error === 'not-allowed') setVoiceState('error-permission')
+      else setVoiceState('error')
+      setTimeout(() => setVoiceState('idle'), 2500)
+    }
+    recog.onend = () => {
+      if (recogRef.current) setVoiceState(s => s === 'listening' ? 'idle' : s)
+    }
+    recog.start()
+  }
+
+  const stop = () => {
+    recogRef.current?.stop()
+    recogRef.current = null
+    setVoiceState('idle')
+  }
+
+  return { voiceState, supported, start, stop }
+}
+
+function useStateRef(init) {
+  const [val, setVal] = useState(init)
+  const ref = useRef(val)
+  const set = (v) => {
+    const next = typeof v === 'function' ? v(ref.current) : v
+    ref.current = next
+    setVal(next)
+  }
+  return [val, set]
+}
+
+// ─── VoiceButton component ────────────────────────────────────────────
+function VoiceButton({ voiceState, onStart, onStop }) {
+  const isListening = voiceState === 'listening'
+  const isLoading = voiceState === 'requesting-permission' || voiceState === 'transcribing'
+  const isError = voiceState === 'error' || voiceState === 'error-permission'
+  const isUnsupported = voiceState === 'unsupported'
+
+  const label = isListening ? 'Escuchando…'
+    : isLoading ? '…'
+    : isError ? 'Intenta de nuevo'
+    : ''
+
+  return (
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+      {label && (
+        <span style={{
+          position: 'absolute', right: 44, whiteSpace: 'nowrap',
+          fontSize: 11, color: isError ? '#ff6b6b' : '#E8FF00',
+          letterSpacing: '0.04em', pointerEvents: 'none',
+          animation: 'fadeIn .2s ease',
+        }}>{label}</span>
+      )}
+      {isListening && (
+        <div style={{ position: 'absolute', right: 44, display: 'flex', gap: 2, alignItems: 'flex-end', height: 16, paddingRight: label ? 80 : 0 }}>
+          {[0,1,2,3,4].map(i => (
+            <div key={i} style={{
+              width: 2, background: '#E8FF00', borderRadius: 2,
+              animation: `voiceWave .8s ease-in-out ${i * 0.1}s infinite alternate`,
+              height: [8,14,10,16,8][i],
+            }} />
+          ))}
+        </div>
+      )}
+      <button
+        style={{
+          ...VBS.btn,
+          ...(isListening ? VBS.listening : {}),
+          ...(isError ? VBS.error : {}),
+          ...(isUnsupported ? VBS.disabled : {}),
+          opacity: isUnsupported ? 0.4 : 1,
+        }}
+        onClick={isListening ? onStop : onStart}
+        disabled={isUnsupported || isLoading}
+        title={isUnsupported ? 'Tu navegador no permite dictado por voz' : isListening ? 'Cancelar' : 'Hablar'}
+      >
+        {isListening ? (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="#080808" stroke="none">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+          </svg>
+        ) : (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+          </svg>
+        )}
+      </button>
+    </div>
+  )
+}
+
+const VBS = {
+  btn: { width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .2s', border: '0.5px solid var(--b2)', background: 'none', color: 'var(--t3)', cursor: 'pointer' },
+  listening: { background: '#E8FF00', borderColor: '#E8FF00', color: '#080808', boxShadow: '0 0 0 4px rgba(232,255,0,0.15)' },
+  error: { borderColor: 'rgba(255,107,107,0.5)', color: '#ff6b6b' },
+  disabled: { cursor: 'not-allowed' },
+}
 
 function OrbCanvas({ state = 'idle' }) {
   const canvasRef = useRef(null)
