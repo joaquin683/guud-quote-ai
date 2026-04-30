@@ -238,7 +238,7 @@ export default function Home() {
       <Head>
         <title>GÜÜD Quote AI — Global Creative HÜB</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Cotiza tu próximo proyecto creativo con IA. GÜÜD Company — Global Creative HÜB." />
+        <meta name="description" content="¡Hola! ¿Listo para cotizar tu próximo proyecto creativo? GÜÜD Company — Global Creative HÜB." />
       </Head>
 
       <div style={S.app}>
@@ -286,8 +286,8 @@ export default function Home() {
               />
             </div>
           </div>
-          {!mini && <div style={S.heroTitle}>Cotiza tu próximo proyecto creativo en segundos</div>}
-          {!mini && <div style={S.heroSub}>Cuéntame qué necesitas y te entrego un rango de presupuesto + próximos pasos en segundos</div>}
+          {!mini && <div style={S.heroTitle}>¡Hola! ¿Listo para cotizar tu próximo proyecto creativo en segundos?</div>}
+
           {mini && <div style={S.miniTitle}>GÜÜD Quote AI</div>}
         </div>
 
