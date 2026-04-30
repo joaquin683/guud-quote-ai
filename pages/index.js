@@ -57,15 +57,20 @@ export default function Home() {
   const [welcomeDone, setWelcomeDone] = useState(false)
   const [intentDetected, setIntentDetected] = useState(null)
 
-  const { voiceState, supported: voiceSupported, start: startVoice, stop: stopVoice } = useVoiceInput({
-    lang: 'es-CL',
-    autoSend: true,
-    onResult: (text, autoSend) => {
-      if (autoSend) {
+  const { voiceState, supported: voiceSupported, start: startVoice, stop: stopVoice, interim: voiceInterim } = useVoiceInput({
+    autoSend: false,
+    onResult: (text, auto) => {
+      if (auto) {
         enviar(text)
       } else {
         setInput(text)
-        inputRef.current?.focus()
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.style.height = 'auto'
+            inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 96) + 'px'
+          }
+          document.getElementById('send-btn')?.removeAttribute('disabled')
+        }, 50)
       }
     },
     onError: () => {},
@@ -340,7 +345,7 @@ export default function Home() {
               <textarea
                 ref={inputRef}
                 style={S.textarea}
-                placeholder="¿Qué te gustaría cotizar?"
+                placeholder={voiceInterim ? voiceInterim : '¿Qué te gustaría cotizar?'}
                 rows={1}
                 value={input}
                 onChange={e => {
@@ -354,6 +359,7 @@ export default function Home() {
               <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} />
               <button
                 style={{ ...S.icoBtn, ...S.snd, ...(!input.trim() || cargando ? S.sndDis : {}) }}
+                id="send-btn"
                 onClick={() => enviar()}
                 disabled={!input.trim() || cargando}
               >
@@ -399,9 +405,11 @@ export default function Home() {
 
 
 // ─── useVoiceInput hook ───────────────────────────────────────────────
-function useVoiceInput({ onResult, onError, lang = 'es-CL', autoSend = true }) {
+function useVoiceInput({ onResult, onError, autoSend = false }) {
   const [voiceState, setVoiceState] = useStateRef('idle')
+  const [interim, setInterim] = useState('')
   const recogRef = useRef(null)
+  const finalRef = useRef('')
 
   const supported = typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
@@ -410,37 +418,57 @@ function useVoiceInput({ onResult, onError, lang = 'es-CL', autoSend = true }) {
     if (!supported) { setVoiceState('unsupported'); return }
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     const recog = new SR()
-    recog.lang = lang
-    recog.continuous = false
-    recog.interimResults = false
+    // Detectar idioma del navegador, fallback a es-CL
+    recog.lang = navigator.language || 'es-CL'
+    recog.continuous = true       // no corta solo — espera al botón stop
+    recog.interimResults = true   // muestra texto mientras el usuario habla
     recogRef.current = recog
+    finalRef.current = ''
+    setInterim('')
 
     setVoiceState('requesting-permission')
     recog.onstart = () => setVoiceState('listening')
+
     recog.onresult = (e) => {
-      setVoiceState('transcribing')
-      const text = e.results[0][0].transcript
-      if (text) { onResult(text, autoSend) }
-      setTimeout(() => setVoiceState('idle'), 400)
+      let interimText = ''
+      let finalText = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          finalText += e.results[i][0].transcript + ' '
+        } else {
+          interimText += e.results[i][0].transcript
+        }
+      }
+      if (finalText) finalRef.current += finalText
+      setInterim(interimText)
     }
+
     recog.onerror = (e) => {
       if (e.error === 'not-allowed') setVoiceState('error-permission')
-      else setVoiceState('error')
+      else if (e.error !== 'aborted') setVoiceState('error')
       setTimeout(() => setVoiceState('idle'), 2500)
     }
+
     recog.onend = () => {
-      if (recogRef.current) setVoiceState(s => s === 'listening' ? 'idle' : s)
+      // Solo termina si el usuario presionó stop (no automáticamente)
     }
+
     recog.start()
   }
 
   const stop = () => {
     recogRef.current?.stop()
     recogRef.current = null
+    setInterim('')
+    const text = finalRef.current.trim()
+    if (text) {
+      onResult(text, autoSend)
+    }
     setVoiceState('idle')
+    finalRef.current = ''
   }
 
-  return { voiceState, supported, start, stop }
+  return { voiceState, supported, start, stop, interim }
 }
 
 function useStateRef(init) {
