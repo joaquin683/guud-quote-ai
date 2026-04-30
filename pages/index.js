@@ -535,7 +535,7 @@ function ConfirmCard({ contacto }) {
 const S = {
   app: { display: 'flex', flexDirection: 'column', height: '100svh', position: 'relative', zIndex: 2 },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' }, inner: { display: 'flex', flexDirection: 'column', flex: 1, maxWidth: 720, margin: '0 auto', width: '100%', overflow: 'hidden' },
-  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative', borderBottom: '1px solid rgba(232,255,0,0.15)' },
+  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative' },
   logoWrap: { display: 'flex', alignItems: 'center' },
   logoImg: { height: 52, width: 'auto', objectFit: 'contain', filter: 'invert(1)' },
   logoText: { fontFamily: 'Unbounded, sans-serif', fontWeight: 900, fontSize: 20, letterSpacing: '0.04em', color: '#080808', lineHeight: 1 },
