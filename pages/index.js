@@ -334,7 +334,7 @@ export default function Home() {
         {fase === 'inicio' && (
           <div style={S.chips}>
             {INITIAL_CHIPS.map((c, i) => (
-              <button key={i} style={S.chip} onClick={() => enviar(c)}>{c}</button>
+              <SuggestionChip key={i} label={c} onClick={() => enviar(c)} />
             ))}
           </div>
         )}
@@ -400,11 +400,13 @@ export default function Home() {
         @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes mpulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,255,0,.2)} 50%{box-shadow:0 0 0 6px transparent} }
         @keyframes caretPulse { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes chipSweep { from{background-position:100% 0} to{background-position:-100% 0} }
+        @keyframes chipGlowPulse { 0%,100%{box-shadow:0 0 0 0.5px #E8FF00, 0 0 8px rgba(232,255,0,0.25)} 50%{box-shadow:0 0 0 0.5px #E8FF00, 0 0 14px rgba(232,255,0,0.4), 0 0 24px rgba(232,255,0,0.15)} }
         textarea { caret-color: transparent !important; }
         textarea::placeholder { color: transparent !important; }
         .fake-caret { display:inline-block; width:2px; height:16px; background:#E8FF00; border-radius:1px; animation:caretPulse 1s step-end infinite; vertical-align:middle; margin-left:2px; }
         @keyframes orbglow { 0%,100%{box-shadow:0 0 20px rgba(232,255,0,.1)} 50%{box-shadow:0 0 35px rgba(232,255,0,.2)} }
-        .chip:hover { border-color: #E8FF00 !important; color: #080808 !important; background: #E8FF00 !important; transition: all .15s ease !important; }
+        
         textarea::placeholder { color: #484644; }
         @media (max-width: 600px) {
           .guud-app { max-width: 100vw !important; }
@@ -679,6 +681,53 @@ function OrbCanvas({ state = 'idle' }) {
 
 
 // ─── getCredentialsUrl helper ─────────────────────────────────────────
+
+// ─── SuggestionChip component ─────────────────────────────────────────
+function SuggestionChip({ label, onClick }) {
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'relative',
+        padding: '7px 14px',
+        borderRadius: 20,
+        border: 'none',
+        background: 'none',
+        fontSize: 12,
+        color: hovered ? '#E8FF00' : 'var(--t2)',
+        cursor: 'pointer',
+        fontFamily: 'DM Sans, sans-serif',
+        transition: 'color .2s ease',
+        outline: 'none',
+        zIndex: 0,
+        // Fake border via box-shadow — glow animado
+        boxShadow: hovered
+          ? '0 0 0 0.5px #E8FF00, 0 0 8px rgba(232,255,0,0.25), 0 0 16px rgba(232,255,0,0.1)'
+          : '0 0 0 0.5px rgba(255,255,255,0.11)',
+      }}
+    >
+      {/* Gradient sweep effect on hover */}
+      {hovered && (
+        <span style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: 20,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(232,255,0,0.06) 50%, transparent 100%)',
+          backgroundSize: '200% 100%',
+          animation: 'chipSweep .6s ease forwards',
+          pointerEvents: 'none',
+          zIndex: -1,
+        }} />
+      )}
+      {label}
+    </button>
+  )
+}
+
 function getCredentialsUrl(agente, industria = null) {
   const map = {
     branding:   'branding',
