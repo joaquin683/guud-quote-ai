@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
   try {
-    const { agente, historial, guardar } = req.body
+    const { agente, historial } = req.body
 
     const [servicios, talentos] = await Promise.all([getServicios(), getTalentos()])
     const systemPrompt = buildAgentPrompt(agente, servicios, talentos, historial)
@@ -20,17 +20,14 @@ export default async function handler(req, res) {
       messages: historial,
     })
 
-    const rawReply = response.content[0].text.trim()
-    // Limpiar markdown code fences que el modelo a veces incluye
-    const reply = rawReply.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim()
+    let reply = response.content[0].text.trim()
+    reply = reply.replace(/```json/gi, '').replace(/```/gi, '').trim()
 
-    // Detectar si es una cotización y guardarla en Supabase
     let quote = null
-    const match = reply.match(/\{[\s\S]*?"QUOTE"\s*:\s*true[\s\S]*?\}/)
-    if (match) {
+    const quoteMatch = reply.match(/{[\s\S]*?"QUOTE"\s*:\s*true[\s\S]*?}/)
+    if (quoteMatch) {
       try {
-        quote = JSON.parse(match[0])
-        // Guardar el lead automáticamente en la base de datos
+        quote = JSON.parse(quoteMatch[0])
         await guardarProyecto({
           nombre_proyecto: quote.proyecto,
           descripcion_cliente: historial[0]?.content || '',
@@ -42,17 +39,9 @@ export default async function handler(req, res) {
       } catch (_) {}
     }
 
-    // Limpiar JSON del texto visible
-    let finalReply = null
-    if (!quote) {
-      finalReply = reply
-        .replace(/```json[\s\S]*?```/gi, '')
-        .replace(/\{[\s\S]*?"QUOTE"\s*:\s*true[\s\S]*?\}/g, '')
-        .trim()
-      // Si quedó vacío, usar el reply original sin modificar
-      if (!finalReply) finalReply = reply.trim()
-    }
+    const finalReply = quote ? null : reply.replace(/{[\s\S]*?QUOTE[\s\S]*?}/g, '').trim() || reply.trim()
     res.status(200).json({ reply: finalReply, quote })
+
   } catch (e) {
     console.error('Chat error:', e)
     res.status(500).json({ error: e.message })
