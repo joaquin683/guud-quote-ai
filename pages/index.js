@@ -259,6 +259,7 @@ export default function Home() {
       <div style={S.app}>
         <div style={S.amb} />
         <header style={S.hdr}>
+          <a href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} onClick={e => { e.preventDefault(); setHasStartedChat(false); setFase('inicio'); setMensajes([]); setHistorial([]); setInput(''); setAgente(null); setTimeout(() => inputRef.current?.focus(), 150); }}>
           <div style={S.logoWrap}>
             <img
               src="/logo.gif"
@@ -271,6 +272,7 @@ export default function Home() {
               <div style={S.logoSub}>Global Creative HÜB</div>
             </div>
           </div>
+          </a>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {agenteInfo && (
               <div style={{ ...S.badge, borderColor: 'rgba(0,0,0,0.2)', color: '#080808', background: 'rgba(0,0,0,0.1)' }}>
