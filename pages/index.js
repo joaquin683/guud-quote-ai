@@ -948,8 +948,8 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
         </div>
         <RelatedCredentialsBlock agente={quote.agente} projectType={quote.servicio} />
         <div style={S.qprice}>
-          <span style={{ fontSize: 11, color: 'var(--t2)' }}>Rango estimado (CLP)</span>
-          <span style={S.qpval}>{fmt(quote.min)} – {fmt(quote.max)}</span>
+          <span style={{ fontSize: 11, color: 'var(--t2)' }}>Precio referencial</span>
+          <span style={S.qpval}>{fmt(quote.min)}</span>
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
           <button style={S.btnP} onClick={onAceptar}>Aceptar estimación</button>
