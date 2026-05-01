@@ -968,7 +968,7 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
           <span style={S.qpval}>{fmt(quote.min)}</span>
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
-          <button style={S.btnP} onClick={onAceptar}>Agendar reunión con GÜÜD</button>
+          <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
           <button style={S.btnS} onClick={onAjustar}>Ajustar alcance</button>
         </div>
       </div>
