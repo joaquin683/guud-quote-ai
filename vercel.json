@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "buildCommand": "next build",
+  "framework": "nextjs",
+  "build": {
+    "env": {
+      "BUILD_ID": "1777604475112"
+    }
+  }
+}
