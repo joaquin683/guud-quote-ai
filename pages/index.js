@@ -335,7 +335,7 @@ export default function Home() {
                 <div style={{ fontSize: 11, color: '#E8FF00', letterSpacing: '0.04em', transition: 'all 0.3s ease', opacity: intentDetected ? 1 : 0.6 }}>
                   {intentDetected ? `Detectando: ${intentDetected}` : input.length > 2 ? 'Detectando tipo de proyecto…' : ''}
                 </div>
-                <div style={S.inputFooter}>GÜÜD Company · Global Creative HÜB</div>
+
               </div>
             </div>
             {/* Chips centered */}
@@ -446,11 +446,22 @@ export default function Home() {
               }}>
                 {intentDetected ? `Detectando: ${intentDetected}` : input.length > 2 ? 'Detectando tipo de proyecto…' : ''}
               </div>
-              <div style={S.inputFooter}>GÜÜD Company · Global Creative HÜB</div>
+  
             </div>
           </div>
         )}
         </div>
+        {/* Footer */}
+        <footer style={{
+          textAlign: 'center',
+          padding: '12px 20px',
+          fontSize: 11,
+          color: '#E8FF00',
+          letterSpacing: '0.05em',
+          flexShrink: 0,
+        }}>
+          GÜÜD Company · Global Creative HÜB
+        </footer>
       </div>
 
       <style>{`
