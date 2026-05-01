@@ -1017,7 +1017,7 @@ const S = {
   hero: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '22px 0 10px', flexShrink: 0, transition: 'all .4s cubic-bezier(.4,0,.2,1)' },
   heroMini: { padding: '7px 0 4px' },
   heroCenter: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '0 20px 40px', animation: 'fadeUp .4s ease', gap: 0 },
-  heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 28, marginTop: 20, textAlign: 'center', letterSpacing: '-0.02em', lineHeight: 1.25, padding: '0 24px', maxWidth: 700, color: '#F2F0E8' },
+  heroTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 28, /* v2 */ marginTop: 20, textAlign: 'center', letterSpacing: '-0.02em', lineHeight: 1.25, padding: '0 24px', maxWidth: 700, color: '#F2F0E8' },
   heroSub: { fontSize: 14, color: 'var(--t2)', textAlign: 'center', marginTop: 10, maxWidth: 480, lineHeight: 1.6, padding: '0 32px' },
   heroInputWrap: { width: '100%', maxWidth: 760, marginTop: 28, padding: '0 20px', position: 'relative' },
   chipsHero: { display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', maxWidth: 760, margin: '14px auto 0', padding: '0 20px' },
