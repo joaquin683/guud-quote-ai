@@ -349,9 +349,11 @@ export default function Home() {
                 {hasStartedChat && <div ref={chatRef} style={S.chat}>
           {mensajes.map(m => (
             <div key={m.id} style={{ ...S.row, ...(m.rol === 'user' ? S.rowUser : {}) }}>
-              <div style={{ ...S.av, ...(m.rol === 'ai' ? S.avAi : S.avU) }}>
-                {m.rol === 'ai' ? <img src="/avatar.svg" alt="GÜÜD" style={{width:'100%',height:'100%',objectFit:'cover'}} /> : 'TÚ'}
-              </div>
+              {m.rol === 'ai' ? (
+                <MiniOrb />
+              ) : (
+                <div style={{ ...S.av, ...S.avU }}>TÚ</div>
+              )}
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} />
               ) : m.extra?.type === 'confirmado' ? (
@@ -366,7 +368,7 @@ export default function Home() {
 
           {cargando && (
             <div style={S.row}>
-              <div style={{ ...S.av, ...S.avAi }}><img src="/avatar.svg" alt="GÜÜD" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
+              <MiniOrb />
               <div style={{ ...S.bub, ...S.bubAi, padding: 0 }}>
                 <div style={S.dots}>
                   {[0, .18, .36].map((d, i) => <span key={i} style={{ ...S.dot, animationDelay: `${d}s` }} />)}
@@ -377,7 +379,7 @@ export default function Home() {
 
           {agendando && (
             <div style={S.row}>
-              <div style={{ ...S.av, ...S.avAi }}><img src="/avatar.svg" alt="GÜÜD" style={{width:'100%',height:'100%',objectFit:'cover'}} /></div>
+              <MiniOrb />
               <div style={S.agendarCard}>
                 <div style={S.agendarTitle}>Agendar reunión · Joaquín Labbe</div>
                 <input style={S.formInput} placeholder="Tu nombre" value={contacto.nombre} onChange={e => setContacto(p => ({ ...p, nombre: e.target.value }))} />
@@ -633,6 +635,35 @@ const VBS = {
   listening: { background: '#E8FF00', borderColor: '#E8FF00', color: '#080808', boxShadow: '0 0 0 4px rgba(232,255,0,0.15)' },
   error: { borderColor: 'rgba(255,107,107,0.5)', color: '#ff6b6b' },
   disabled: { cursor: 'not-allowed' },
+}
+
+
+// ─── MiniOrb — orb animado para avatar de chat ───────────────────────
+function MiniOrb() {
+  return (
+    <div style={{
+      width: 36, height: 36, borderRadius: '50%',
+      position: 'relative', flexShrink: 0,
+      overflow: 'visible',
+    }}>
+      {/* Ripple waves — 2 sutiles */}
+      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(232,255,0,0.3)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '0s', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(232,255,0,0.18)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '1s', pointerEvents: 'none' }} />
+      {/* Orb core */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: '50%',
+        overflow: 'hidden',
+        border: '1px solid rgba(232,255,0,0.25)',
+        background: '#080808',
+      }}>
+        <video
+          src="/orb.mp4"
+          autoPlay loop muted playsInline
+          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+        />
+      </div>
+    </div>
+  )
 }
 
 function OrbCanvas({ state = 'idle' }) {
