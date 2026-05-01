@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1024,
+      max_tokens: 2048,
       system: systemPrompt,
       messages: historial,
     })
@@ -42,11 +42,17 @@ export default async function handler(req, res) {
       } catch (_) {}
     }
 
-    // Si hay quote, el reply no debe mostrar JSON crudo
-    const cleanReply = quote
-      ? null
-      : reply.replace(/\{[\s\S]*?"QUOTE"[\s\S]*?\}/g, '').trim() || null
-    res.status(200).json({ reply: cleanReply, quote })
+    // Limpiar JSON del texto visible
+    let finalReply = null
+    if (!quote) {
+      finalReply = reply
+        .replace(/```json[\s\S]*?```/gi, '')
+        .replace(/\{[\s\S]*?"QUOTE"\s*:\s*true[\s\S]*?\}/g, '')
+        .trim()
+      // Si quedó vacío, usar el reply original sin modificar
+      if (!finalReply) finalReply = reply.trim()
+    }
+    res.status(200).json({ reply: finalReply, quote })
   } catch (e) {
     console.error('Chat error:', e)
     res.status(500).json({ error: e.message })
