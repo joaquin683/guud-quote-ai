@@ -20,11 +20,13 @@ export default async function handler(req, res) {
       messages: historial,
     })
 
-    const reply = response.content[0].text.trim()
+    const rawReply = response.content[0].text.trim()
+    // Limpiar markdown code fences que el modelo a veces incluye
+    const reply = rawReply.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim()
 
     // Detectar si es una cotización y guardarla en Supabase
     let quote = null
-    const match = reply.match(/\{[\s\S]*"QUOTE"\s*:\s*true[\s\S]*\}/)
+    const match = reply.match(/\{[\s\S]*?"QUOTE"\s*:\s*true[\s\S]*?\}/)
     if (match) {
       try {
         quote = JSON.parse(match[0])
@@ -40,7 +42,11 @@ export default async function handler(req, res) {
       } catch (_) {}
     }
 
-    res.status(200).json({ reply, quote })
+    // Si hay quote, el reply no debe mostrar JSON crudo
+    const cleanReply = quote
+      ? null
+      : reply.replace(/\{[\s\S]*?"QUOTE"[\s\S]*?\}/g, '').trim() || null
+    res.status(200).json({ reply: cleanReply, quote })
   } catch (e) {
     console.error('Chat error:', e)
     res.status(500).json({ error: e.message })
