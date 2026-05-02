@@ -86,6 +86,7 @@ export default function Home() {
 
   const chatRef   = useRef(null)
   const inputRef  = useRef(null)
+  const agendarRef = useRef(null)
   const canvasRef = useRef(null)
   const rafRef    = useRef(null)
   const wtRef     = useRef(0)
@@ -130,6 +131,15 @@ export default function Home() {
   useEffect(() => {
     chatRef.current?.scrollTo({ top: 9999, behavior: 'smooth' })
   }, [mensajes, cargando])
+
+  // Scroll to agendar card when it appears
+  useEffect(() => {
+    if (agendando) {
+      setTimeout(() => {
+        agendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+    }
+  }, [agendando])
 
   const addMsg = (texto, rol, extra = null) =>
     setMensajes(prev => [...prev, { texto, rol, extra, id: Date.now() + Math.random() }])
@@ -398,7 +408,7 @@ export default function Home() {
           {agendando && (
             <div style={S.row}>
               <MiniOrb />
-              <div style={S.agendarCard}>
+              <div ref={agendarRef} style={S.agendarCard}>
                 <div style={S.agendarTitle}>Agendar reunión · Joaquín Labbe</div>
                 <input style={S.formInput} placeholder="Tu nombre" value={contacto.nombre} onChange={e => setContacto(p => ({ ...p, nombre: e.target.value }))} />
                 <input style={{ ...S.formInput, marginTop: 8 }} placeholder="Tu email" type="email" value={contacto.email} onChange={e => setContacto(p => ({ ...p, email: e.target.value }))} />
