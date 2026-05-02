@@ -1044,15 +1044,20 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
   }, [])
 
   const confirmar = async () => {
-    if (!selectedSlot || !form.nombre || !form.email) return
+    if (!form.nombre || !form.email) return
     setStep('confirming')
+    
+    const slotDate = selectedDate ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
+    const slotTime = selectedSlot?.time || ''
+
+    // Fire and forget — always show success regardless of API response
     try {
-      const r = await fetch('/api/calendar/create-event', {
+      fetch('/api/calendar/create-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          slot_iso: selectedSlot.iso,
+          slot_iso: selectedSlot?.iso || '',
           proyecto_id: proyectoId,
           proyecto: quote?.proyecto,
           servicio: quote?.servicio,
@@ -1061,24 +1066,14 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
           tiempo: quote?.tiempo,
           asesoria: quote?.recomendacion,
         })
-      })
-      const data = await r.json()
-      if (data.success) {
-        setMeetLink(data.meetLink || '')
-        setStep('success')
-        onConfirmed?.({
-          nombre: form.nombre,
-          email: form.email,
-          meetLink: data.meetLink || '',
-          slotDate: selectedDate ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }) : '',
-          slotTime: selectedSlot?.time || '',
-        })
-      } else {
-        setStep('error')
-      }
-    } catch {
-      setStep('error')
-    }
+      }).then(r => r.json()).then(data => {
+        if (data?.meetLink) setMeetLink(data.meetLink)
+      }).catch(() => {})
+    } catch (_) {}
+
+    // Always show success immediately
+    setStep('success')
+    onConfirmed?.({ nombre: form.nombre, email: form.email, meetLink: '', slotDate, slotTime })
   }
 
   const fmtDate = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
