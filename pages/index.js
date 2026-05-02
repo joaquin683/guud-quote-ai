@@ -341,7 +341,7 @@ export default function Home() {
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
               </div>
             </div>
-            <div style={S.heroTitle}>¡Hola! ¿Estás listo para cotizar tu próximo proyecto creativo?</div>
+            <div style={S.heroTitle}>¿Estás listo para cotizar en vivo y avanzar con lo que necesitas?</div>
             {/* Input centered below title */}
             <div style={S.heroInputWrap}>
               <div style={S.inputBox}>
