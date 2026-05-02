@@ -91,6 +91,24 @@ export default function Home() {
   const rafRef    = useRef(null)
   const wtRef     = useRef(0)
 
+  // ─── resetSession ────────────────────────────────────────────────
+  const resetSession = () => {
+    setMensajes([])
+    setHistorial([])
+    setInput('')
+    setFase('inicio')
+    setAgente(null)
+    setCargando(false)
+    setWaveActive(false)
+    setMicActivo(false)
+    setAgendando(false)
+    setContacto({ nombre: '', email: '' })
+    setProyectoId(null)
+    setHasStartedChat(false)
+    setIntentDetected(null)
+    setTimeout(() => inputRef.current?.focus(), 150)
+  }
+
   // Autofocus input on mount
   useEffect(() => {
     const t = setTimeout(() => inputRef.current?.focus(), 100)
@@ -285,7 +303,7 @@ export default function Home() {
       <div style={S.app}>
         <div style={S.amb} />
         <header style={S.hdr}>
-          <a href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} onClick={e => { e.preventDefault(); setHasStartedChat(false); setFase('inicio'); setMensajes([]); setHistorial([]); setInput(''); setAgente(null); setTimeout(() => inputRef.current?.focus(), 150); }}>
+          <a href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} onClick={e => { e.preventDefault(); resetSession(); }}>
           <div style={S.logoWrap}>
             <img
               src="/logo.gif"
@@ -991,7 +1009,7 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
 
 
 // ─── MeetingScheduler component ──────────────────────────────────────
-function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
+function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset }) {
   const [step, setStep] = useState('idle') // idle | confirming | success | error
   const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '' })
   const [selectedDate, setSelectedDate] = useState('')
@@ -1093,6 +1111,9 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
         <span style={{color:'var(--t3)'}}>Nos vemos.</span>
       </div>
       {meetLink && <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>Unirse a Google Meet</a>}
+      <button onClick={() => onReset?.()} style={{ ...MS.btnSecondary, marginTop: 4 }}>
+        Iniciar nueva cotización
+      </button>
     </div>
   )
 
