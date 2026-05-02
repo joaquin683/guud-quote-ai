@@ -1083,8 +1083,15 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
       <div style={MS.successIcon}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#080808" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div style={MS.successTitle}>Reunión agendada</div>
-      <div style={MS.successSub}>Te enviamos la invitación al calendario a <strong>{form.email}</strong>.</div>
+      <div style={MS.successTitle}>Reunión confirmada</div>
+      <div style={MS.successSub}>
+        Tendrás una reunión con un Director Creativo Ejecutivo de GÜÜD Company
+        {selectedSlot && selectedDate ? <span> el <strong style={{color:'var(--t1)'}}>{new Date(selectedDate+'T12:00:00').toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'})}</strong> a las <strong style={{color:'var(--t1)'}}>{selectedSlot.time}</strong></span> : ''}.
+        <br/><br/>
+        Te enviamos la invitación al calendario a <strong style={{color:'var(--t1)'}}>{form.email}</strong> con todos los detalles.
+        <br/><br/>
+        <span style={{color:'var(--t3)'}}>Nos vemos.</span>
+      </div>
       {meetLink && <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>Unirse a Google Meet</a>}
     </div>
   )
