@@ -385,7 +385,7 @@ export default function Home() {
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} />
               ) : m.extra?.type === 'confirmado' ? (
-                <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} />
+                <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} />
               ) : (
                 <div style={{ ...S.bub, ...(m.rol === 'user' ? S.bubUser : S.bubAi) }}>
                   {m.texto}
@@ -413,7 +413,7 @@ export default function Home() {
                   quote={mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote}
                   proyectoId={proyectoId}
                   onConfirmed={({ nombre, email, meetLink }) => {
-                    addMsg(null, 'ai', { type: 'confirmado', contacto: { nombre, email }, meetLink })
+                    addMsg(null, 'ai', { type: 'confirmado', contacto: { nombre, email }, meetLink, slotDate, slotTime })
                     setFase('confirmado')
                     setAgendando(false)
                   }}
@@ -1066,7 +1066,13 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
       if (data.success) {
         setMeetLink(data.meetLink || '')
         setStep('success')
-        onConfirmed?.({ nombre: form.nombre, email: form.email, meetLink: data.meetLink || '' })
+        onConfirmed?.({
+          nombre: form.nombre,
+          email: form.email,
+          meetLink: data.meetLink || '',
+          slotDate: selectedDate ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }) : '',
+          slotTime: selectedSlot?.time || '',
+        })
       } else {
         setStep('error')
       }
@@ -1184,7 +1190,7 @@ const MS = {
 }
 
 
-function ConfirmCard({ contacto, meetLink }) {
+function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
   return (
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
       <div style={S.ccard}>
@@ -1196,15 +1202,18 @@ function ConfirmCard({ contacto, meetLink }) {
         <div style={{ fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>
           ¡Reunión confirmada!
         </div>
-        <div style={{ fontSize: 12.5, color: 'var(--t2)', lineHeight: 1.55 }}>
-          {contacto.nombre}, Joaquín te contactará a{' '}
-          <strong style={{ color: 'var(--t1)' }}>{contacto.email}</strong>{' '}
-          en las próximas horas.
+        <div style={{ fontSize: 13, color: 'var(--t2)', lineHeight: 1.7, textAlign: 'center', marginBottom: 4 }}>
+          Un Director Creativo Ejecutivo de GÜÜD Company tendrá una reunión contigo
+          {slotDate && slotTime ? <span> el <strong style={{color:'var(--t1)'}}>{slotDate}</strong> a las <strong style={{color:'var(--t1)'}}>{slotTime}</strong></span> : ''}.
+          <br/><br/>
+          Te enviamos la invitación a <strong style={{color:'var(--t1)'}}>{contacto.email}</strong> con todos los detalles.
+          <br/>
+          <span style={{color:'var(--t3)'}}>¡Nos vemos!</span>
         </div>
         <div style={S.jlCard}>
-          <div style={S.jlAvatar}>JL</div>
+          <div style={S.jlAvatar}>GÜ</div>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 500 }}>Joaquín Labbe</div>
+            <div style={{ fontSize: 13, fontWeight: 500 }}>Director Creativo Ejecutivo</div>
             <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>GÜÜD Company</div>
           </div>
         </div>
