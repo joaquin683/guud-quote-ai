@@ -385,7 +385,7 @@ export default function Home() {
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} />
               ) : m.extra?.type === 'confirmado' ? (
-                <ConfirmCard contacto={m.extra.contacto} />
+                <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} />
               ) : (
                 <div style={{ ...S.bub, ...(m.rol === 'user' ? S.bubUser : S.bubAi) }}>
                   {m.texto}
@@ -408,13 +408,16 @@ export default function Home() {
           {agendando && (
             <div style={S.row}>
               <MiniOrb />
-              <div ref={agendarRef} style={S.agendarCard}>
-                <div style={S.agendarTitle}>Agendar reunión · Joaquín Labbe</div>
-                <input style={S.formInput} placeholder="Tu nombre" value={contacto.nombre} onChange={e => setContacto(p => ({ ...p, nombre: e.target.value }))} />
-                <input style={{ ...S.formInput, marginTop: 8 }} placeholder="Tu email" type="email" value={contacto.email} onChange={e => setContacto(p => ({ ...p, email: e.target.value }))} />
-                <button style={{ ...S.btnP, width: '100%', marginTop: 12 }} onClick={confirmarReunion} disabled={!contacto.nombre || !contacto.email || cargando}>
-                  Confirmar reunión →
-                </button>
+              <div ref={agendarRef} style={{ flex: 1, minWidth: 0, animation: 'up .3s ease' }}>
+                <MeetingScheduler
+                  quote={mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote}
+                  proyectoId={proyectoId}
+                  onConfirmed={({ nombre, email, meetLink }) => {
+                    addMsg(null, 'ai', { type: 'confirmado', contacto: { nombre, email }, meetLink })
+                    setFase('confirmado')
+                    setAgendando(false)
+                  }}
+                />
               </div>
             </div>
           )}
@@ -986,7 +989,193 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
   )
 }
 
-function ConfirmCard({ contacto }) {
+
+// ─── MeetingScheduler component ──────────────────────────────────────
+function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
+  const [step, setStep] = useState('form') // form | slots | confirming | success | error
+  const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '' })
+  const [selectedDate, setSelectedDate] = useState('')
+  const [slots, setSlots] = useState([])
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [selectedSlot, setSelectedSlot] = useState(null)
+  const [meetLink, setMeetLink] = useState('')
+
+  // Generate next 5 weekdays
+  const weekdays = []
+  let d = new Date()
+  d.setDate(d.getDate() + 1)
+  while (weekdays.length < 5) {
+    if (d.getDay() !== 0 && d.getDay() !== 6) {
+      weekdays.push(d.toISOString().split('T')[0])
+    }
+    d.setDate(d.getDate() + 1)
+  }
+
+  const fetchSlots = async (date) => {
+    setSelectedDate(date)
+    setSelectedSlot(null)
+    setLoadingSlots(true)
+    try {
+      const r = await fetch('/api/calendar/availability?date=' + date)
+      const data = await r.json()
+      setSlots(data.slots || [])
+    } catch {
+      setSlots([])
+    }
+    setLoadingSlots(false)
+    setStep('slots')
+  }
+
+  const confirmar = async () => {
+    if (!selectedSlot || !form.nombre || !form.email) return
+    setStep('confirming')
+    try {
+      const r = await fetch('/api/calendar/create-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          slot_iso: selectedSlot.iso,
+          proyecto_id: proyectoId,
+          proyecto: quote?.proyecto,
+          servicio: quote?.servicio,
+          entregables: quote?.entregables,
+          precio: quote?.min ? new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(quote.min) : '',
+          tiempo: quote?.tiempo,
+          asesoria: quote?.recomendacion,
+        })
+      })
+      const data = await r.json()
+      if (data.success) {
+        setMeetLink(data.meetLink)
+        setStep('success')
+        onConfirmed?.({ nombre: form.nombre, email: form.email, meetLink: data.meetLink })
+      } else {
+        setStep('error')
+      }
+    } catch {
+      setStep('error')
+    }
+  }
+
+  const fmtDate = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
+
+  if (step === 'success') return (
+    <div style={MS.card}>
+      <div style={MS.successIcon}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#080808" strokeWidth="3">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div style={MS.successTitle}>Reunión agendada</div>
+      <div style={MS.successSub}>Te enviamos la invitación al calendario a <strong>{form.email}</strong>.</div>
+      {meetLink && (
+        <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>
+          Unirse a Google Meet
+        </a>
+      )}
+    </div>
+  )
+
+  if (step === 'error') return (
+    <div style={MS.card}>
+      <div style={MS.errorText}>No pudimos agendar la reunión. Intenta nuevamente o déjanos tus datos.</div>
+      <button style={MS.btnSecondary} onClick={() => setStep('form')}>Volver a intentar</button>
+    </div>
+  )
+
+  return (
+    <div style={MS.card}>
+      <div style={MS.header}>
+        <div style={MS.tag}>Agenda una reunión con GÜÜD</div>
+        <div style={MS.sub}>Elige un horario para revisar esta estimación con nuestro equipo creativo.</div>
+      </div>
+
+      {/* Formulario */}
+      <div style={MS.fields}>
+        <input style={MS.input} placeholder="Tu nombre *" value={form.nombre}
+          onChange={e => setForm(p => ({...p, nombre: e.target.value}))} />
+        <input style={MS.input} placeholder="Tu email *" type="email" value={form.email}
+          onChange={e => setForm(p => ({...p, email: e.target.value}))} />
+        <input style={MS.input} placeholder="Empresa (opcional)" value={form.empresa}
+          onChange={e => setForm(p => ({...p, empresa: e.target.value}))} />
+        <input style={MS.input} placeholder="Teléfono (opcional)" value={form.telefono}
+          onChange={e => setForm(p => ({...p, telefono: e.target.value}))} />
+      </div>
+
+      {/* Selector de fecha */}
+      <div style={MS.sectionLabel}>Selecciona un día</div>
+      <div style={MS.dateRow}>
+        {weekdays.map(day => (
+          <button key={day} onClick={() => fetchSlots(day)}
+            style={{ ...MS.dateBtn, ...(selectedDate === day ? MS.dateBtnActive : {}) }}>
+            <div style={MS.dateDow}>{new Date(day+'T12:00:00').toLocaleDateString('es-CL',{weekday:'short'})}</div>
+            <div style={MS.dateNum}>{new Date(day+'T12:00:00').getDate()}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Selector de horarios */}
+      {(step === 'slots' || step === 'confirming') && (
+        <>
+          <div style={MS.sectionLabel}>
+            {loadingSlots ? 'Cargando horarios…' : 'Horarios disponibles · ' + fmtDate(selectedDate)}
+          </div>
+          {!loadingSlots && (
+            <div style={MS.slotGrid}>
+              {slots.length === 0 && <div style={MS.noSlots}>Sin disponibilidad este día.</div>}
+              {slots.map(slot => (
+                <button key={slot.iso} onClick={() => setSelectedSlot(slot)}
+                  style={{ ...MS.slotBtn, ...(selectedSlot?.iso === slot.iso ? MS.slotBtnActive : {}) }}>
+                  {slot.time}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Botón confirmar */}
+      {selectedSlot && (
+        <button
+          style={{ ...MS.btnPrimary, opacity: (!form.nombre || !form.email || step === 'confirming') ? 0.5 : 1 }}
+          onClick={confirmar}
+          disabled={!form.nombre || !form.email || step === 'confirming'}
+        >
+          {step === 'confirming' ? 'Agendando…' : 'Confirmar reunión · ' + selectedSlot.time}
+        </button>
+      )}
+    </div>
+  )
+}
+
+const MS = {
+  card: { border: '0.5px solid rgba(232,255,0,0.2)', borderRadius: 16, padding: '18px 16px', background: '#0E0E0E', width: '100%', display: 'flex', flexDirection: 'column', gap: 12 },
+  header: { borderBottom: '0.5px solid var(--b1)', paddingBottom: 12 },
+  tag: { fontSize: 9, fontWeight: 700, letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--acc)', fontFamily: 'Unbounded, sans-serif', marginBottom: 5 },
+  sub: { fontSize: 13, color: 'var(--t2)', lineHeight: 1.5 },
+  fields: { display: 'flex', flexDirection: 'column', gap: 8 },
+  input: { background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 10, padding: '10px 13px', fontSize: 13, color: 'var(--t1)', outline: 'none', width: '100%' },
+  sectionLabel: { fontSize: 11, color: 'var(--t3)', letterSpacing: '.06em', textTransform: 'uppercase', marginTop: 4 },
+  dateRow: { display: 'flex', gap: 6, flexWrap: 'wrap' },
+  dateBtn: { padding: '8px 12px', borderRadius: 10, border: '0.5px solid var(--b2)', background: 'none', color: 'var(--t2)', cursor: 'pointer', textAlign: 'center', minWidth: 52, transition: 'all .15s' },
+  dateBtnActive: { borderColor: '#E8FF00', background: 'rgba(232,255,0,0.08)', color: '#E8FF00' },
+  dateDow: { fontSize: 10, textTransform: 'uppercase', letterSpacing: '.06em' },
+  dateNum: { fontSize: 18, fontWeight: 600, marginTop: 2 },
+  slotGrid: { display: 'flex', flexWrap: 'wrap', gap: 6 },
+  slotBtn: { padding: '7px 12px', borderRadius: 8, border: '0.5px solid var(--b2)', background: 'none', color: 'var(--t2)', cursor: 'pointer', fontSize: 13, transition: 'all .15s' },
+  slotBtnActive: { borderColor: '#E8FF00', background: 'rgba(232,255,0,0.1)', color: '#E8FF00', fontWeight: 600 },
+  noSlots: { fontSize: 12, color: 'var(--t3)' },
+  btnPrimary: { padding: '12px 16px', background: '#E8FF00', color: '#080808', border: 'none', borderRadius: 10, fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all .2s', width: '100%', marginTop: 4 },
+  btnSecondary: { padding: '10px 14px', background: 'none', color: 'var(--t2)', border: '0.5px solid var(--b2)', borderRadius: 10, fontSize: 12, cursor: 'pointer', width: '100%' },
+  successIcon: { width: 44, height: 44, borderRadius: '50%', background: '#E8FF00', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px auto' },
+  successTitle: { fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 15, textAlign: 'center' },
+  successSub: { fontSize: 13, color: 'var(--t2)', textAlign: 'center', lineHeight: 1.55 },
+  meetLink: { display: 'block', textAlign: 'center', fontSize: 13, color: '#E8FF00', padding: '10px 16px', border: '0.5px solid rgba(232,255,0,0.3)', borderRadius: 10, textDecoration: 'none', marginTop: 4 },
+  errorText: { fontSize: 13, color: '#ff6b6b', lineHeight: 1.5 },
+}
+
+function ConfirmCard({ contacto, meetLink }) {
   return (
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
       <div style={S.ccard}>
