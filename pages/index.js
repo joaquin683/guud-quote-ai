@@ -992,7 +992,7 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
 
 // ─── MeetingScheduler component ──────────────────────────────────────
 function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
-  const [step, setStep] = useState('form') // form | slots | confirming | success | error
+  const [step, setStep] = useState('idle') // idle | confirming | success | error
   const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '' })
   const [selectedDate, setSelectedDate] = useState('')
   const [slots, setSlots] = useState([])
@@ -1000,15 +1000,20 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
   const [selectedSlot, setSelectedSlot] = useState(null)
   const [meetLink, setMeetLink] = useState('')
 
+  // All possible time slots 10:00-18:00 every 30min
+  const ALL_TIMES = [
+    '10:00','10:30','11:00','11:30','12:00','12:30',
+    '13:00','13:30','14:00','14:30','15:00','15:30',
+    '16:00','16:30','17:00','17:30'
+  ]
+
   // Generate next 5 weekdays
   const weekdays = []
-  let d = new Date()
-  d.setDate(d.getDate() + 1)
+  const d0 = new Date()
+  d0.setDate(d0.getDate() + 1)
   while (weekdays.length < 5) {
-    if (d.getDay() !== 0 && d.getDay() !== 6) {
-      weekdays.push(d.toISOString().split('T')[0])
-    }
-    d.setDate(d.getDate() + 1)
+    if (d0.getDay() !== 0 && d0.getDay() !== 6) weekdays.push(d0.toISOString().split('T')[0])
+    d0.setDate(d0.getDate() + 1)
   }
 
   const fetchSlots = async (date) => {
@@ -1018,13 +1023,25 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
     try {
       const r = await fetch('/api/calendar/availability?date=' + date)
       const data = await r.json()
-      setSlots(data.slots || [])
+      // Build full slot list marking available vs booked
+      const availTimes = new Set((data.slots || []).map(s => s.time))
+      const full = ALL_TIMES.map(t => ({
+        time: t,
+        iso: date + 'T' + t + ':00-03:00',
+        available: availTimes.size === 0 ? true : availTimes.has(t), // if no data, show all as available
+      }))
+      setSlots(full)
     } catch {
-      setSlots([])
+      // Fallback: show all as available
+      setSlots(ALL_TIMES.map(t => ({ time: t, iso: date + 'T' + t + ':00-03:00', available: true })))
     }
     setLoadingSlots(false)
-    setStep('slots')
   }
+
+  // Auto-select first weekday on mount
+  useEffect(() => {
+    if (weekdays.length > 0) fetchSlots(weekdays[0])
+  }, [])
 
   const confirmar = async () => {
     if (!selectedSlot || !form.nombre || !form.email) return
@@ -1047,9 +1064,9 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
       })
       const data = await r.json()
       if (data.success) {
-        setMeetLink(data.meetLink)
+        setMeetLink(data.meetLink || '')
         setStep('success')
-        onConfirmed?.({ nombre: form.nombre, email: form.email, meetLink: data.meetLink })
+        onConfirmed?.({ nombre: form.nombre, email: form.email, meetLink: data.meetLink || '' })
       } else {
         setStep('error')
       }
@@ -1063,24 +1080,18 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
   if (step === 'success') return (
     <div style={MS.card}>
       <div style={MS.successIcon}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#080808" strokeWidth="3">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#080808" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
       <div style={MS.successTitle}>Reunión agendada</div>
       <div style={MS.successSub}>Te enviamos la invitación al calendario a <strong>{form.email}</strong>.</div>
-      {meetLink && (
-        <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>
-          Unirse a Google Meet
-        </a>
-      )}
+      {meetLink && <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>Unirse a Google Meet</a>}
     </div>
   )
 
   if (step === 'error') return (
     <div style={MS.card}>
       <div style={MS.errorText}>No pudimos agendar la reunión. Intenta nuevamente o déjanos tus datos.</div>
-      <button style={MS.btnSecondary} onClick={() => setStep('form')}>Volver a intentar</button>
+      <button style={MS.btnSecondary} onClick={() => setStep('idle')}>Volver a intentar</button>
     </div>
   )
 
@@ -1091,19 +1102,14 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
         <div style={MS.sub}>Elige un horario para revisar esta estimación con nuestro equipo creativo.</div>
       </div>
 
-      {/* Formulario */}
       <div style={MS.fields}>
-        <input style={MS.input} placeholder="Tu nombre *" value={form.nombre}
-          onChange={e => setForm(p => ({...p, nombre: e.target.value}))} />
-        <input style={MS.input} placeholder="Tu email *" type="email" value={form.email}
-          onChange={e => setForm(p => ({...p, email: e.target.value}))} />
-        <input style={MS.input} placeholder="Empresa (opcional)" value={form.empresa}
-          onChange={e => setForm(p => ({...p, empresa: e.target.value}))} />
-        <input style={MS.input} placeholder="Teléfono (opcional)" value={form.telefono}
-          onChange={e => setForm(p => ({...p, telefono: e.target.value}))} />
+        <input style={MS.input} placeholder="Tu nombre *" value={form.nombre} onChange={e => setForm(p => ({...p, nombre: e.target.value}))} />
+        <input style={MS.input} placeholder="Tu email *" type="email" value={form.email} onChange={e => setForm(p => ({...p, email: e.target.value}))} />
+        <input style={MS.input} placeholder="Empresa (opcional)" value={form.empresa} onChange={e => setForm(p => ({...p, empresa: e.target.value}))} />
+        <input style={MS.input} placeholder="Teléfono (opcional)" value={form.telefono} onChange={e => setForm(p => ({...p, telefono: e.target.value}))} />
       </div>
 
-      {/* Selector de fecha */}
+      {/* Selector de día */}
       <div style={MS.sectionLabel}>Selecciona un día</div>
       <div style={MS.dateRow}>
         {weekdays.map(day => (
@@ -1115,27 +1121,28 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed }) {
         ))}
       </div>
 
-      {/* Selector de horarios */}
-      {(step === 'slots' || step === 'confirming') && (
-        <>
-          <div style={MS.sectionLabel}>
-            {loadingSlots ? 'Cargando horarios…' : 'Horarios disponibles · ' + fmtDate(selectedDate)}
-          </div>
-          {!loadingSlots && (
-            <div style={MS.slotGrid}>
-              {slots.length === 0 && <div style={MS.noSlots}>Sin disponibilidad este día.</div>}
-              {slots.map(slot => (
-                <button key={slot.iso} onClick={() => setSelectedSlot(slot)}
-                  style={{ ...MS.slotBtn, ...(selectedSlot?.iso === slot.iso ? MS.slotBtnActive : {}) }}>
-                  {slot.time}
-                </button>
-              ))}
-            </div>
-          )}
-        </>
-      )}
+      {/* Horarios — siempre visibles, ocupados tachados */}
+      <div style={MS.sectionLabel}>
+        {loadingSlots ? 'Cargando horarios…' : selectedDate ? 'Horarios · ' + fmtDate(selectedDate) : ''}
+      </div>
+      <div style={MS.slotGrid}>
+        {loadingSlots && <div style={MS.loadingText}>Cargando…</div>}
+        {!loadingSlots && slots.map(slot => (
+          <button
+            key={slot.iso}
+            disabled={!slot.available}
+            onClick={() => slot.available && setSelectedSlot(slot)}
+            style={{
+              ...MS.slotBtn,
+              ...(selectedSlot?.iso === slot.iso ? MS.slotBtnActive : {}),
+              ...(slot.available ? {} : MS.slotBtnBooked),
+            }}
+          >
+            {slot.time}
+          </button>
+        ))}
+      </div>
 
-      {/* Botón confirmar */}
       {selectedSlot && (
         <button
           style={{ ...MS.btnPrimary, opacity: (!form.nombre || !form.email || step === 'confirming') ? 0.5 : 1 }}
@@ -1165,7 +1172,8 @@ const MS = {
   slotGrid: { display: 'flex', flexWrap: 'wrap', gap: 6 },
   slotBtn: { padding: '7px 12px', borderRadius: 8, border: '0.5px solid var(--b2)', background: 'none', color: 'var(--t2)', cursor: 'pointer', fontSize: 13, transition: 'all .15s' },
   slotBtnActive: { borderColor: '#E8FF00', background: 'rgba(232,255,0,0.1)', color: '#E8FF00', fontWeight: 600 },
-  noSlots: { fontSize: 12, color: 'var(--t3)' },
+  slotBtnBooked: { textDecoration: 'line-through', opacity: 0.35, cursor: 'not-allowed', borderColor: 'rgba(255,255,255,0.05)' },
+  loadingText: { fontSize: 12, color: 'var(--t3)' },
   btnPrimary: { padding: '12px 16px', background: '#E8FF00', color: '#080808', border: 'none', borderRadius: 10, fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all .2s', width: '100%', marginTop: 4 },
   btnSecondary: { padding: '10px 14px', background: 'none', color: 'var(--t2)', border: '0.5px solid var(--b2)', borderRadius: 10, fontSize: 12, cursor: 'pointer', width: '100%' },
   successIcon: { width: 44, height: 44, borderRadius: '50%', background: '#E8FF00', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px auto' },
@@ -1174,6 +1182,7 @@ const MS = {
   meetLink: { display: 'block', textAlign: 'center', fontSize: 13, color: '#E8FF00', padding: '10px 16px', border: '0.5px solid rgba(232,255,0,0.3)', borderRadius: 10, textDecoration: 'none', marginTop: 4 },
   errorText: { fontSize: 13, color: '#ff6b6b', lineHeight: 1.5 },
 }
+
 
 function ConfirmCard({ contacto, meetLink }) {
   return (
