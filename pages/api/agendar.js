@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabase'
 
-async function notifySlack({ nombre, email, empresa, servicio, precio, proyecto }) {
+async function notifySlack(data) {
   const url = process.env.SLACK_WEBHOOK_URL
   if (!url) return
   try {
@@ -8,46 +8,52 @@ async function notifySlack({ nombre, email, empresa, servicio, precio, proyecto 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        text: [`*Nuevo lead en GÜÜD Quote AI*`,
-          `*Cliente:* ${nombre} (${email})`,
-          empresa ? `*Empresa:* ${empresa}` : '',
-          `*Servicio:* ${servicio || 'No especificado'}`,
-          `*Proyecto:* ${proyecto || '-'}`,
-          precio ? `*Precio ref:* ${precio}` : '',
+        text: [
+          '*Nuevo lead → GÜÜD Quote AI*',
+          data.nombre_cliente ? '*Cliente:* ' + data.nombre_cliente : '',
+          data.email_cliente  ? '*Email:* '   + data.email_cliente  : '',
+          data.agente_usado   ? '*Servicio:* ' + data.agente_usado  : '',
+          data.nombre_proyecto ? '*Proyecto:* ' + data.nombre_proyecto : '',
+          data.precio_estimado_min ? '*Precio ref:* $' + new Intl.NumberFormat('es-CL').format(data.precio_estimado_min) : '',
         ].filter(Boolean).join('\n')
       })
     })
-  } catch(e) { console.error('Slack notify error:', e.message) }
+  } catch(e) { console.error('Slack error:', e.message) }
 }
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
+
   try {
-    const { nombre, email, empresa, telefono, servicio, proyecto, entregables, precio, tiempo, asesoria, agente } = req.body
+    const { nombre, email, servicio, proyecto, precio, agente } = req.body
     if (!nombre || !email) return res.status(400).json({ error: 'nombre y email requeridos' })
 
-    const { data, error } = await supabase.from('proyectos').insert([{
-      nombre_cliente: nombre,
-      email_cliente: email,
-      empresa: empresa || null,
-      telefono: telefono || null,
-      nombre_proyecto: proyecto || null,
-      descripcion_cliente: servicio || null,
-      agente_usado: agente || null,
-      precio_estimado_min: precio || null,
-      estado: 'cotizado',
-      entregables: entregables || null,
-      tiempo_estimado: tiempo || null,
-    }]).select().single()
+    const row = {
+      nombre_proyecto:     proyecto  || null,
+      descripcion_cliente: servicio  || null,
+      agente_usado:        agente    || null,
+      precio_estimado_min: precio    || null,
+      estado:              'cotizado',
+    }
 
-    if (error) console.error('Supabase insert error:', error.message)
+    const { data, error } = await supabase
+      .from('proyectos')
+      .insert([row])
+      .select()
+      .single()
 
-    // Notify Slack async (fire and forget)
-    notifySlack({ nombre, email, empresa, servicio, precio, proyecto })
+    if (error) {
+      console.error('Supabase insert error:', error.message, error.details)
+    }
 
-    res.status(200).json({ ok: true, id: data?.id || null })
+    const id = data?.id || null
+
+    // Notify Slack (fire and forget)
+    notifySlack({ nombre_cliente: nombre, email_cliente: email, agente_usado: agente, nombre_proyecto: proyecto, precio_estimado_min: precio })
+
+    res.status(200).json({ ok: true, id })
   } catch(e) {
     console.error('agendar error:', e.message)
-    res.status(200).json({ ok: true })
+    res.status(200).json({ ok: true, id: null })
   }
 }
