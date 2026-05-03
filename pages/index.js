@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import Head from 'next/head'
+import { getT } from '../lib/translations'
 
 const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
 
@@ -51,6 +52,17 @@ export default function Home() {
   const [micActivo, setMicActivo]   = useState(false)
   const [mini, setMini]             = useState(false)
   const [hasStartedChat, setHasStartedChat] = useState(false)
+
+  // Language
+  const [lang, setLang] = useState(() => {
+    if (typeof window === 'undefined') return 'es'
+    const saved = localStorage.getItem('guud_language')
+    if (saved && ['es','en','pt'].includes(saved)) return saved
+    const browser = navigator.language?.substring(0,2) || 'es'
+    return ['es','en','pt'].includes(browser) ? browser : 'es'
+  })
+  const t = getT(lang)
+  const changeLang = (l) => { setLang(l); localStorage.setItem('guud_language', l) }
   // Refocus when not in chat
   useEffect(() => {
     if (!hasStartedChat) {
@@ -192,7 +204,7 @@ export default function Home() {
         setHistorial(hist)
         const r2 = await fetch('/api/chat', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agente: ag, historial: hist }),
+          body: JSON.stringify({ agente: ag, historial: hist, lang }),
         })
         const d2 = await r2.json()
         if (d2.quote) {
@@ -214,7 +226,7 @@ export default function Home() {
       try {
         const r = await fetch('/api/chat', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agente, historial: hist }),
+          body: JSON.stringify({ agente, historial: hist, lang }),
         })
         const d = await r.json()
         if (d.quote) {
@@ -318,6 +330,20 @@ export default function Home() {
           </div>
           </a>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', gap: 4, marginRight: 4 }}>
+              {['es','en','pt'].map(l => (
+                <button key={l} onClick={() => changeLang(l)} style={{
+                  fontSize: 10, padding: '3px 8px', borderRadius: 20, border: 'none',
+                  background: lang === l ? '#E8FF00' : 'none',
+                  color: lang === l ? '#080808' : 'var(--t3)',
+                  cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                  fontWeight: lang === l ? 600 : 400, letterSpacing: '.04em',
+                  transition: 'all .15s',
+                }}>
+                  {l === 'es' ? 'ES' : l === 'en' ? 'EN' : 'PT'}
+                </button>
+              ))}
+            </div>
             {agenteInfo && (
               <div style={{ ...S.badge, borderColor: 'rgba(0,0,0,0.2)', color: '#080808', background: 'rgba(0,0,0,0.1)' }}>
                 {agenteInfo.label}
@@ -341,7 +367,7 @@ export default function Home() {
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
               </div>
             </div>
-            <div style={S.heroTitle}>¿Estás listo para cotizar en vivo y avanzar con lo que necesitas?</div>
+            <div style={S.heroTitle}>{t.heroTitle}</div>
             {/* Input centered below title */}
             <div style={S.heroInputWrap}>
               <div style={S.inputBox}>
@@ -379,14 +405,14 @@ export default function Home() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, minHeight: 16 }}>
                 <div style={{ fontSize: 11, color: '#E8FF00', letterSpacing: '0.04em', transition: 'all 0.3s ease', opacity: intentDetected ? 1 : 0.6 }}>
-                  {intentDetected ? `Detectando: ${intentDetected}` : input.length > 2 ? 'Detectando tipo de proyecto…' : ''}
+                  {intentDetected ? t.detectingPrefix + intentDetected : input.length > 2 ? t.detecting : ''}
                 </div>
 
               </div>
             </div>
             {/* Chips centered */}
             <div style={S.chipsHero}>
-              {INITIAL_CHIPS.map((chip, i) => (
+              {t.chips.map((chip, i) => (
                 <SuggestionChip key={i} label={chip} index={i} onClick={() => enviar(chip)} />
               ))}
             </div>
@@ -401,7 +427,7 @@ export default function Home() {
                 <div style={{ ...S.av, ...S.avU }}>TÚ</div>
               )}
               {m.extra?.type === 'quote' ? (
-                <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} />
+                <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t} />
               ) : m.extra?.type === 'confirmado' ? (
                 <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} />
               ) : (
@@ -509,7 +535,7 @@ export default function Home() {
           letterSpacing: '0.05em',
           flexShrink: 0,
         }}>
-          GÜÜD Company · Global Creative HÜB
+          {t.footer}
         </footer>
       </div>
 
@@ -963,19 +989,19 @@ function RelatedCredentialsBlock({ agente, projectType }) {
   )
 }
 
-function QuoteCard({ quote, onAceptar, onAjustar }) {
+function QuoteCard({ quote, onAceptar, onAjustar, t }) {
   return (
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
       <div style={S.qcard}>
         <div style={S.qhdr}>
-          <div style={S.qtag}>Estimación · GÜÜD Company</div>
+          <div style={S.qtag}>{t ? t.estimation : 'Estimación · GÜÜD Company'}</div>
           <div style={S.qname}>{quote.proyecto}</div>
           <div style={{ fontSize: 11.5, color: 'var(--t2)', marginTop: 2 }}>{quote.servicio}</div>
         </div>
         <div style={{ padding: '12px 16px' }}>
           {[
-            ['Entregables', quote.entregables],
-            ['Tiempo estimado', quote.tiempo],
+            [t ? t.deliverables : 'Entregables', quote.entregables],
+            [t ? t.timeline : 'Tiempo estimado', quote.tiempo],
           ].filter(([, v]) => v).map(([k, v]) => (
             <div key={k} style={S.qrow}>
               <span style={{ color: 'var(--t2)', flexShrink: 0, marginRight: 12 }}>{k}</span>
@@ -995,12 +1021,12 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
         </div>
         <RelatedCredentialsBlock agente={quote.agente} projectType={quote.servicio} />
         <div style={S.qprice}>
-          <span style={{ fontSize: 11, color: 'var(--t2)' }}>Precio referencial</span>
+          <span style={{ fontSize: 11, color: 'var(--t2)' }}>{t ? t.priceLabel : 'Precio referencial'}</span>
           <span style={S.qpval}>{fmt(quote.min)}</span>
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
           <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
-          <button style={S.btnS} onClick={onAjustar}>Ajustar alcance</button>
+          <button style={S.btnS} onClick={onAjustar}>{t ? t.adjustBtn : 'Ajustar alcance'}</button>
         </div>
       </div>
     </div>
@@ -1009,7 +1035,8 @@ function QuoteCard({ quote, onAceptar, onAjustar }) {
 
 
 // ─── MeetingScheduler component ──────────────────────────────────────
-function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset }) {
+function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp }) {
+  const tl = tProp || { scheduleTitle: 'Agenda una reunión con GÜÜD', scheduleSub: 'Elige un horario.', nameField: 'Tu nombre *', emailField: 'Tu email *', companyField: 'Empresa', phoneField: 'Teléfono', selectDay: 'Selecciona un día', selectTime: 'Horarios', confirmBtn: 'Confirmar reunión', confirming: 'Agendando…', successTitle: 'Reunión confirmada', successMsg: 'Tendrás una reunión', successEmail: 'Te enviamos la invitación a', successDetails: 'con todos los detalles.', successBye: 'Nos vemos.', meetBtn: 'Unirse a Google Meet', newQuote: 'Iniciar nueva cotización', errorMsg: 'No pudimos agendar.', retryBtn: 'Volver a intentar', loadingSlots: 'Cargando…', noSlots: 'Sin disponibilidad.' }
   const [step, setStep] = useState('idle') // idle | confirming | success | error
   const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '' })
   const [selectedDate, setSelectedDate] = useState('')
@@ -1101,7 +1128,7 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset }) {
       <div style={MS.successIcon}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#080808" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div style={MS.successTitle}>Reunión confirmada</div>
+      <div style={MS.successTitle}>{tl.successTitle}</div>
       <div style={MS.successSub}>
         Tendrás una reunión con un Director Creativo Ejecutivo de GÜÜD Company
         {selectedSlot && selectedDate ? <span> el <strong style={{color:'var(--t1)'}}>{new Date(selectedDate+'T12:00:00').toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'})}</strong> a las <strong style={{color:'var(--t1)'}}>{selectedSlot.time}</strong></span> : ''}.
@@ -1110,36 +1137,34 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset }) {
         <br/><br/>
         <span style={{color:'var(--t3)'}}>Nos vemos.</span>
       </div>
-      {meetLink && <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>Unirse a Google Meet</a>}
-      <button onClick={() => onReset?.()} style={{ ...MS.btnSecondary, marginTop: 4 }}>
-        Iniciar nueva cotización
-      </button>
+      {meetLink && <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>{tl.meetBtn}</a>}
+      <button onClick={() => onReset?.()} style={{ ...MS.btnSecondary, marginTop: 4 }}>{tl.newQuote}</button>
     </div>
   )
 
   if (step === 'error') return (
     <div style={MS.card}>
-      <div style={MS.errorText}>No pudimos agendar la reunión. Intenta nuevamente o déjanos tus datos.</div>
-      <button style={MS.btnSecondary} onClick={() => setStep('idle')}>Volver a intentar</button>
+      <div style={MS.errorText}>{tl.errorMsg}</div>
+      <button style={MS.btnSecondary} onClick={() => setStep('idle')}>{tl.retryBtn}</button>
     </div>
   )
 
   return (
     <div style={MS.card}>
       <div style={MS.header}>
-        <div style={MS.tag}>Agenda una reunión con GÜÜD</div>
-        <div style={MS.sub}>Elige un horario para revisar esta estimación con nuestro equipo creativo.</div>
+        <div style={MS.tag}>{tl.scheduleTitle}</div>
+        <div style={MS.sub}>{tl.scheduleSub}</div>
       </div>
 
       <div style={MS.fields}>
-        <input style={MS.input} placeholder="Tu nombre *" value={form.nombre} onChange={e => setForm(p => ({...p, nombre: e.target.value}))} />
-        <input style={MS.input} placeholder="Tu email *" type="email" value={form.email} onChange={e => setForm(p => ({...p, email: e.target.value}))} />
-        <input style={MS.input} placeholder="Empresa (opcional)" value={form.empresa} onChange={e => setForm(p => ({...p, empresa: e.target.value}))} />
-        <input style={MS.input} placeholder="Teléfono (opcional)" value={form.telefono} onChange={e => setForm(p => ({...p, telefono: e.target.value}))} />
+        <input style={MS.input} placeholder={tl.nameField} value={form.nombre} onChange={e => setForm(p => ({...p, nombre: e.target.value}))} />
+        <input style={MS.input} placeholder={tl.emailField} type="email" value={form.email} onChange={e => setForm(p => ({...p, email: e.target.value}))} />
+        <input style={MS.input} placeholder={tl.companyField} value={form.empresa} onChange={e => setForm(p => ({...p, empresa: e.target.value}))} />
+        <input style={MS.input} placeholder={tl.phoneField} value={form.telefono} onChange={e => setForm(p => ({...p, telefono: e.target.value}))} />
       </div>
 
       {/* Selector de día */}
-      <div style={MS.sectionLabel}>Selecciona un día</div>
+      <div style={MS.sectionLabel}>{tl.selectDay}</div>
       <div style={MS.dateRow}>
         {weekdays.map(day => (
           <button key={day} onClick={() => fetchSlots(day)}
@@ -1152,10 +1177,10 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset }) {
 
       {/* Horarios — siempre visibles, ocupados tachados */}
       <div style={MS.sectionLabel}>
-        {loadingSlots ? 'Cargando horarios…' : selectedDate ? 'Horarios · ' + fmtDate(selectedDate) : ''}
+        {loadingSlots ? tl.loadingSlots : selectedDate ? 'Horarios · ' + fmtDate(selectedDate) : ''}
       </div>
       <div style={MS.slotGrid}>
-        {loadingSlots && <div style={MS.loadingText}>Cargando…</div>}
+        {loadingSlots && <div style={MS.loadingText}>{tl.loadingSlots}</div>}
         {!loadingSlots && slots.map(slot => (
           <button
             key={slot.iso}
@@ -1178,7 +1203,7 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset }) {
           onClick={confirmar}
           disabled={!form.nombre || !form.email || step === 'confirming'}
         >
-          {step === 'confirming' ? 'Agendando…' : 'Confirmar reunión · ' + selectedSlot.time}
+          {step === 'confirming' ? tl.confirming : tl.confirmBtn + ' · ' + selectedSlot.time}
         </button>
       )}
     </div>
