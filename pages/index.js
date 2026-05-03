@@ -1103,118 +1103,46 @@ function playSuccessSound() {
 
 
 // ─── downloadQuotePDF ─────────────────────────────────────────────────
-async function downloadQuotePDF(quote, proyectoId) {
-  try {
-    const { jsPDF } = await import('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/+esm')
-    const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-    const W = 210, M = 20
+function downloadQuotePDF(quote) {
+  const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+  <title>Cotización GÜÜD</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#080808;color:#EDEBE5;font-family:helvetica,sans-serif;padding:40px;min-height:100vh}
+    .logo{font-size:28px;font-weight:900;letter-spacing:-.02em;margin-bottom:32px}
+    .logo span{color:#E8FF00}
+    .tag{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E8FF00;margin-bottom:8px}
+    .title{font-size:24px;font-weight:700;margin-bottom:6px;line-height:1.2}
+    .sub{font-size:13px;color:#8F8D89;margin-bottom:24px}
+    .divider{border:none;border-top:0.5px solid rgba(255,255,255,.1);margin:20px 0}
+    .row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px}
+    .row-label{color:#8F8D89}
+    .advisory-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8F8D89;margin-bottom:8px}
+    .advisory{font-size:13px;line-height:1.65;color:#EDEBE5}
+    .price-row{display:flex;justify-content:space-between;align-items:center;background:#0F0F0F;padding:16px;border-radius:12px;margin:24px 0}
+    .price-label{font-size:11px;color:#8F8D89}
+    .price-val{font-size:28px;font-weight:700;color:#E8FF00}
+    .footer{text-align:center;font-size:11px;color:#4E4D4A;margin-top:40px}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style></head><body>
+  <div class="logo">G<span>Ü</span>ÜD <span style="font-size:14px;font-weight:400;color:#4E4D4A">Quote AI</span></div>
+  <div class="tag">Estimación · GÜÜD Company</div>
+  <div class="title">${quote.proyecto || 'Proyecto creativo'}</div>
+  <div class="sub">${quote.servicio || ''}</div>
+  <hr class="divider">
+  ${quote.entregables ? `<div class="row"><span class="row-label">Entregables</span><span style="max-width:60%;text-align:right">${quote.entregables}</span></div>` : ''}
+  ${quote.tiempo ? `<div class="row"><span class="row-label">Tiempo estimado</span><span>${quote.tiempo}</span></div>` : ''}
+  ${quote.recomendacion ? `<hr class="divider"><div class="advisory-label">Asesoría GÜÜD</div><div class="advisory">${quote.recomendacion}</div>` : ''}
+  <div class="price-row"><div class="price-label">Precio referencial</div><div class="price-val">${fmt(quote.min)}</div></div>
+  <div class="footer">GÜÜD Company · Global Creative HÜB · guud-quote-ai.vercel.app</div>
+  </body></html>`;
 
-    // Background
-    doc.setFillColor(8, 8, 8)
-    doc.rect(0, 0, W, 297, 'F')
-
-    // Header bar
-    doc.setFillColor(20, 20, 20)
-    doc.rect(0, 0, W, 28, 'F')
-
-    // Logo
-    doc.setTextColor(232, 255, 0)
-    doc.setFontSize(16)
-    doc.setFont('helvetica', 'bold')
-    doc.text('GÜÜD', M, 17)
-    doc.setTextColor(100, 100, 100)
-    doc.setFontSize(8)
-    doc.setFont('helvetica', 'normal')
-    doc.text('Quote AI', M + 22, 17)
-
-    // Tag
-    doc.setTextColor(232, 255, 0)
-    doc.setFontSize(7)
-    doc.setFont('helvetica', 'bold')
-    doc.text('ESTIMACIÓN · GÜÜD COMPANY', M, 44)
-
-    // Project name
-    doc.setTextColor(237, 235, 229)
-    doc.setFontSize(18)
-    doc.setFont('helvetica', 'bold')
-    const proj = quote.proyecto || 'Proyecto creativo'
-    const projLines = doc.splitTextToSize(proj, W - M * 2)
-    doc.text(projLines, M, 54)
-
-    let y = 54 + projLines.length * 9 + 6
-
-    // Divider
-    doc.setDrawColor(40, 40, 40)
-    doc.setLineWidth(0.3)
-    doc.line(M, y, W - M, y)
-    y += 8
-
-    // Rows
-    const rows = [
-      ['Servicio', quote.servicio || quote.agente || '-'],
-      ['Entregables', quote.entregables || '-'],
-      ['Tiempo estimado', quote.tiempo || '-'],
-    ]
-    rows.forEach(([label, val]) => {
-      if (!val || val === '-') return
-      doc.setTextColor(100, 100, 100)
-      doc.setFontSize(8)
-      doc.setFont('helvetica', 'normal')
-      doc.text(label.toUpperCase(), M, y)
-      doc.setTextColor(200, 198, 192)
-      doc.setFontSize(10)
-      const lines = doc.splitTextToSize(String(val), W - M * 2)
-      doc.text(lines, M, y + 5)
-      y += 5 + lines.length * 5 + 7
-    })
-
-    // Advisory
-    if (quote.recomendacion) {
-      doc.setDrawColor(40, 40, 40)
-      doc.line(M, y, W - M, y); y += 7
-      doc.setTextColor(100, 100, 100)
-      doc.setFontSize(8)
-      doc.setFont('helvetica', 'bold')
-      doc.text('ASESORÍA GÜÜD', M, y); y += 5
-      doc.setTextColor(200, 198, 192)
-      doc.setFontSize(9)
-      doc.setFont('helvetica', 'normal')
-      const aLines = doc.splitTextToSize(quote.recomendacion, W - M * 2)
-      doc.text(aLines, M, y); y += aLines.length * 5 + 8
-    }
-
-    // Price
-    doc.setDrawColor(40, 40, 40)
-    doc.line(M, y, W - M, y); y += 8
-    doc.setFillColor(20, 20, 20)
-    doc.rect(M - 2, y - 4, W - M * 2 + 4, 16, 'F')
-    doc.setTextColor(100, 100, 100)
-    doc.setFontSize(8)
-    doc.text('PRECIO REFERENCIAL', M, y + 2)
-    doc.setTextColor(232, 255, 0)
-    doc.setFontSize(20)
-    doc.setFont('helvetica', 'bold')
-    doc.text(fmt(quote.min), W - M, y + 2, { align: 'right' })
-    y += 22
-
-    // CTA
-    doc.setFillColor(232, 255, 0)
-    doc.roundedRect(M, y, W - M * 2, 12, 3, 3, 'F')
-    doc.setTextColor(8, 8, 8)
-    doc.setFontSize(10)
-    doc.setFont('helvetica', 'bold')
-    doc.text('guud-quote-ai.vercel.app', W / 2, y + 8, { align: 'center' })
-
-    // Footer
-    doc.setTextColor(60, 60, 60)
-    doc.setFontSize(7)
-    doc.setFont('helvetica', 'normal')
-    doc.text('GÜÜD Company · Global Creative HÜB', W / 2, 287, { align: 'center' })
-
-    const fname = (quote.proyecto || 'cotizacion').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-guud.pdf'
-    doc.save(fname)
-  } catch(e) { console.error('PDF error:', e.message); alert('Error generando PDF: ' + e.message) }
+  const w = window.open('', '_blank', 'width=800,height=900');
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 500);
 }
 
 // ─── MeetingScheduler component ──────────────────────────────────────
