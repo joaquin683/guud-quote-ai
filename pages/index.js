@@ -551,6 +551,9 @@ export default function Home() {
         @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes mpulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,255,0,.2)} 50%{box-shadow:0 0 0 6px transparent} }
         @keyframes caretPulse { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes successPop { 0%{transform:scale(0.5);opacity:0} 60%{transform:scale(1.08)} 80%{transform:scale(0.97)} 100%{transform:scale(1);opacity:1} }
+        @keyframes successGlow { 0%{box-shadow:0 0 0 0 rgba(232,255,0,0)} 40%{box-shadow:0 0 0 12px rgba(232,255,0,0.25), 0 0 24px rgba(232,255,0,0.15)} 100%{box-shadow:0 0 0 0 rgba(232,255,0,0)} }
+        @keyframes checkDraw { 0%{stroke-dashoffset:30} 100%{stroke-dashoffset:0} }
         @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
         @keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
         @keyframes chipSweep { from{background-position:100% 0} to{background-position:-100% 0} }
@@ -1048,8 +1051,33 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare }) {
 }
 
 
+
+// ─── playSuccessSound ─────────────────────────────────────────────────
+function playSuccessSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    const gain = ctx.createGain()
+    gain.gain.setValueAtTime(0, ctx.currentTime)
+    gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45)
+    gain.connect(ctx.destination)
+
+    // Two-tone chime: base note + harmony
+    [[880, 0, 0.3], [1108, 0.08, 0.35], [1320, 0.16, 0.3]].forEach(([freq, delay, dur]) => {
+      const osc = ctx.createOscillator()
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + delay)
+      osc.frequency.exponentialRampToValueAtTime(freq * 0.98, ctx.currentTime + delay + dur)
+      osc.connect(gain)
+      osc.start(ctx.currentTime + delay)
+      osc.stop(ctx.currentTime + delay + dur)
+    })
+  } catch(e) { /* silently ignore if audio blocked */ }
+}
+
 // ─── MeetingScheduler component ──────────────────────────────────────
 function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp }) {
+  const soundPlayed = useRef(false)
   const tl = tProp || { scheduleTitle: 'Agenda una reunión con GÜÜD', scheduleSub: 'Elige un horario.', nameField: 'Tu nombre *', emailField: 'Tu email *', companyField: 'Empresa', phoneField: 'Teléfono', selectDay: 'Selecciona un día', selectTime: 'Horarios', confirmBtn: 'Confirmar reunión', confirming: 'Agendando…', successTitle: 'Reunión confirmada', successMsg: 'Tendrás una reunión', successEmail: 'Te enviamos la invitación a', successDetails: 'con todos los detalles.', successBye: 'Nos vemos.', meetBtn: 'Unirse a Google Meet', newQuote: 'Iniciar nueva cotización', errorMsg: 'No pudimos agendar.', retryBtn: 'Volver a intentar', loadingSlots: 'Cargando…', noSlots: 'Sin disponibilidad.' }
   const [step, setStep] = useState('idle') // idle | confirming | success | error
   const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '' })
@@ -1137,10 +1165,25 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
 
   const fmtDate = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
 
-  if (step === 'success') return (
+  if (step === 'success') {
+    if (!soundPlayed.current) {
+      soundPlayed.current = true
+      setTimeout(playSuccessSound, 200)
+    }
+    return (
     <div style={MS.card}>
-      <div style={MS.successIcon}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#080808" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+      <div style={{
+        width: 52, height: 52, borderRadius: '50%',
+        background: '#E8FF00',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        margin: '4px auto',
+        animation: 'successPop .6s cubic-bezier(.34,1.56,.64,1) forwards, successGlow 1s ease-out .3s forwards',
+      }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#080808" strokeWidth="3"
+          strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12"
+            style={{ strokeDasharray: 30, strokeDashoffset: 30, animation: 'checkDraw .35s ease .45s forwards' }} />
+        </svg>
       </div>
       <div style={MS.successTitle}>{tl.successTitle}</div>
       <div style={MS.successSub}>
@@ -1154,7 +1197,7 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
       {meetLink && <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>{tl.meetBtn}</a>}
       <button onClick={() => onReset?.()} style={{ ...MS.btnSecondary, marginTop: 4 }}>{tl.newQuote}</button>
     </div>
-  )
+  )}
 
   if (step === 'error') return (
     <div style={MS.card}>
