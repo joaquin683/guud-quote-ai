@@ -429,6 +429,7 @@ export default function Home() {
               )}
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t}
+                onDownloadPDF={() => downloadQuotePDF(m.extra.quote, proyectoId)}
                 onShare={proyectoId ? () => {
                 const url = window.location.origin + '/cotizacion/' + proyectoId;
                 if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => alert('Link copiado al portapapeles'));
@@ -1003,7 +1004,7 @@ function RelatedCredentialsBlock({ agente, projectType }) {
   )
 }
 
-function QuoteCard({ quote, onAceptar, onAjustar, t, onShare }) {
+function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
   return (
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
       <div style={S.qcard}>
@@ -1041,11 +1042,37 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare }) {
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
           <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
           <button style={S.btnS} onClick={onAjustar}>{t ? t.adjustBtn : 'Ajustar alcance'}</button>
-          {onShare && (
-            <button style={{ ...S.btnS, fontSize: 11, padding: '7px 14px', marginTop: 4 }} onClick={onShare}>
-              Compartir cotización
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            {onShare && (
+              <button onClick={onShare} title="Copiar link" style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '7px 14px', borderRadius: 10, border: '0.5px solid var(--b2)',
+                background: 'none', color: 'var(--t2)', cursor: 'pointer', fontSize: 12,
+                transition: 'all .15s', flex: 1, justifyContent: 'center',
+              }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                </svg>
+                Compartir
+              </button>
+            )}
+            {onDownloadPDF && (
+              <button onClick={onDownloadPDF} title="Descargar PDF" style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '7px 14px', borderRadius: 10, border: '0.5px solid var(--b2)',
+                background: 'none', color: 'var(--t2)', cursor: 'pointer', fontSize: 12,
+                transition: 'all .15s', flex: 1, justifyContent: 'center',
+              }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Descargar PDF
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -1075,6 +1102,122 @@ function playSuccessSound() {
       osc.stop(ctx.currentTime + delay + dur)
     })
   } catch(e) { /* silently ignore if audio blocked */ }
+}
+
+
+// ─── downloadQuotePDF ─────────────────────────────────────────────────
+async function downloadQuotePDF(quote, proyectoId) {
+  try {
+    const { jsPDF } = await import('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/+esm')
+    const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+    const W = 210, M = 20
+
+    // Background
+    doc.setFillColor(8, 8, 8)
+    doc.rect(0, 0, W, 297, 'F')
+
+    // Header bar
+    doc.setFillColor(20, 20, 20)
+    doc.rect(0, 0, W, 28, 'F')
+
+    // Logo
+    doc.setTextColor(232, 255, 0)
+    doc.setFontSize(16)
+    doc.setFont('helvetica', 'bold')
+    doc.text('GÜÜD', M, 17)
+    doc.setTextColor(100, 100, 100)
+    doc.setFontSize(8)
+    doc.setFont('helvetica', 'normal')
+    doc.text('Quote AI', M + 22, 17)
+
+    // Tag
+    doc.setTextColor(232, 255, 0)
+    doc.setFontSize(7)
+    doc.setFont('helvetica', 'bold')
+    doc.text('ESTIMACIÓN · GÜÜD COMPANY', M, 44)
+
+    // Project name
+    doc.setTextColor(237, 235, 229)
+    doc.setFontSize(18)
+    doc.setFont('helvetica', 'bold')
+    const proj = quote.proyecto || 'Proyecto creativo'
+    const projLines = doc.splitTextToSize(proj, W - M * 2)
+    doc.text(projLines, M, 54)
+
+    let y = 54 + projLines.length * 9 + 6
+
+    // Divider
+    doc.setDrawColor(40, 40, 40)
+    doc.setLineWidth(0.3)
+    doc.line(M, y, W - M, y)
+    y += 8
+
+    // Rows
+    const rows = [
+      ['Servicio', quote.servicio || quote.agente || '-'],
+      ['Entregables', quote.entregables || '-'],
+      ['Tiempo estimado', quote.tiempo || '-'],
+    ]
+    rows.forEach(([label, val]) => {
+      if (!val || val === '-') return
+      doc.setTextColor(100, 100, 100)
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'normal')
+      doc.text(label.toUpperCase(), M, y)
+      doc.setTextColor(200, 198, 192)
+      doc.setFontSize(10)
+      const lines = doc.splitTextToSize(String(val), W - M * 2)
+      doc.text(lines, M, y + 5)
+      y += 5 + lines.length * 5 + 7
+    })
+
+    // Advisory
+    if (quote.recomendacion) {
+      doc.setDrawColor(40, 40, 40)
+      doc.line(M, y, W - M, y); y += 7
+      doc.setTextColor(100, 100, 100)
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'bold')
+      doc.text('ASESORÍA GÜÜD', M, y); y += 5
+      doc.setTextColor(200, 198, 192)
+      doc.setFontSize(9)
+      doc.setFont('helvetica', 'normal')
+      const aLines = doc.splitTextToSize(quote.recomendacion, W - M * 2)
+      doc.text(aLines, M, y); y += aLines.length * 5 + 8
+    }
+
+    // Price
+    doc.setDrawColor(40, 40, 40)
+    doc.line(M, y, W - M, y); y += 8
+    doc.setFillColor(20, 20, 20)
+    doc.rect(M - 2, y - 4, W - M * 2 + 4, 16, 'F')
+    doc.setTextColor(100, 100, 100)
+    doc.setFontSize(8)
+    doc.text('PRECIO REFERENCIAL', M, y + 2)
+    doc.setTextColor(232, 255, 0)
+    doc.setFontSize(20)
+    doc.setFont('helvetica', 'bold')
+    doc.text(fmt(quote.min), W - M, y + 2, { align: 'right' })
+    y += 22
+
+    // CTA
+    doc.setFillColor(232, 255, 0)
+    doc.roundedRect(M, y, W - M * 2, 12, 3, 3, 'F')
+    doc.setTextColor(8, 8, 8)
+    doc.setFontSize(10)
+    doc.setFont('helvetica', 'bold')
+    doc.text('guud-quote-ai.vercel.app', W / 2, y + 8, { align: 'center' })
+
+    // Footer
+    doc.setTextColor(60, 60, 60)
+    doc.setFontSize(7)
+    doc.setFont('helvetica', 'normal')
+    doc.text('GÜÜD Company · Global Creative HÜB', W / 2, 287, { align: 'center' })
+
+    const fname = (quote.proyecto || 'cotizacion').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-guud.pdf'
+    doc.save(fname)
+  } catch(e) { console.error('PDF error:', e.message); alert('Error generando PDF: ' + e.message) }
 }
 
 // ─── MeetingScheduler component ──────────────────────────────────────
