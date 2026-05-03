@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // build: 1777822520557
+  // gcal: 1777851911788
 }
 module.exports = nextConfig
