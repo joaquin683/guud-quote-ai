@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // rebuild: 1777737486460
+  // build: 1777822520557
 }
 module.exports = nextConfig
