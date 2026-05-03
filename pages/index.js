@@ -329,6 +329,21 @@ export default function Home() {
             </div>
           </div>
           </a>
+          {/* Lang selector — centered in header */}
+          <div style={S.langSelector}>
+            {['es','en','pt'].map(l => (
+              <button key={l} onClick={() => changeLang(l)} style={{
+                fontSize: 10, padding: '3px 10px', borderRadius: 20, border: 'none',
+                background: lang === l ? '#E8FF00' : 'none',
+                color: lang === l ? '#080808' : 'var(--t3)',
+                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                fontWeight: lang === l ? 700 : 400, letterSpacing: '.06em',
+                transition: 'all .2s',
+              }}>
+                {l === 'es' ? 'ES' : l === 'en' ? 'EN' : 'PT'}
+              </button>
+            ))}
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {agenteInfo && (
               <div style={{ ...S.badge, borderColor: 'rgba(0,0,0,0.2)', color: '#080808', background: 'rgba(0,0,0,0.1)' }}>
@@ -354,22 +369,6 @@ export default function Home() {
               </div>
             </div>
             <div style={S.heroTitle}>{t.heroTitle}</div>
-            {/* Language selector — centered */}
-            <div style={{ display: 'flex', gap: 6, marginTop: 14, marginBottom: 2 }}>
-              {['es','en','pt'].map(l => (
-                <button key={l} onClick={() => changeLang(l)} style={{
-                  fontSize: 11, padding: '4px 14px', borderRadius: 20, border: 'none',
-                  background: lang === l ? '#E8FF00' : 'rgba(255,255,255,0.06)',
-                  color: lang === l ? '#080808' : 'var(--t3)',
-                  cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                  fontWeight: lang === l ? 700 : 400, letterSpacing: '.06em',
-                  transition: 'all .2s',
-                }}>
-                  {l === 'es' ? 'ES' : l === 'en' ? 'EN' : 'PT'}
-                </button>
-              ))}
-            </div>
-
             {/* Input centered below title */}
             <div style={S.heroInputWrap}>
               <div style={S.inputBox}>
@@ -1275,7 +1274,7 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
 const S = {
   app: { display: 'flex', flexDirection: 'column', height: '100svh', position: 'relative', zIndex: 2, transition: 'all .4s ease' },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' }, inner: { display: 'flex', flexDirection: 'column', flex: 1, maxWidth: 720, margin: '0 auto', width: '100%', overflow: 'hidden' },
-  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative' },
+  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative' }, langSelector: { position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 4 },
   logoWrap: { display: 'flex', alignItems: 'center' },
   logoImg: { height: 52, width: 'auto', objectFit: 'contain', filter: 'invert(1)' },
   logoText: { fontFamily: 'Unbounded, sans-serif', fontWeight: 900, fontSize: 20, letterSpacing: '0.04em', color: '#080808', lineHeight: 1 },
