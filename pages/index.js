@@ -308,7 +308,7 @@ export default function Home() {
     <>
       <Head>
         <title>GÜÜD Quote AI — Global Creative HÜB</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="description" content="¡Hola! ¿Listo para cotizar tu próximo proyecto creativo? GÜÜD Company — Global Creative HÜB." />
       </Head>
 
@@ -428,7 +428,8 @@ export default function Home() {
                 <div style={{ ...S.av, ...S.avU }}>TÚ</div>
               )}
               {m.extra?.type === 'quote' ? (
-                <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t} />
+                <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t}
+                onShare={proyectoId ? () => { const url = window.location.origin + '/cotizacion/' + proyectoId; navigator.clipboard?.writeText(url).then(() => alert('Link copiado: ' + url)); } : null} />
               ) : m.extra?.type === 'confirmado' ? (
                 <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} />
               ) : (
@@ -571,6 +572,9 @@ export default function Home() {
         }
         @media (max-width: 768px) {
           .hero-title-initial { font-size: 22px !important; }
+        }
+        @media (max-width: 600px) {
+          textarea { font-size: 16px !important; }
         }
       `}</style>
     </>
@@ -990,7 +994,7 @@ function RelatedCredentialsBlock({ agente, projectType }) {
   )
 }
 
-function QuoteCard({ quote, onAceptar, onAjustar, t }) {
+function QuoteCard({ quote, onAceptar, onAjustar, t, onShare }) {
   return (
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
       <div style={S.qcard}>
@@ -1028,6 +1032,11 @@ function QuoteCard({ quote, onAceptar, onAjustar, t }) {
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
           <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
           <button style={S.btnS} onClick={onAjustar}>{t ? t.adjustBtn : 'Ajustar alcance'}</button>
+          {onShare && (
+            <button style={{ ...S.btnS, fontSize: 11, padding: '7px 14px', marginTop: 4 }} onClick={onShare}>
+              Compartir cotización
+            </button>
+          )}
         </div>
       </div>
     </div>
