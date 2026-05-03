@@ -462,6 +462,8 @@ export default function Home() {
                 <MeetingScheduler
                   quote={mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote}
                   proyectoId={proyectoId}
+                  t={t}
+                  onReset={() => { setAgendando(false); resetSession(); }}
                   onConfirmed={({ nombre, email, meetLink }) => {
                     addMsg(null, 'ai', { type: 'confirmado', contacto: { nombre, email }, meetLink, slotDate, slotTime })
                     setFase('confirmado')
