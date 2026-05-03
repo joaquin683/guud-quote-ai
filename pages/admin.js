@@ -1,258 +1,108 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 
-const ESTADOS = {
-  lead:      { label: 'Lead',       color: '#6EE7FF' },
-  cotizado:  { label: 'Cotizado',   color: '#C8F135' },
-  aceptado:  { label: 'Aceptado',   color: '#FFB86C' },
-  en_curso:  { label: 'En curso',   color: '#BD93F9' },
-  cerrado:   { label: 'Cerrado',    color: '#8F8D89' },
-}
-
-const fmt = n => n ? new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n) : '—'
-const fmtDate = d => d ? new Date(d).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—'
+const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
+const fmtDate = d => new Date(d).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+const ESTADOS = { cotizado: { label: 'Cotizado', color: '#E8FF00', bg: 'rgba(232,255,0,0.1)' }, meeting_scheduled: { label: 'Reunión agendada', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' } }
 
 export default function Admin() {
-  const [tab, setTab]           = useState('leads')
-  const [proyectos, setProyectos] = useState([])
-  const [servicios, setServicios] = useState([])
-  const [talentos, setTalentos]   = useState([])
-  const [loading, setLoading]     = useState(true)
+  const [data, setData] = useState(null)
+  const [filtroEstado, setFiltroEstado] = useState('')
+  const [filtroAgente, setFiltroAgente] = useState('')
+  const [busqueda, setBusqueda] = useState('')
 
-  useEffect(() => {
-    fetchAll()
-  }, [])
-
-  const fetchAll = async () => {
-    setLoading(true)
-    try {
-      const [pRes, sRes, tRes] = await Promise.all([
-        fetch('/api/admin'),
-        fetch('/api/servicios'),
-        fetch('/api/talentos'),
-      ])
-      const [p, s, t] = await Promise.all([pRes.json(), sRes.json(), tRes.json()])
-      setProyectos(p.proyectos || [])
-      setServicios(s.servicios || [])
-      setTalentos(t.talentos || [])
-    } catch (e) {
-      console.error(e)
-    }
-    setLoading(false)
+  const load = () => {
+    const params = new URLSearchParams()
+    if (filtroEstado) params.set('estado', filtroEstado)
+    if (filtroAgente) params.set('agente', filtroAgente)
+    fetch('/api/admin?' + params).then(r => r.json()).then(setData)
   }
 
-  const totalCotizado = proyectos.filter(p => p.estado !== 'lead').length
-  const totalAceptado = proyectos.filter(p => p.estado === 'aceptado' || p.estado === 'en_curso').length
-  const valorPipeline = proyectos.reduce((acc, p) => acc + (p.precio_estimado_max || 0), 0)
+  useEffect(() => { load() }, [filtroEstado, filtroAgente])
+
+  const proyectos = (data?.proyectos || []).filter(p =>
+    !busqueda || (p.nombre_cliente + ' ' + p.email_cliente + ' ' + (p.nombre_proyecto||'')).toLowerCase().includes(busqueda.toLowerCase())
+  )
+
+  const S = {
+    page: { minHeight: '100vh', background: '#080808', color: '#EDEBE5', fontFamily: 'DM Sans, sans-serif', padding: '0 0 60px' },
+    hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 32px', borderBottom: '0.5px solid rgba(255,255,255,0.08)' },
+    logo: { fontFamily: 'Unbounded, sans-serif', fontWeight: 900, fontSize: 18 },
+    back: { fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' },
+    body: { maxWidth: 1100, margin: '0 auto', padding: '32px 24px' },
+    metrics: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 32 },
+    metCard: { background: '#0F0F0F', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '16px 18px' },
+    metVal: { fontSize: 28, fontWeight: 700, fontFamily: 'Unbounded, sans-serif', color: '#E8FF00' },
+    metLbl: { fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4, textTransform: 'uppercase', letterSpacing: '.06em' },
+    filters: { display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' },
+    inp: { background: '#111', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '8px 12px', color: '#EDEBE5', fontSize: 13, outline: 'none', flex: 1, minWidth: 200 },
+    sel: { background: '#111', border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '8px 12px', color: '#EDEBE5', fontSize: 13, outline: 'none' },
+    refreshBtn: { background: 'none', border: '0.5px solid rgba(255,255,255,0.15)', borderRadius: 8, padding: '8px 14px', color: 'rgba(255,255,255,0.4)', fontSize: 12, cursor: 'pointer' },
+    table: { width: '100%', borderCollapse: 'collapse' },
+    th: { textAlign: 'left', fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: '.1em', textTransform: 'uppercase', padding: '8px 12px', borderBottom: '0.5px solid rgba(255,255,255,0.08)' },
+    td: { padding: '12px 12px', borderBottom: '0.5px solid rgba(255,255,255,0.05)', fontSize: 13, verticalAlign: 'top' },
+    empty: { textAlign: 'center', padding: '60px 0', color: 'rgba(255,255,255,0.3)', fontSize: 14 },
+  }
+  const badge = estado => ({ fontSize: 10, padding: '3px 8px', borderRadius: 10, background: (ESTADOS[estado]||{bg:'rgba(255,255,255,0.08)'}).bg, color: (ESTADOS[estado]||{color:'#888'}).color, fontWeight: 600 })
 
   return (
     <>
-      <Head><title>GÜÜD Admin — Dashboard</title></Head>
-      <div style={A.wrap}>
-        <div style={A.amb} />
-
-        {/* Header */}
-        <header style={A.hdr}>
-          <div style={A.logo}>GÜ<span style={{ color: 'var(--acc)' }}>Ü</span>D <span style={{ opacity: .3 }}>|</span> <span style={{ color: 'var(--t2)', fontWeight: 400, fontSize: 14 }}>Admin</span></div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <a href="/" style={A.badgeBtn}>← App pública</a>
-            <button style={A.badgeBtn} onClick={fetchAll}>↻ Actualizar</button>
-          </div>
+      <Head><title>Admin · GÜÜD Quote AI</title><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;900&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" /></Head>
+      <div style={S.page}>
+        <header style={S.hdr}>
+          <div style={S.logo}>GÜ<span style={{color:'#E8FF00'}}>Ü</span>D Admin</div>
+          <a href="/" style={S.back}>← Volver a la app</a>
         </header>
-
-        {/* Métricas */}
-        <div style={A.metrics}>
-          {[
-            { label: 'Total leads', value: proyectos.length },
-            { label: 'Cotizados',   value: totalCotizado },
-            { label: 'Aceptados',   value: totalAceptado },
-            { label: 'Pipeline máx', value: fmt(valorPipeline) },
-          ].map(m => (
-            <div key={m.label} style={A.metCard}>
-              <div style={A.metVal}>{m.value}</div>
-              <div style={A.metLbl}>{m.label}</div>
+        <div style={S.body}>
+          {data && (
+            <div style={S.metrics}>
+              <div style={S.metCard}><div style={S.metVal}>{data.metrics.total}</div><div style={S.metLbl}>Total leads</div></div>
+              <div style={S.metCard}><div style={S.metVal}>{data.metrics.cotizados}</div><div style={S.metLbl}>Cotizados</div></div>
+              <div style={S.metCard}><div style={S.metVal}>{data.metrics.agendados}</div><div style={S.metLbl}>Reuniones agendadas</div></div>
+              <div style={S.metCard}><div style={{...S.metVal, fontSize: data.metrics.avgPrecio ? 18 : 28}}>{data.metrics.avgPrecio ? fmt(data.metrics.avgPrecio) : '-'}</div><div style={S.metLbl}>Ticket promedio</div></div>
             </div>
-          ))}
-        </div>
-
-        {/* Tabs */}
-        <div style={A.tabs}>
-          {[['leads', 'Leads & Proyectos'], ['servicios', 'Servicios & Tarifas'], ['talentos', 'Equipo']].map(([key, label]) => (
-            <button key={key} style={{ ...A.tab, ...(tab === key ? A.tabActive : {}) }} onClick={() => setTab(key)}>
-              {label}
-              {key === 'leads' && proyectos.length > 0 && (
-                <span style={A.tabBadge}>{proyectos.length}</span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Contenido */}
-        <div style={A.content}>
-          {loading ? (
-            <div style={{ textAlign: 'center', color: 'var(--t3)', padding: 40 }}>Cargando…</div>
-          ) : tab === 'leads' ? (
-            <LeadsTable proyectos={proyectos} />
-          ) : tab === 'servicios' ? (
-            <ServiciosTable servicios={servicios} />
+          )}
+          <div style={S.filters}>
+            <input style={S.inp} placeholder="Buscar cliente, email o proyecto…" value={busqueda} onChange={e => setBusqueda(e.target.value)} />
+            <select style={S.sel} value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)}>
+              <option value="">Todos los estados</option>
+              <option value="cotizado">Cotizados</option>
+              <option value="meeting_scheduled">Con reunión</option>
+            </select>
+            <select style={S.sel} value={filtroAgente} onChange={e => setFiltroAgente(e.target.value)}>
+              <option value="">Todos los servicios</option>
+              <option value="branding">Branding</option>
+              <option value="web">Web</option>
+              <option value="campana">Campaña</option>
+              <option value="contenido">Contenido</option>
+              <option value="estrategia">Estrategia</option>
+            </select>
+            <button style={S.refreshBtn} onClick={load}>↻ Actualizar</button>
+          </div>
+          {!data ? (
+            <div style={S.empty}>Cargando leads…</div>
+          ) : proyectos.length === 0 ? (
+            <div style={S.empty}>No hay leads que coincidan.</div>
           ) : (
-            <TalentosTable talentos={talentos} />
+            <table style={S.table}>
+              <thead><tr>{['Cliente','Email','Proyecto','Servicio','Precio ref.','Estado','Fecha'].map(h=><th key={h} style={S.th}>{h}</th>)}</tr></thead>
+              <tbody>
+                {proyectos.map((p,i) => (
+                  <tr key={i} style={{background: i%2===0?'transparent':'rgba(255,255,255,0.015)'}}>
+                    <td style={S.td}>{p.nombre_cliente||'-'}</td>
+                    <td style={{...S.td,color:'rgba(255,255,255,0.45)'}}>{p.email_cliente||'-'}</td>
+                    <td style={S.td}>{p.nombre_proyecto||'-'}</td>
+                    <td style={{...S.td,textTransform:'capitalize',color:'rgba(255,255,255,0.5)'}}>{p.agente_usado||'-'}</td>
+                    <td style={S.td}>{p.precio_estimado_min?fmt(p.precio_estimado_min):'-'}</td>
+                    <td style={S.td}><span style={badge(p.estado)}>{(ESTADOS[p.estado]||{label:p.estado||'?'}).label}</span></td>
+                    <td style={{...S.td,color:'rgba(255,255,255,0.35)',fontSize:11}}>{p.created_at?fmtDate(p.created_at):'-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
-
-      <style>{`
-        @keyframes up { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-      `}</style>
     </>
   )
-}
-
-function LeadsTable({ proyectos }) {
-  if (proyectos.length === 0) return (
-    <div style={{ textAlign: 'center', color: 'var(--t3)', padding: 60, fontSize: 14 }}>
-      Aún no hay leads. Cuando un cliente cotice, aparecerán aquí automáticamente.
-    </div>
-  )
-  return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={A.table}>
-        <thead>
-          <tr>
-            {['Proyecto', 'Agente', 'Rango CLP', 'Estado', 'Contacto', 'Reunión', 'Fecha'].map(h => (
-              <th key={h} style={A.th}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {proyectos.map(p => {
-            const est = ESTADOS[p.estado] || ESTADOS.lead
-            return (
-              <tr key={p.id} style={A.tr}>
-                <td style={A.td}>
-                  <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--t1)' }}>{p.nombre_proyecto || '—'}</div>
-                  <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2, maxWidth: 200 }}>{p.descripcion_cliente?.substring(0, 60)}{p.descripcion_cliente?.length > 60 ? '…' : ''}</div>
-                </td>
-                <td style={{ ...A.td, fontSize: 12 }}>{p.agente_usado || '—'}</td>
-                <td style={{ ...A.td, fontSize: 12, color: 'var(--acc)' }}>
-                  {p.precio_estimado_min ? `${new Intl.NumberFormat('es-CL').format(p.precio_estimado_min)} – ${new Intl.NumberFormat('es-CL').format(p.precio_estimado_max)}` : '—'}
-                </td>
-                <td style={A.td}>
-                  <span style={{ ...A.pill, borderColor: est.color + '44', color: est.color }}>{est.label}</span>
-                </td>
-                <td style={{ ...A.td, fontSize: 12 }}>
-                  {p.nombre_contacto && <div style={{ color: 'var(--t1)' }}>{p.nombre_contacto}</div>}
-                  {p.email_contacto && <div style={{ color: 'var(--t3)', fontSize: 11 }}>{p.email_contacto}</div>}
-                  {!p.nombre_contacto && <span style={{ color: 'var(--t3)' }}>—</span>}
-                </td>
-                <td style={A.td}>
-                  <span style={{ fontSize: 16 }}>{p.reunion_agendada ? '✓' : '·'}</span>
-                </td>
-                <td style={{ ...A.td, fontSize: 11, color: 'var(--t3)' }}>{fmtDate(p.creado_en)}</td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-function ServiciosTable({ servicios }) {
-  return (
-    <div>
-      <div style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 12 }}>
-        Para editar precios, ve a <strong style={{ color: 'var(--t2)' }}>supabase.com → Table Editor → servicios</strong> y edita directamente.
-      </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={A.table}>
-          <thead>
-            <tr>
-              {['Servicio', 'Agente', 'Precio mín', 'Precio máx', 'Tiempo', 'Activo'].map(h => (
-                <th key={h} style={A.th}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {servicios.map(s => (
-              <tr key={s.id} style={A.tr}>
-                <td style={A.td}>
-                  <div style={{ fontWeight: 500, fontSize: 13 }}>{s.nombre}</div>
-                  <div style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>{s.descripcion}</div>
-                </td>
-                <td style={{ ...A.td, fontSize: 12 }}>{s.agente}</td>
-                <td style={{ ...A.td, fontSize: 12, color: 'var(--acc)' }}>{new Intl.NumberFormat('es-CL').format(s.precio_min)}</td>
-                <td style={{ ...A.td, fontSize: 12, color: 'var(--acc)' }}>{new Intl.NumberFormat('es-CL').format(s.precio_max)}</td>
-                <td style={{ ...A.td, fontSize: 12 }}>{s.tiempo_estimado}</td>
-                <td style={A.td}><span style={{ fontSize: 16 }}>{s.activo ? '✓' : '·'}</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
-
-function TalentosTable({ talentos }) {
-  return (
-    <div>
-      <div style={{ fontSize: 12, color: 'var(--t3)', marginBottom: 12 }}>
-        Para editar el equipo, ve a <strong style={{ color: 'var(--t2)' }}>supabase.com → Table Editor → talentos</strong>.
-      </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={A.table}>
-          <thead>
-            <tr>
-              {['Nombre', 'Rol', 'Skills', 'Horas disponibles', 'Tarifa/hora', 'Email'].map(h => (
-                <th key={h} style={A.th}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {talentos.map(t => (
-              <tr key={t.id} style={A.tr}>
-                <td style={A.td}><div style={{ fontWeight: 500, fontSize: 13 }}>{t.nombre}</div></td>
-                <td style={{ ...A.td, fontSize: 12, color: 'var(--t2)' }}>{t.rol}</td>
-                <td style={A.td}>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                    {t.skills?.map(s => (
-                      <span key={s} style={{ ...A.pill, fontSize: 10, color: 'var(--acc)', borderColor: 'rgba(200,241,53,.2)' }}>{s}</span>
-                    ))}
-                  </div>
-                </td>
-                <td style={{ ...A.td, fontSize: 13 }}>
-                  <span style={{ color: t.disponibilidad_horas > 20 ? 'var(--acc)' : 'var(--coral)' }}>{t.disponibilidad_horas}h</span>
-                </td>
-                <td style={{ ...A.td, fontSize: 12, color: 'var(--t2)' }}>{t.tarifa_hora ? new Intl.NumberFormat('es-CL').format(t.tarifa_hora) : '—'}</td>
-                <td style={{ ...A.td, fontSize: 12, color: 'var(--t3)' }}>{t.email || '—'}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
-}
-
-const A = {
-  wrap: { minHeight: '100vh', maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 2, padding: '0 0 40px' },
-  amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 600px 300px at 50% -80px, rgba(200,241,53,0.03), transparent)' },
-  hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '0.5px solid var(--b1)', marginBottom: 24 },
-  logo: { fontFamily: 'Syne', fontWeight: 800, fontSize: 17 },
-  badgeBtn: { fontSize: 11, color: 'var(--t3)', border: '0.5px solid var(--b2)', padding: '4px 11px', borderRadius: 20, background: 'none', cursor: 'pointer', fontFamily: 'DM Sans' },
-  metrics: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, padding: '0 24px 24px' },
-  metCard: { background: 'var(--bg2)', borderRadius: 12, border: '0.5px solid var(--b1)', padding: '14px 16px' },
-  metVal: { fontFamily: 'Syne', fontWeight: 700, fontSize: 22, color: 'var(--t1)' },
-  metLbl: { fontSize: 11, color: 'var(--t3)', marginTop: 3, textTransform: 'uppercase', letterSpacing: '.06em' },
-  tabs: { display: 'flex', gap: 0, padding: '0 24px', borderBottom: '0.5px solid var(--b1)', marginBottom: 20 },
-  tab: { padding: '10px 16px', fontSize: 13, color: 'var(--t3)', background: 'none', border: 'none', cursor: 'pointer', borderBottom: '2px solid transparent', transition: 'all .2s', display: 'flex', alignItems: 'center', gap: 7 },
-  tabActive: { color: 'var(--t1)', borderBottomColor: 'var(--acc)' },
-  tabBadge: { fontSize: 10, background: 'var(--bg3)', border: '0.5px solid var(--b2)', padding: '1px 6px', borderRadius: 10, color: 'var(--t2)' },
-  content: { padding: '0 24px' },
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: 13 },
-  th: { textAlign: 'left', padding: '8px 12px', fontSize: 10.5, color: 'var(--t3)', textTransform: 'uppercase', letterSpacing: '.07em', borderBottom: '0.5px solid var(--b1)', fontWeight: 500 },
-  tr: { borderBottom: '0.5px solid var(--b1)', transition: 'background .15s' },
-  td: { padding: '12px 12px', verticalAlign: 'top', color: 'var(--t2)' },
-  pill: { display: 'inline-block', padding: '2px 8px', borderRadius: 20, border: '0.5px solid', fontSize: 11 },
 }
