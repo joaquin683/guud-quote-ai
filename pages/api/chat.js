@@ -8,10 +8,12 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
   try {
-    const { agente, historial } = req.body
+    const { agente, historial, lang } = req.body
 
     const [servicios, talentos] = await Promise.all([getServicios(), getTalentos()])
-    const systemPrompt = buildAgentPrompt(agente, servicios, talentos, historial)
+    const langNames = { es: 'español', en: 'English', pt: 'português (brasileño)' }
+    const langInstruction = lang && langNames[lang] ? `\n\nIDIOMA: Responde SIEMPRE en ${langNames[lang]}. No cambies de idioma aunque el usuario escriba en otro.` : ''
+    const systemPrompt = buildAgentPrompt(agente, servicios, talentos, historial) + langInstruction
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-5',
