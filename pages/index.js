@@ -429,7 +429,11 @@ export default function Home() {
               )}
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t}
-                onShare={proyectoId ? () => { const url = window.location.origin + '/cotizacion/' + proyectoId; navigator.clipboard?.writeText(url).then(() => alert('Link copiado: ' + url)); } : null} />
+                onShare={proyectoId ? () => {
+                const url = window.location.origin + '/cotizacion/' + proyectoId;
+                if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => alert('Link copiado al portapapeles'));
+                else alert(url);
+              } : null} />
               ) : m.extra?.type === 'confirmado' ? (
                 <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} />
               ) : (
