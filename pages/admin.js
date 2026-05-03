@@ -4,6 +4,7 @@ import Head from 'next/head'
 const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
 const fmtDate = d => new Date(d).toLocaleDateString('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 const ESTADOS = { cotizado: { label: 'Cotizado', color: '#E8FF00', bg: 'rgba(232,255,0,0.1)' }, meeting_scheduled: { label: 'Reunión agendada', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' } }
+const isAgendado = p => p.reunion_agendada === true
 
 export default function Admin() {
   const [data, setData] = useState(null)
@@ -21,7 +22,7 @@ export default function Admin() {
   useEffect(() => { load() }, [filtroEstado, filtroAgente])
 
   const proyectos = (data?.proyectos || []).filter(p =>
-    !busqueda || (p.nombre_cliente + ' ' + p.email_cliente + ' ' + (p.nombre_proyecto||'')).toLowerCase().includes(busqueda.toLowerCase())
+    !busqueda || (p.nombre_contacto||'-' + ' ' + p.email_contacto||'-' + ' ' + (p.nombre_proyecto||'')).toLowerCase().includes(busqueda.toLowerCase())
   )
 
   const S = {
@@ -89,13 +90,13 @@ export default function Admin() {
               <tbody>
                 {proyectos.map((p,i) => (
                   <tr key={i} style={{background: i%2===0?'transparent':'rgba(255,255,255,0.015)'}}>
-                    <td style={S.td}>{p.nombre_cliente||'-'}</td>
-                    <td style={{...S.td,color:'rgba(255,255,255,0.45)'}}>{p.email_cliente||'-'}</td>
+                    <td style={S.td}>{p.nombre_contacto||'-'||'-'}</td>
+                    <td style={{...S.td,color:'rgba(255,255,255,0.45)'}}>{p.email_contacto||'-'||'-'}</td>
                     <td style={S.td}>{p.nombre_proyecto||'-'}</td>
                     <td style={{...S.td,textTransform:'capitalize',color:'rgba(255,255,255,0.5)'}}>{p.agente_usado||'-'}</td>
                     <td style={S.td}>{p.precio_estimado_min?fmt(p.precio_estimado_min):'-'}</td>
                     <td style={S.td}><span style={badge(p.estado)}>{(ESTADOS[p.estado]||{label:p.estado||'?'}).label}</span></td>
-                    <td style={{...S.td,color:'rgba(255,255,255,0.35)',fontSize:11}}>{p.created_at?fmtDate(p.created_at):'-'}</td>
+                    <td style={{...S.td,color:'rgba(255,255,255,0.35)',fontSize:11}}>{p.creado_en?fmtDate(p.creado_en):'-'}</td>
                   </tr>
                 ))}
               </tbody>
