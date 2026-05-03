@@ -330,20 +330,6 @@ export default function Home() {
           </div>
           </a>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ display: 'flex', gap: 4, marginRight: 4 }}>
-              {['es','en','pt'].map(l => (
-                <button key={l} onClick={() => changeLang(l)} style={{
-                  fontSize: 10, padding: '3px 8px', borderRadius: 20, border: 'none',
-                  background: lang === l ? '#E8FF00' : 'none',
-                  color: lang === l ? '#080808' : 'var(--t3)',
-                  cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
-                  fontWeight: lang === l ? 600 : 400, letterSpacing: '.04em',
-                  transition: 'all .15s',
-                }}>
-                  {l === 'es' ? 'ES' : l === 'en' ? 'EN' : 'PT'}
-                </button>
-              ))}
-            </div>
             {agenteInfo && (
               <div style={{ ...S.badge, borderColor: 'rgba(0,0,0,0.2)', color: '#080808', background: 'rgba(0,0,0,0.1)' }}>
                 {agenteInfo.label}
@@ -368,6 +354,22 @@ export default function Home() {
               </div>
             </div>
             <div style={S.heroTitle}>{t.heroTitle}</div>
+            {/* Language selector — centered */}
+            <div style={{ display: 'flex', gap: 6, marginTop: 14, marginBottom: 2 }}>
+              {['es','en','pt'].map(l => (
+                <button key={l} onClick={() => changeLang(l)} style={{
+                  fontSize: 11, padding: '4px 14px', borderRadius: 20, border: 'none',
+                  background: lang === l ? '#E8FF00' : 'rgba(255,255,255,0.06)',
+                  color: lang === l ? '#080808' : 'var(--t3)',
+                  cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                  fontWeight: lang === l ? 700 : 400, letterSpacing: '.06em',
+                  transition: 'all .2s',
+                }}>
+                  {l === 'es' ? 'ES' : l === 'en' ? 'EN' : 'PT'}
+                </button>
+              ))}
+            </div>
+
             {/* Input centered below title */}
             <div style={S.heroInputWrap}>
               <div style={S.inputBox}>
