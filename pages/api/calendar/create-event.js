@@ -27,7 +27,7 @@ export default async function handler(req, res) {
         const event = await calendar.events.insert({
           calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
           conferenceDataVersion: 1,
-          sendUpdates: 'all',
+
           requestBody: {
             summary: 'Reunión GÜÜD · ' + (proyecto || 'Proyecto creativo'),
             description: [
@@ -43,10 +43,7 @@ export default async function handler(req, res) {
             ].filter(Boolean).join('\n'),
             start: { dateTime: startTime.toISOString(), timeZone: 'America/Santiago' },
             end:   { dateTime: endTime.toISOString(),   timeZone: 'America/Santiago' },
-            attendees: [
-              { email: e },
-              { email: process.env.GUUD_EMAIL || 'contacto@guudcompany.cl' },
-            ],
+            // Note: attendees removed — service accounts need Domain-Wide Delegation to invite
             conferenceData: {
               createRequest: { requestId: 'guud-' + Date.now(), conferenceSolutionKey: { type: 'hangoutsMeet' } }
             },
