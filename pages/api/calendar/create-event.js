@@ -19,7 +19,7 @@ export default async function handler(req, res) {
         const auth = new google.auth.JWT({
           email: process.env.GOOGLE_CLIENT_EMAIL,
           key:   process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-          scopes: ['https://www.googleapis.com/auth/calendar.events'],
+          scopes: ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events'],
         })
         const calendar  = google.calendar({ version: 'v3', auth })
         const startTime = new Date(slot_iso)
@@ -27,6 +27,7 @@ export default async function handler(req, res) {
         const event = await calendar.events.insert({
           calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
           conferenceDataVersion: 1,
+          sendUpdates: 'all',
           requestBody: {
             summary: 'Reunión GÜÜD · ' + (proyecto || 'Proyecto creativo'),
             description: [
