@@ -15,24 +15,20 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
   const { nombre: n, email: e, slot_iso, proyecto, servicio, entregables, tiempo, asesoria, precio } = req.body
-
-  if (!n || !e || !slot_iso) return res.status(400).json({ error: 'nombre, email y slot_iso requeridos' })
+  if (!n || !e || !slot_iso) return res.status(400).json({ error: 'faltan campos' })
 
   let eventId = null
-  let meetLink = null
   let gcalError = null
 
   if (process.env.GOOGLE_CLIENT_EMAIL && process.env.GOOGLE_PRIVATE_KEY && process.env.GOOGLE_CALENDAR_ID) {
     try {
       const auth = getAuth()
       const calendar = google.calendar({ version: 'v3', auth })
-
       const startTime = new Date(slot_iso)
       const endTime = new Date(startTime.getTime() + 30 * 60 * 1000)
 
       const desc = [
-        'Cliente: ' + n,
-        'Email: ' + e,
+        'Cliente: ' + n, 'Email: ' + e,
         proyecto    ? 'Proyecto: '    + proyecto    : '',
         servicio    ? 'Servicio: '    + servicio    : '',
         entregables ? 'Entregables: ' + entregables : '',
@@ -43,31 +39,22 @@ export default async function handler(req, res) {
 
       const { data } = await calendar.events.insert({
         calendarId: process.env.GOOGLE_CALENDAR_ID,
-        conferenceDataVersion: 1,
         requestBody: {
-          summary: 'Reunion GUUD - ' + (proyecto || 'Proyecto creativo'),
+          summary: 'Reunion GUUD - ' + (proyecto || 'Proyecto'),
           description: desc,
           start: { dateTime: startTime.toISOString(), timeZone: 'America/Santiago' },
           end:   { dateTime: endTime.toISOString(),   timeZone: 'America/Santiago' },
-          conferenceData: {
-            createRequest: {
-              requestId: 'guud-' + Date.now(),
-              conferenceSolutionKey: { type: 'hangoutsMeet' },
-            },
-          },
+          location: 'Google Meet (link por confirmar)',
         },
       })
-
       eventId = data.id || null
-      meetLink = data.conferenceData?.entryPoints?.find(ep => ep.entryPointType === 'video')?.uri || null
-
     } catch (err) {
       gcalError = err.message
       console.error('GCal error:', err.message)
     }
-  } else {
-    gcalError = 'Missing env vars'
   }
 
-  res.status(200).json({ success: true, eventId, meetLink, gcalError })
+  // meetLink is null — service accounts cannot create Meet links
+  // The event is created in the calendar; Joaquin can add Meet manually or send link separately
+  res.status(200).json({ success: true, eventId, meetLink: null, gcalError })
 }
