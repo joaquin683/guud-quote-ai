@@ -1,15 +1,11 @@
 import { google } from 'googleapis'
 
-function getOAuthClient() {
-  const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_OAUTH_CLIENT_ID,
-    process.env.GOOGLE_OAUTH_CLIENT_SECRET,
-    'https://developers.google.com/oauthplayground'
-  )
-  oauth2Client.setCredentials({
-    refresh_token: process.env.GOOGLE_OAUTH_REFRESH_TOKEN
+function getAuth() {
+  return new google.auth.JWT({
+    email: process.env.GOOGLE_CLIENT_EMAIL,
+    key: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+    scopes: ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events'],
   })
-  return oauth2Client
 }
 
 export default async function handler(req, res) {
@@ -23,11 +19,15 @@ export default async function handler(req, res) {
   let gcalError = null
 
   try {
-    const auth = getOAuthClient()
+    const auth = getAuth()
     const calendar = google.calendar({ version: 'v3', auth })
 
     const startTime = new Date(slot_iso)
     const endTime = new Date(startTime.getTime() + 30 * 60 * 1000)
+
+    // Format date for display
+    const dateStr = startTime.toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Santiago' })
+    const timeStr = startTime.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' })
 
     const desc = [
       'Cliente: ' + n,
@@ -38,37 +38,26 @@ export default async function handler(req, res) {
       precio      ? 'Precio: '      + precio      : '',
       tiempo      ? 'Tiempo: '      + tiempo      : '',
       asesoria    ? 'Asesoria:\n'  + asesoria    : '',
+      '',
+      'Reunion agendada el ' + dateStr + ' a las ' + timeStr,
     ].filter(Boolean).join('\n')
 
     const { data } = await calendar.events.insert({
       calendarId: process.env.GOOGLE_CALENDAR_ID,
-      conferenceDataVersion: 1,
-      sendUpdates: 'all',
       requestBody: {
-        summary: 'Reunion GUUD - ' + (proyecto || 'Proyecto creativo'),
+        summary: 'Reunion GUUD · ' + (proyecto || 'Proyecto creativo'),
         description: desc,
         start: { dateTime: startTime.toISOString(), timeZone: 'America/Santiago' },
         end:   { dateTime: endTime.toISOString(),   timeZone: 'America/Santiago' },
-        attendees: [
-          { email: e },
-          { email: process.env.GUUD_EMAIL || 'contacto@guudcompany.cl' },
-        ],
-        conferenceData: {
-          createRequest: {
-            requestId: 'guud-' + Date.now(),
-            conferenceSolutionKey: { type: 'hangoutsMeet' },
-          },
-        },
-        guestsCanModify: false,
+        status: 'confirmed',
       },
     })
 
     eventId = data.id || null
-    meetLink = data.conferenceData?.entryPoints?.find(ep => ep.entryPointType === 'video')?.uri || null
 
   } catch (err) {
     gcalError = err.message
-    console.error('GCal OAuth error:', err.message)
+    console.error('GCal error:', err.message)
   }
 
   res.status(200).json({ success: true, eventId, meetLink, gcalError })
