@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // gcal-gmail: 1777904086836
+  // hola-oauth: 1778448545920
 }
 module.exports = nextConfig
