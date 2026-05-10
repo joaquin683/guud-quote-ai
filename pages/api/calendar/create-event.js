@@ -48,8 +48,12 @@ export default async function handler(req, res) {
         end:   { dateTime: endTime.toISOString(),   timeZone: 'America/Santiago' },
         attendees: [
           { email: e },
-          { email: process.env.GUUD_EMAIL || 'contacto@guudcompany.cl' },
+          { email: process.env.GUUD_EMAIL || 'contacto@guudcompany.cl', displayName: 'GÜÜD Company' },
         ],
+        organizer: {
+          displayName: 'GÜÜD Company',
+          email: process.env.GUUD_EMAIL || 'contacto@guudcompany.cl',
+        },
         conferenceData: {
           createRequest: {
             requestId: 'guud-' + Date.now(),
