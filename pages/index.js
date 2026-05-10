@@ -1151,6 +1151,19 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
   const tl = tProp || { scheduleTitle: 'Agenda una reunión con GÜÜD', scheduleSub: 'Elige un horario.', nameField: 'Tu nombre *', emailField: 'Tu email *', companyField: 'Empresa', phoneField: 'Teléfono', selectDay: 'Selecciona un día', selectTime: 'Horarios', confirmBtn: 'Confirmar reunión', confirming: 'Agendando…', successTitle: 'Reunión confirmada', successMsg: 'Tendrás una reunión', successEmail: 'Te enviamos la invitación a', successDetails: 'con todos los detalles.', successBye: 'Nos vemos.', meetBtn: 'Unirse a Google Meet', newQuote: 'Iniciar nueva cotización', errorMsg: 'No pudimos agendar.', retryBtn: 'Volver a intentar', loadingSlots: 'Cargando…', noSlots: 'Sin disponibilidad.' }
   const [step, setStep] = useState('idle') // idle | confirming | success | error
   const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '' })
+  const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState({})
+  const isValidEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
+  const isValidName  = v => v.trim().length >= 2
+  const isValidPhone = v => !v || /^[+\d][\d\s\-().]{5,}$/.test(v.trim())
+  const validate = f => {
+    const e = {}
+    if (!isValidName(f.nombre))    e.nombre   = 'Ingresa tu nombre (mín. 2 caracteres)'
+    if (!isValidEmail(f.email))    e.email    = 'Ingresa un email válido (ej: juan@empresa.com)'
+    if (!isValidPhone(f.telefono)) e.telefono = 'Teléfono inválido'
+    return e
+  }
+  const canConfirm = isValidName(form.nombre) && isValidEmail(form.email) && isValidPhone(form.telefono)
   const [selectedDate, setSelectedDate] = useState('')
   const [slots, setSlots] = useState([])
   const [loadingSlots, setLoadingSlots] = useState(false)
@@ -1201,7 +1214,10 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
   }, [])
 
   const confirmar = async () => {
-    if (!form.nombre || !form.email) return
+    const errs = validate(form)
+    setTouched({ nombre: true, email: true, telefono: true })
+    setErrors(errs)
+    if (Object.keys(errs).length > 0) return
     setStep('confirming')
     
     const slotDate = selectedDate ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
@@ -1284,10 +1300,28 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
       </div>
 
       <div style={MS.fields}>
-        <input style={MS.input} placeholder={tl.nameField} value={form.nombre} onChange={e => setForm(p => ({...p, nombre: e.target.value}))} />
-        <input style={MS.input} placeholder={tl.emailField} type="email" value={form.email} onChange={e => setForm(p => ({...p, email: e.target.value}))} />
-        <input style={MS.input} placeholder={tl.companyField} value={form.empresa} onChange={e => setForm(p => ({...p, empresa: e.target.value}))} />
-        <input style={MS.input} placeholder={tl.phoneField} value={form.telefono} onChange={e => setForm(p => ({...p, telefono: e.target.value}))} />
+        <div style={{display:'flex',flexDirection:'column',gap:2}}>
+          <input style={{...MS.input,borderColor:touched.nombre&&errors.nombre?'#ff4d4f':undefined}} placeholder={tl.nameField} value={form.nombre}
+            onChange={e=>{setForm(p=>({...p,nombre:e.target.value}));if(touched.nombre)setErrors(v=>({...v,nombre:isValidName(e.target.value)?undefined:'Ingresa tu nombre'}))}}
+            onBlur={()=>{setTouched(p=>({...p,nombre:true}));setErrors(v=>({...v,nombre:isValidName(form.nombre)?undefined:'Ingresa tu nombre (mín. 2 caracteres)'}))}}
+          />
+          {touched.nombre&&errors.nombre&&<span style={{fontSize:11,color:'#ff4d4f',paddingLeft:4,marginTop:2}}>{errors.nombre}</span>}
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:2}}>
+          <input style={{...MS.input,borderColor:touched.email&&errors.email?'#ff4d4f':undefined}} placeholder={tl.emailField} type="email" value={form.email}
+            onChange={e=>{setForm(p=>({...p,email:e.target.value}));if(touched.email)setErrors(v=>({...v,email:isValidEmail(e.target.value)?undefined:'Email inválido'}))}}
+            onBlur={()=>{setTouched(p=>({...p,email:true}));setErrors(v=>({...v,email:isValidEmail(form.email)?undefined:'Ingresa un email válido (ej: juan@empresa.com)'}))}}
+          />
+          {touched.email&&errors.email&&<span style={{fontSize:11,color:'#ff4d4f',paddingLeft:4,marginTop:2}}>{errors.email}</span>}
+        </div>
+        <input style={MS.input} placeholder={tl.companyField} value={form.empresa} onChange={e=>setForm(p=>({...p,empresa:e.target.value}))} />
+        <div style={{display:'flex',flexDirection:'column',gap:2}}>
+          <input style={{...MS.input,borderColor:touched.telefono&&errors.telefono?'#ff4d4f':undefined}} placeholder={tl.phoneField} value={form.telefono}
+            onChange={e=>{setForm(p=>({...p,telefono:e.target.value}));if(touched.telefono)setErrors(v=>({...v,telefono:isValidPhone(e.target.value)?undefined:'Teléfono inválido'}))}}
+            onBlur={()=>{setTouched(p=>({...p,telefono:true}));setErrors(v=>({...v,telefono:isValidPhone(form.telefono)?undefined:'Teléfono inválido'}))}}
+          />
+          {touched.telefono&&errors.telefono&&<span style={{fontSize:11,color:'#ff4d4f',paddingLeft:4,marginTop:2}}>{errors.telefono}</span>}
+        </div>
       </div>
 
       {/* Selector de día */}
@@ -1326,9 +1360,9 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
 
       {selectedSlot && (
         <button
-          style={{ ...MS.btnPrimary, opacity: (!form.nombre || !form.email || step === 'confirming') ? 0.5 : 1 }}
+          style={{ ...MS.btnPrimary, opacity: (!canConfirm || step === 'confirming') ? 0.5 : 1, cursor: !canConfirm ? 'not-allowed' : 'pointer' }}
           onClick={confirmar}
-          disabled={!form.nombre || !form.email || step === 'confirming'}
+          disabled={!canConfirm || step === 'confirming'}
         >
           {step === 'confirming' ? tl.confirming : tl.confirmBtn + ' · ' + selectedSlot.time}
         </button>
