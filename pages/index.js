@@ -172,12 +172,17 @@ export default function Home() {
     chatRef.current?.scrollTo({ top: 9999, behavior: 'smooth' })
   }, [mensajes, cargando])
 
-  // ─── Refoco el input cuando termina de cargar ───────────────────────────
+  // ─── Refoco el input siempre que termina de cargar o llega un mensaje ──
   useEffect(() => {
     if (!cargando && inputRef.current) {
-      setTimeout(() => inputRef.current?.focus(), 50)
+      // Timeout más largo para dejar que QuoteCard y scroll terminen
+      setTimeout(() => {
+        if (inputRef.current && document.activeElement !== inputRef.current) {
+          inputRef.current.focus()
+        }
+      }, 150)
     }
-  }, [cargando])
+  }, [cargando, mensajes])
 
   // Scroll to agendar card when it appears
   useEffect(() => {
