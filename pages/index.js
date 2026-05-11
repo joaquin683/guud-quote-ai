@@ -1062,8 +1062,28 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
         </div>
         <RelatedCredentialsBlock agente={quote.agente} projectType={quote.servicio} />
         <div style={S.qprice}>
-          <span style={{ fontSize: 11, color: 'var(--t2)' }}>{t ? t.priceLabel : 'Precio referencial'}</span>
-          <span style={S.qpval}>{fmt(quote.min)}</span>
+          {quote.min === 0 && quote.max === 0 ? (
+            <>
+              <span style={{ fontSize: 11, color: 'var(--t2)' }}>Presupuesto</span>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'rgba(232,255,0,0.08)', border: '1px solid rgba(232,255,0,0.3)',
+                borderRadius: 8, padding: '4px 10px', marginTop: 4,
+                fontSize: 12, fontWeight: 700, color: 'var(--acc)',
+                letterSpacing: '0.02em'
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+                Depende de la idea
+              </span>
+            </>
+          ) : (
+            <>
+              <span style={{ fontSize: 11, color: 'var(--t2)' }}>{t ? t.priceLabel : 'Precio referencial'}</span>
+              <span style={S.qpval}>{fmt(quote.min)}</span>
+            </>
+          )}
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
           <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
