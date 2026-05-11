@@ -18,25 +18,18 @@ const AGENT_LABELS = {
 }
 
 const INITIAL_CHIPS = [
-  'Cotizar una marca desde cero',
-  'Estimar rediseño de identidad visual',
-  'Cotizar una web que convierta',
-  'Presupuestar contenido mensual',
-  'Cotizar campaña de lanzamiento',
-  'No sé qué necesito aún',
+  'Crear mi marca',
+  'Necesito una web',
+  'Lanzar una campaña',
+  'Contenido para mis redes',
+  'No sé por dónde empezar',
+  'Activar mi marca',
+  'Pautar en redes',
+  'Algo diferente',
+  'Desarrollar una app',
 ]
 
-const AGENT_CHIPS = [
-  { key: 'branding',   emoji: '✦', label: 'Crear mi marca',          msg: 'Quiero crear o rediseñar la identidad visual de mi marca' },
-  { key: 'web',        emoji: '◈', label: 'Necesito una web',        msg: 'Necesito un sitio web o tienda online' },
-  { key: 'campana',    emoji: '◉', label: 'Lanzar una campaña',      msg: 'Quiero lanzar una campaña creativa o producción audiovisual' },
-  { key: 'contenido',  emoji: '▣', label: 'Contenido para mis redes',msg: 'Necesito contenido mensual para mis redes sociales' },
-  { key: 'estrategia', emoji: '◎', label: 'No sé por dónde empezar', msg: 'No sé bien qué necesito, quiero una asesoría estratégica' },
-  { key: 'btl',        emoji: '◆', label: 'Activar mi marca',        msg: 'Quiero activar mi marca con un evento o experiencia presencial' },
-  { key: 'ads',        emoji: '◐', label: 'Pautar en redes',         msg: 'Quiero pautar en Meta, Google o TikTok y necesitar ayuda' },
-  { key: 'guerrilla',  emoji: '✺', label: 'Algo diferente',          msg: 'Quiero algo disruptivo, una acción de guerrilla o marketing no convencional' },
-  { key: 'producto',   emoji: '◑', label: 'Desarrollar una app',     msg: 'Quiero desarrollar una app, plataforma o producto digital' },
-]
+// AGENT_CHIPS moved to INITIAL_CHIPS
 
 
 // Detección de intención en tiempo real
@@ -434,14 +427,6 @@ export default function Home() {
             <div style={S.chipsHero}>
               {t.chips.map((chip, i) => (
                 <SuggestionChip key={i} label={chip} index={i} onClick={() => enviar(chip)} />
-              ))}
-            </div>
-            <div style={S.agentChipsRow}>
-              {AGENT_CHIPS.map((a) => (
-                <button key={a.key} style={S.agentChip} onClick={() => enviar(a.msg)}>
-                  <span style={S.agentChipEmoji}>{a.emoji}</span>
-                  <span style={S.agentChipLabel}>{a.label}</span>
-                </button>
               ))}
             </div>
           </div>
