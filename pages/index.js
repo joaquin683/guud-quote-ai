@@ -26,6 +26,18 @@ const INITIAL_CHIPS = [
   'No sé qué necesito aún',
 ]
 
+const AGENT_CHIPS = [
+  { key: 'branding',   emoji: '✦', label: 'Branding',    msg: 'Quiero cotizar un proyecto de branding e identidad visual' },
+  { key: 'web',        emoji: '◈', label: 'Web',         msg: 'Quiero cotizar un sitio web o plataforma digital' },
+  { key: 'campana',    emoji: '◉', label: 'Campaña',     msg: 'Quiero cotizar una campaña creativa o producción' },
+  { key: 'contenido',  emoji: '▣', label: 'Contenido',   msg: 'Quiero cotizar contenido para redes sociales' },
+  { key: 'estrategia', emoji: '◎', label: 'Estrategia',  msg: 'Quiero cotizar una consultoría o estrategia creativa' },
+  { key: 'btl',        emoji: '◆', label: 'BTL',         msg: 'Quiero cotizar una activación BTL o evento de marca' },
+  { key: 'ads',        emoji: '◐', label: 'Ads',         msg: 'Quiero cotizar pauta digital o campañas de performance' },
+  { key: 'guerrilla',  emoji: '✺', label: 'Guerrilla',   msg: 'Quiero cotizar una acción de marketing de guerrilla' },
+  { key: 'producto',   emoji: '◑', label: 'Producto',    msg: 'Quiero cotizar el desarrollo de un producto digital' },
+]
+
 
 // Detección de intención en tiempo real
 const INTENT_MAP = [
