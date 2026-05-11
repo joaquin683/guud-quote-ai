@@ -11,6 +11,10 @@ const AGENT_LABELS = {
   campana:    { label: 'Especialista Campaña',    color: '#E8FF00' },
   contenido:  { label: 'Especialista Contenido',  color: '#E8FF00' },
   estrategia: { label: 'Consultor Estratégico',   color: '#E8FF00' },
+  btl:        { label: 'Especialista BTL',           color: '#E8FF00' },
+  ads:        { label: 'Especialista Ads',           color: '#E8FF00' },
+  guerrilla:  { label: 'Creativo Guerrilla',         color: '#E8FF00' },
+  producto:   { label: 'Desarrollo de Producto',     color: '#E8FF00' },
 }
 
 const INITIAL_CHIPS = [
