@@ -195,7 +195,7 @@ export default function Home() {
     const msg = texto || input.trim()
     if (!msg || cargando) return
     setInput('')
-    if (inputRef.current) inputRef.current.style.height = 'auto'
+    if (inputRef.current) { inputRef.current.style.height = 'auto'; inputRef.current.focus() }
     setMini(true)
     setHasStartedChat(true); analytics.chatStarted(agente || 'pending')
     addMsg(msg, 'user')
