@@ -264,7 +264,8 @@ export default function Home() {
     }
   }
 
-  const aceptarCotizacion = () => { analytics.quoteAccepted(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min); setAgendando(true) }
+  const aceptarCotizacion = () => {
+    if (!contacto.nombre || !contacto.email) { setLeadModal(true); setPendingAgenda(true); return } analytics.quoteAccepted(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min); setAgendando(true) }
 
   const confirmarReunion = async () => {
     if (!contacto.nombre || !contacto.email) return
@@ -480,6 +481,45 @@ export default function Home() {
             </div>
           )}
 
+          {leadModal && (
+            <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
+              <div style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 16, padding: '36px 32px', width: 360, fontFamily: 'DM Sans, sans-serif' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#F2F0E8', marginBottom: 6 }}>Un paso más</div>
+                <div style={{ fontSize: 13, color: '#666', marginBottom: 24 }}>¿Con quién compartimos esta cotización?</div>
+                <input
+                  placeholder="Tu nombre *"
+                  value={contacto.nombre}
+                  onChange={e => setContacto(c => ({ ...c, nombre: e.target.value }))}
+                  style={{ width: '100%', background: '#0D0D0D', border: '1px solid #1f1f1f', borderRadius: 8, padding: '11px 14px', color: '#F2F0E8', fontSize: 14, outline: 'none', marginBottom: 10 }}
+                />
+                <input
+                  placeholder="Tu email *"
+                  type="email"
+                  value={contacto.email}
+                  onChange={e => setContacto(c => ({ ...c, email: e.target.value }))}
+                  style={{ width: '100%', background: '#0D0D0D', border: '1px solid #1f1f1f', borderRadius: 8, padding: '11px 14px', color: '#F2F0E8', fontSize: 14, outline: 'none', marginBottom: 10 }}
+                />
+                <input
+                  placeholder="Empresa (opcional)"
+                  value={contacto.empresa || ''}
+                  onChange={e => setContacto(c => ({ ...c, empresa: e.target.value }))}
+                  style={{ width: '100%', background: '#0D0D0D', border: '1px solid #1f1f1f', borderRadius: 8, padding: '11px 14px', color: '#F2F0E8', fontSize: 14, outline: 'none', marginBottom: 20 }}
+                />
+                <button
+                  onClick={() => {
+                    if (!contacto.nombre || !contacto.email) return
+                    setLeadModal(false)
+                    if (pendingAgenda) { setPendingAgenda(false); setAgendando(true) }
+                  }}
+                  style={{ width: '100%', background: '#E8FF00', border: 'none', borderRadius: 8, padding: '13px', fontWeight: 700, fontSize: 14, cursor: 'pointer', color: '#0A0A0A' }}
+                >Continuar a agendar reunión →</button>
+                <button
+                  onClick={() => { setLeadModal(false); setPendingAgenda(false) }}
+                  style={{ width: '100%', background: 'none', border: 'none', padding: '10px', fontSize: 12, color: '#555', cursor: 'pointer', marginTop: 4 }}
+                >Cancelar</button>
+              </div>
+            </div>
+          )}
           {agendando && (
             <div style={S.row}>
               <MiniOrb />
