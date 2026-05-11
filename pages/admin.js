@@ -12,7 +12,7 @@ export default function Admin() {
   const [pinError, setPinError] = useState(false)
 
   const handlePin = () => {
-    if (pin === (process.env.NEXT_PUBLIC_ADMIN_PIN || '8520')) {
+    if (pin === (process.env.NEXT_PUBLIC_ADMIN_PIN || 'estamosguud')) {
       setAuthed(true)
       setPinError(false)
     } else {
@@ -24,14 +24,19 @@ export default function Admin() {
   if (!authed) return (
     <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, sans-serif' }}>
       <div style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 16, padding: '40px 36px', width: 320, textAlign: 'center' }}>
-        <div style={{ fontSize: 22, fontWeight: 700, color: '#F2F0E8', marginBottom: 8 }}>GÜÜD Admin</div>
-        <div style={{ fontSize: 13, color: '#484644', marginBottom: 28 }}>Ingresa el PIN de acceso</div>
+        <a href="/" style={{ display: 'block', textDecoration: 'none', marginBottom: 16 }}>
+          <img src="/logo.gif" alt="GÜÜD Company" style={{ width: 52, height: 52, borderRadius: '50%', display: 'block', margin: '0 auto 10px', border: '1px solid rgba(232,255,0,0.2)' }} />
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#F2F0E8', textAlign: 'center', letterSpacing: '0.05em' }}>GÜÜD Company</div>
+          <div style={{ fontSize: 10, color: '#484644', textAlign: 'center', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>Global Creative HÜB</div>
+        </a>
+        <div style={{ fontSize: 11, color: '#484644', marginBottom: 20, textAlign: 'center', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Acceso admin</div>
+
         <input
           type="password"
           value={pin}
           onChange={e => { setPin(e.target.value); setPinError(false) }}
           onKeyDown={e => e.key === 'Enter' && handlePin()}
-          placeholder="••••"
+          placeholder="contraseña"
           autoFocus
           style={{ width: '100%', background: '#0D0D0D', border: pinError ? '1px solid #E24B4A' : '1px solid #1f1f1f', borderRadius: 8, padding: '12px 16px', color: '#F2F0E8', fontSize: 18, textAlign: 'center', letterSpacing: 8, outline: 'none', marginBottom: 8 }}
         />
