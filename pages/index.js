@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Head from 'next/head'
 import { getT } from '../lib/translations'
+import { analytics } from '../lib/analytics'
 
 const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
 
@@ -180,7 +181,7 @@ export default function Home() {
     setInput('')
     if (inputRef.current) inputRef.current.style.height = 'auto'
     setMini(true)
-    setHasStartedChat(true)
+    setHasStartedChat(true); analytics.chatStarted(agente || 'pending')
     addMsg(msg, 'user')
 
     if (fase === 'inicio') {
@@ -208,6 +209,7 @@ export default function Home() {
         })
         const d2 = await r2.json()
         if (d2.quote) {
+          analytics.quoteGenerated(agente, d2.quote.min, d2.quote.proyecto)
           setFase('cotizado')
           addMsg(null, 'ai', { type: 'quote', quote: d2.quote })
         } else {
@@ -241,7 +243,7 @@ export default function Home() {
     }
   }
 
-  const aceptarCotizacion = () => setAgendando(true)
+  const aceptarCotizacion = () => { analytics.quoteAccepted(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min); setAgendando(true) }
 
   const confirmarReunion = async () => {
     if (!contacto.nombre || !contacto.email) return
@@ -257,6 +259,7 @@ export default function Home() {
   }
 
   const ajustarAlcance = async () => {
+    analytics.quoteAdjusted(agente)
     const msg = 'Quiero ajustar el alcance del proyecto.'
     addMsg(msg, 'user')
     const hist = [...historial, { role: 'user', content: msg }]
@@ -429,7 +432,7 @@ export default function Home() {
               )}
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t}
-                onDownloadPDF={() => downloadQuotePDF(m.extra.quote, proyectoId)}
+                onDownloadPDF={() => { analytics.quotePdfDownloaded(agente); downloadQuotePDF(m.extra.quote, proyectoId) }}
                 onShare={proyectoId ? () => {
                 const url = window.location.origin + '/cotizacion/' + proyectoId;
                 if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => alert('Link copiado al portapapeles'));
@@ -467,6 +470,7 @@ export default function Home() {
                   onReset={() => { setAgendando(false); resetSession(); }}
                   onConfirmed={({ nombre, email, meetLink }) => {
                     addMsg(null, 'ai', { type: 'confirmado', contacto: { nombre, email }, meetLink, slotDate, slotTime })
+                    analytics.meetingScheduled(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min)
                     setFase('confirmado')
                     setAgendando(false)
                   }}
