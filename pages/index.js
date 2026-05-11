@@ -27,15 +27,15 @@ const INITIAL_CHIPS = [
 ]
 
 const AGENT_CHIPS = [
-  { key: 'branding',   emoji: '✦', label: 'Branding',    msg: 'Quiero cotizar un proyecto de branding e identidad visual' },
-  { key: 'web',        emoji: '◈', label: 'Web',         msg: 'Quiero cotizar un sitio web o plataforma digital' },
-  { key: 'campana',    emoji: '◉', label: 'Campaña',     msg: 'Quiero cotizar una campaña creativa o producción' },
-  { key: 'contenido',  emoji: '▣', label: 'Contenido',   msg: 'Quiero cotizar contenido para redes sociales' },
-  { key: 'estrategia', emoji: '◎', label: 'Estrategia',  msg: 'Quiero cotizar una consultoría o estrategia creativa' },
-  { key: 'btl',        emoji: '◆', label: 'BTL',         msg: 'Quiero cotizar una activación BTL o evento de marca' },
-  { key: 'ads',        emoji: '◐', label: 'Ads',         msg: 'Quiero cotizar pauta digital o campañas de performance' },
-  { key: 'guerrilla',  emoji: '✺', label: 'Guerrilla',   msg: 'Quiero cotizar una acción de marketing de guerrilla' },
-  { key: 'producto',   emoji: '◑', label: 'Producto',    msg: 'Quiero cotizar el desarrollo de un producto digital' },
+  { key: 'branding',   emoji: '✦', label: 'Crear mi marca',          msg: 'Quiero crear o rediseñar la identidad visual de mi marca' },
+  { key: 'web',        emoji: '◈', label: 'Necesito una web',        msg: 'Necesito un sitio web o tienda online' },
+  { key: 'campana',    emoji: '◉', label: 'Lanzar una campaña',      msg: 'Quiero lanzar una campaña creativa o producción audiovisual' },
+  { key: 'contenido',  emoji: '▣', label: 'Contenido para mis redes',msg: 'Necesito contenido mensual para mis redes sociales' },
+  { key: 'estrategia', emoji: '◎', label: 'No sé por dónde empezar', msg: 'No sé bien qué necesito, quiero una asesoría estratégica' },
+  { key: 'btl',        emoji: '◆', label: 'Activar mi marca',        msg: 'Quiero activar mi marca con un evento o experiencia presencial' },
+  { key: 'ads',        emoji: '◐', label: 'Pautar en redes',         msg: 'Quiero pautar en Meta, Google o TikTok y necesitar ayuda' },
+  { key: 'guerrilla',  emoji: '✺', label: 'Algo diferente',          msg: 'Quiero algo disruptivo, una acción de guerrilla o marketing no convencional' },
+  { key: 'producto',   emoji: '◑', label: 'Desarrollar una app',     msg: 'Quiero desarrollar una app, plataforma o producto digital' },
 ]
 
 
