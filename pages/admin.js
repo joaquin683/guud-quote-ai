@@ -7,6 +7,43 @@ const ESTADOS = { cotizado: { label: 'Cotizado', color: '#E8FF00', bg: 'rgba(232
 const isAgendado = p => p.reunion_agendada === true
 
 export default function Admin() {
+  const [authed, setAuthed] = useState(false)
+  const [pin, setPin] = useState('')
+  const [pinError, setPinError] = useState(false)
+
+  const handlePin = () => {
+    if (pin === (process.env.NEXT_PUBLIC_ADMIN_PIN || '8520')) {
+      setAuthed(true)
+      setPinError(false)
+    } else {
+      setPinError(true)
+      setPin('')
+    }
+  }
+
+  if (!authed) return (
+    <div style={{ minHeight: '100vh', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, sans-serif' }}>
+      <div style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 16, padding: '40px 36px', width: 320, textAlign: 'center' }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: '#F2F0E8', marginBottom: 8 }}>GÜÜD Admin</div>
+        <div style={{ fontSize: 13, color: '#484644', marginBottom: 28 }}>Ingresa el PIN de acceso</div>
+        <input
+          type="password"
+          value={pin}
+          onChange={e => { setPin(e.target.value); setPinError(false) }}
+          onKeyDown={e => e.key === 'Enter' && handlePin()}
+          placeholder="••••"
+          autoFocus
+          style={{ width: '100%', background: '#0D0D0D', border: pinError ? '1px solid #E24B4A' : '1px solid #1f1f1f', borderRadius: 8, padding: '12px 16px', color: '#F2F0E8', fontSize: 18, textAlign: 'center', letterSpacing: 8, outline: 'none', marginBottom: 8 }}
+        />
+        {pinError && <div style={{ fontSize: 12, color: '#E24B4A', marginBottom: 8 }}>PIN incorrecto</div>}
+        <button
+          onClick={handlePin}
+          style={{ width: '100%', background: '#E8FF00', border: 'none', borderRadius: 8, padding: '12px', fontWeight: 700, fontSize: 14, cursor: 'pointer', color: '#0A0A0A', marginTop: 8 }}
+        >Entrar</button>
+      </div>
+    </div>
+  )
+
   const [data, setData] = useState(null)
   const [filtroEstado, setFiltroEstado] = useState('')
   const [filtroAgente, setFiltroAgente] = useState('')
