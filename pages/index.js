@@ -436,6 +436,14 @@ export default function Home() {
                 <SuggestionChip key={i} label={chip} index={i} onClick={() => enviar(chip)} />
               ))}
             </div>
+            <div style={S.agentChipsRow}>
+              {AGENT_CHIPS.map((a) => (
+                <button key={a.key} style={S.agentChip} onClick={() => enviar(a.msg)}>
+                  <span style={S.agentChipEmoji}>{a.emoji}</span>
+                  <span style={S.agentChipLabel}>{a.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
                 {hasStartedChat && <div ref={chatRef} style={S.chat}>
