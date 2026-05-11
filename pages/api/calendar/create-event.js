@@ -49,6 +49,7 @@ export default async function handler(req, res) {
         attendees: [
           { email: e },
           { email: process.env.GUUD_EMAIL || 'contacto@guudcompany.cl', displayName: 'GÜÜD Company' },
+          { email: 'tomas@guudcompany.cl', displayName: 'Tomás · GÜÜD Company' },
         ],
         organizer: {
           displayName: 'GÜÜD Company',
