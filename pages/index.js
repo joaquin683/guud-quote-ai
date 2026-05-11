@@ -308,7 +308,7 @@ export default function Home() {
     <>
       <Head>
         <title>GÜÜD Quote AI — Global Creative HÜB</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
         <meta name="description" content="¡Hola! ¿Listo para cotizar tu próximo proyecto creativo? GÜÜD Company — Global Creative HÜB." />
       </Head>
 
@@ -576,15 +576,17 @@ export default function Home() {
         @keyframes orbglow { 0%,100%{box-shadow:0 0 20px rgba(232,255,0,.1)} 50%{box-shadow:0 0 35px rgba(232,255,0,.2)} }
         
         textarea::placeholder { color: #484644; }
-        @media (max-width: 600px) {
-          .guud-app { max-width: 100vw !important; }
-          .guud-hdr { padding: 12px 16px !important; }
-        }
+        /* ─── Mobile / iOS ─── */
         @media (max-width: 768px) {
-          .hero-title-initial { font-size: 22px !important; }
+          .guud-app { max-width: 100vw !important; }
+          .guud-hdr { padding: 10px 14px !important; }
+          .hero-title-initial { font-size: 20px !important; line-height:1.25 !important; padding:0 16px !important; }
         }
         @media (max-width: 600px) {
-          textarea { font-size: 16px !important; }
+          textarea, input, select { font-size: 16px !important; }
+        }
+        .bottom-input-area {
+          padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
         }
       `}</style>
     </>
@@ -1552,7 +1554,7 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
 }
 
 const S = {
-  app: { display: 'flex', flexDirection: 'column', height: '100svh', position: 'relative', zIndex: 2, transition: 'all .4s ease' },
+  app: { display: 'flex', flexDirection: 'column', height: '100dvh', position: 'relative', zIndex: 2, transition: 'all .4s ease' },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' }, inner: { display: 'flex', flexDirection: 'column', flex: 1, maxWidth: 720, margin: '0 auto', width: '100%', overflow: 'hidden' },
   hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative' }, langSelector: { position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 4 },
   logoWrap: { display: 'flex', alignItems: 'center' },
