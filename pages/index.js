@@ -1105,44 +1105,164 @@ function playSuccessSound() {
 // ─── downloadQuotePDF ─────────────────────────────────────────────────
 function downloadQuotePDF(quote) {
   const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
-  <title>Cotización GÜÜD</title>
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{background:#080808;color:#EDEBE5;font-family:helvetica,sans-serif;padding:40px;min-height:100vh}
-    .logo{font-size:28px;font-weight:900;letter-spacing:-.02em;margin-bottom:32px}
-    .logo span{color:#E8FF00}
-    .tag{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#E8FF00;margin-bottom:8px}
-    .title{font-size:24px;font-weight:700;margin-bottom:6px;line-height:1.2}
-    .sub{font-size:13px;color:#8F8D89;margin-bottom:24px}
-    .divider{border:none;border-top:0.5px solid rgba(255,255,255,.1);margin:20px 0}
-    .row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px}
-    .row-label{color:#8F8D89}
-    .advisory-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#8F8D89;margin-bottom:8px}
-    .advisory{font-size:13px;line-height:1.65;color:#EDEBE5}
-    .price-row{display:flex;justify-content:space-between;align-items:center;background:#0F0F0F;padding:16px;border-radius:12px;margin:24px 0}
-    .price-label{font-size:11px;color:#8F8D89}
-    .price-val{font-size:28px;font-weight:700;color:#E8FF00}
-    .footer{text-align:center;font-size:11px;color:#4E4D4A;margin-top:40px}
-    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  </style></head><body>
-  <div class="logo">G<span>Ü</span>ÜD <span style="font-size:14px;font-weight:400;color:#4E4D4A">Quote AI</span></div>
-  <div class="tag">Estimación · GÜÜD Company</div>
-  <div class="title">${quote.proyecto || 'Proyecto creativo'}</div>
-  <div class="sub">${quote.servicio || ''}</div>
-  <hr class="divider">
-  ${quote.entregables ? `<div class="row"><span class="row-label">Entregables</span><span style="max-width:60%;text-align:right">${quote.entregables}</span></div>` : ''}
-  ${quote.tiempo ? `<div class="row"><span class="row-label">Tiempo estimado</span><span>${quote.tiempo}</span></div>` : ''}
-  ${quote.recomendacion ? `<hr class="divider"><div class="advisory-label">Asesoría GÜÜD</div><div class="advisory">${quote.recomendacion}</div>` : ''}
-  <div class="price-row"><div class="price-label">Precio referencial</div><div class="price-val">${fmt(quote.min)}</div></div>
-  <div class="footer">GÜÜD Company · Global Creative HÜB · guud-quote-ai.vercel.app</div>
-  </body></html>`;
+  const date = new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' })
 
-  const w = window.open('', '_blank', 'width=800,height=900');
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Cotización GÜÜD · ${quote.proyecto || 'Proyecto'}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:210mm;min-height:297mm;background:#080808;color:#EDEBE5;font-family:'Inter',system-ui,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  .page{width:210mm;min-height:297mm;background:#080808;display:flex;flex-direction:column}
+
+  /* Header */
+  .header{background:#0D0D0D;border-bottom:1px solid #1A1A1A;padding:28px 40px;display:flex;justify-content:space-between;align-items:center}
+  .logo{font-size:22px;font-weight:900;letter-spacing:-.03em;color:#EDEBE5}
+  .logo span{color:#E8FF00}
+  .logo-sub{font-size:11px;font-weight:400;color:#4E4D4A;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+  .header-right{text-align:right}
+  .doc-label{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#4E4D4A;margin-bottom:4px}
+  .doc-date{font-size:12px;color:#8F8D89}
+
+  /* Hero */
+  .hero{padding:40px 40px 32px;border-bottom:1px solid #1A1A1A}
+  .tag{display:inline-flex;align-items:center;gap:6px;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#E8FF00;margin-bottom:14px}
+  .tag::before{content:'';width:6px;height:6px;background:#E8FF00;border-radius:50%;display:inline-block}
+  .project-title{font-size:26px;font-weight:700;line-height:1.2;color:#EDEBE5;margin-bottom:8px;letter-spacing:-.02em}
+  .service-tag{display:inline-block;background:#141414;border:1px solid #242424;border-radius:20px;padding:5px 14px;font-size:11px;color:#8F8D89;font-weight:500}
+
+  /* Body */
+  .body{padding:32px 40px;flex:1}
+
+  /* Info rows */
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+  .info-block{background:#0D0D0D;border:1px solid #1A1A1A;border-radius:12px;padding:16px 18px}
+  .info-label{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#4E4D4A;margin-bottom:6px}
+  .info-value{font-size:13px;color:#EDEBE5;font-weight:500;line-height:1.5}
+
+  /* Advisory */
+  .advisory{background:#0D0D0D;border:1px solid #1A1A1A;border-left:3px solid #E8FF00;border-radius:12px;padding:20px 22px;margin-bottom:28px}
+  .advisory-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#E8FF00;margin-bottom:10px}
+  .advisory-text{font-size:13px;color:#C0BEB8;line-height:1.75;font-weight:400}
+
+  /* Price */
+  .price-section{background:#111;border:1px solid #222;border-radius:16px;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+  .price-left{}
+  .price-label{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#4E4D4A;margin-bottom:6px}
+  .price-note{font-size:11px;color:#4E4D4A;margin-top:4px}
+  .price-value{font-size:36px;font-weight:900;color:#E8FF00;letter-spacing:-.02em;line-height:1}
+
+  /* CTA */
+  .cta{background:#E8FF00;border-radius:12px;padding:16px 28px;text-align:center;margin-bottom:28px}
+  .cta-text{font-size:13px;font-weight:700;color:#080808;letter-spacing:.02em}
+  .cta-url{font-size:11px;color:#3D4200;margin-top:3px;font-weight:500}
+
+  /* Footer */
+  .footer{border-top:1px solid #1A1A1A;padding:20px 40px;display:flex;justify-content:space-between;align-items:center;background:#0D0D0D}
+  .footer-left{font-size:10px;color:#4E4D4A;line-height:1.6}
+  .footer-right{font-size:10px;color:#4E4D4A;text-align:right}
+  .footer-brand{font-size:12px;font-weight:700;color:#EDEBE5;margin-bottom:2px}
+
+  @media print {
+    html,body{width:210mm;min-height:297mm}
+    .page{page-break-after:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <div class="logo">G<span>Ü</span>ÜD</div>
+      <div class="logo-sub">Global Creative HÜB</div>
+    </div>
+    <div class="header-right">
+      <div class="doc-label">Estimación de proyecto</div>
+      <div class="doc-date">${date}</div>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="tag">Cotización GÜÜD</div>
+    <div class="project-title">${quote.proyecto || 'Proyecto creativo'}</div>
+    ${quote.servicio ? `<div class="service-tag">${quote.servicio}</div>` : ''}
+  </div>
+
+  <!-- Body -->
+  <div class="body">
+
+    <!-- Info Grid -->
+    <div class="info-grid">
+      ${quote.entregables ? `
+      <div class="info-block" style="grid-column:1/-1">
+        <div class="info-label">Entregables incluidos</div>
+        <div class="info-value">${quote.entregables}</div>
+      </div>` : ''}
+      ${quote.tiempo ? `
+      <div class="info-block">
+        <div class="info-label">Tiempo estimado</div>
+        <div class="info-value">${quote.tiempo}</div>
+      </div>` : ''}
+      ${quote.agente ? `
+      <div class="info-block">
+        <div class="info-label">Equipo asignado</div>
+        <div class="info-value" style="text-transform:capitalize">${quote.agente}</div>
+      </div>` : ''}
+    </div>
+
+    <!-- Advisory -->
+    ${quote.recomendacion ? `
+    <div class="advisory">
+      <div class="advisory-label">Asesoría GÜÜD</div>
+      <div class="advisory-text">${quote.recomendacion}</div>
+    </div>` : ''}
+
+    <!-- Price -->
+    <div class="price-section">
+      <div class="price-left">
+        <div class="price-label">Precio referencial</div>
+        <div class="price-note">Valor estimado · sujeto a scope final</div>
+      </div>
+      <div class="price-value">${fmt(quote.min)}</div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta">
+      <div class="cta-text">¿Listo para avanzar? Agenda tu reunión con GÜÜD</div>
+      <div class="cta-url">guud-quote-ai.vercel.app</div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-left">
+      <div>Este documento es una estimación referencial y no constituye una propuesta formal.</div>
+      <div>Los precios pueden variar según el alcance definitivo del proyecto.</div>
+    </div>
+    <div class="footer-right">
+      <div class="footer-brand">GÜÜD Company</div>
+      <div>hola@guudcompany.cl</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>`;
+
+  const w = window.open('', '_blank', 'width=900,height=1100');
+  if (!w) { alert('Permite los popups para descargar el PDF'); return; }
   w.document.write(html);
   w.document.close();
   w.focus();
-  setTimeout(() => { w.print(); }, 500);
+  setTimeout(() => { w.print(); }, 800);
 }
 
 // ─── MeetingScheduler component ──────────────────────────────────────
