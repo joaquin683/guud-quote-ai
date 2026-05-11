@@ -488,26 +488,26 @@ export default function Home() {
                 <div style={{ fontSize: 13, color: '#666', marginBottom: 24 }}>¿Con quién compartimos esta cotización?</div>
                 <input
                   placeholder="Tu nombre *"
-                  value={contacto.nombre}
+                  value={contacto?.nombre}
                   onChange={e => setContacto(c => ({ ...c, nombre: e.target.value }))}
                   style={{ width: '100%', background: '#0D0D0D', border: '1px solid #1f1f1f', borderRadius: 8, padding: '11px 14px', color: '#F2F0E8', fontSize: 14, outline: 'none', marginBottom: 10 }}
                 />
                 <input
                   placeholder="Tu email *"
                   type="email"
-                  value={contacto.email}
+                  value={contacto?.email}
                   onChange={e => setContacto(c => ({ ...c, email: e.target.value }))}
                   style={{ width: '100%', background: '#0D0D0D', border: '1px solid #1f1f1f', borderRadius: 8, padding: '11px 14px', color: '#F2F0E8', fontSize: 14, outline: 'none', marginBottom: 10 }}
                 />
                 <input
                   placeholder="Empresa (opcional)"
-                  value={contacto.empresa || ''}
+                  value={contacto?.empresa || ''}
                   onChange={e => setContacto(c => ({ ...c, empresa: e.target.value }))}
                   style={{ width: '100%', background: '#0D0D0D', border: '1px solid #1f1f1f', borderRadius: 8, padding: '11px 14px', color: '#F2F0E8', fontSize: 14, outline: 'none', marginBottom: 20 }}
                 />
                 <button
                   onClick={() => {
-                    if (!contacto.nombre || !contacto.email) return
+                    if (!contacto?.nombre || !contacto?.email) return
                     setLeadModal(false)
                     if (pendingAgenda) { setPendingAgenda(false); setAgendando(true) }
                   }}
@@ -1638,7 +1638,7 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
           Un Director Creativo Ejecutivo de GÜÜD Company tendrá una reunión contigo
           {slotDate && slotTime ? <span> el <strong style={{color:'var(--t1)'}}>{slotDate}</strong> a las <strong style={{color:'var(--t1)'}}>{slotTime}</strong></span> : ''}.
           <br/><br/>
-          Te enviamos la invitación a <strong style={{color:'var(--t1)'}}>{contacto.email}</strong> con todos los detalles.
+          Te enviamos la invitación a <strong style={{color:'var(--t1)'}}>{contacto?.email}</strong> con todos los detalles.
           <br/>
           <span style={{color:'var(--t3)'}}>¡Nos vemos!</span>
         </div>
