@@ -254,7 +254,7 @@ export default function Home() {
         const d = await r.json()
         if (d.quote) {
           setFase('cotizado')
-          addMsg(null, 'ai', { type: 'quote', quote: d.quote })
+          addMsg(null, 'ai', { type: 'quote', quote: d.quote || {} })
         } else {
           addMsg(d.reply, 'ai')
           setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
@@ -265,10 +265,10 @@ export default function Home() {
   }
 
   const aceptarCotizacion = () => {
-    if (!contacto.nombre || !contacto.email) { setLeadModal(true); setPendingAgenda(true); return } analytics.quoteAccepted(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min); setAgendando(true) }
+    if (!contacto?.nombre || !contacto?.email) { setLeadModal(true); setPendingAgenda(true); return } analytics.quoteAccepted(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min); setAgendando(true) }
 
   const confirmarReunion = async () => {
-    if (!contacto.nombre || !contacto.email) return
+    if (!contacto?.nombre || !contacto?.email) return
     setCargando(true)
     try {
       if (proyectoId) await fetch('/api/agendar', {
