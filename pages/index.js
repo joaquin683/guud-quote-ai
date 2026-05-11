@@ -8,9 +8,9 @@ const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: '
 const AGENT_LABELS = {
   branding:   { label: 'Especialista Branding',  color: '#E8FF00' },
   web:        { label: 'Especialista Web',        color: '#E8FF00' },
-  campana:    { label: 'Especialista Campaña',    color: '#E8FF00' },
+  campana:    { label: 'Especialista CampaÃ±a',    color: '#E8FF00' },
   contenido:  { label: 'Especialista Contenido',  color: '#E8FF00' },
-  estrategia: { label: 'Consultor Estratégico',   color: '#E8FF00' },
+  estrategia: { label: 'Consultor EstratÃ©gico',   color: '#E8FF00' },
   btl:        { label: 'Especialista BTL',           color: '#E8FF00' },
   ads:        { label: 'Especialista Ads',           color: '#E8FF00' },
   guerrilla:  { label: 'Creativo Guerrilla',         color: '#E8FF00' },
@@ -19,21 +19,21 @@ const AGENT_LABELS = {
 
 const INITIAL_CHIPS = [
   'Cotizar una marca desde cero',
-  'Estimar rediseño de identidad visual',
+  'Estimar rediseÃ±o de identidad visual',
   'Cotizar una web que convierta',
   'Presupuestar contenido mensual',
-  'Cotizar campaña de lanzamiento',
-  'No sé qué necesito aún',
+  'Cotizar campaÃ±a de lanzamiento',
+  'No sÃ© quÃ© necesito aÃºn',
 ]
 
 
-// Detección de intención en tiempo real
+// DetecciÃ³n de intenciÃ³n en tiempo real
 const INTENT_MAP = [
-  { label: 'Branding',    keys: ['marca', 'brand', 'logo', 'identidad', 'naming', 'nombre', 'rebranding', 'rediseño'] },
-  { label: 'Web',         keys: ['web', 'landing', 'ecommerce', 'página', 'sitio', 'tienda', 'pág', 'wordpress', 'shopify'] },
-  { label: 'Campaña', keys: ['campaña', 'lanzamiento', 'ads', 'publicidad', 'anuncio', 'key visual', 'kv', 'pauta'] },
+  { label: 'Branding',    keys: ['marca', 'brand', 'logo', 'identidad', 'naming', 'nombre', 'rebranding', 'rediseÃ±o'] },
+  { label: 'Web',         keys: ['web', 'landing', 'ecommerce', 'pÃ¡gina', 'sitio', 'tienda', 'pÃ¡g', 'wordpress', 'shopify'] },
+  { label: 'CampaÃ±a', keys: ['campaÃ±a', 'lanzamiento', 'ads', 'publicidad', 'anuncio', 'key visual', 'kv', 'pauta'] },
   { label: 'Contenido',   keys: ['redes', 'contenido', 'social', 'posts', 'instagram', 'tiktok', 'reels', 'stories'] },
-  { label: 'Estrategia',  keys: ['estrategia', 'consultoría', 'posicionamiento', 'plan', 'consultoria', 'asesoría'] },
+  { label: 'Estrategia',  keys: ['estrategia', 'consultorÃ­a', 'posicionamiento', 'plan', 'consultoria', 'asesorÃ­a'] },
 ]
 
 function detectIntent(text) {
@@ -45,7 +45,7 @@ function detectIntent(text) {
   return found.length > 0 ? found.join(' / ') : null
 }
 
-const WELCOME_MSG = '¡Hola! ¿Listo para cotizar tu próximo proyecto creativo en segundos?'
+const WELCOME_MSG = 'Â¡Hola! Â¿Listo para cotizar tu prÃ³ximo proyecto creativo en segundos?'
 
 export default function Home() {
   const [fase, setFase]             = useState('inicio')
@@ -108,7 +108,7 @@ export default function Home() {
   const rafRef    = useRef(null)
   const wtRef     = useRef(0)
 
-  // ─── resetSession ────────────────────────────────────────────────
+  // âââ resetSession ââââââââââââââââââââââââââââââââââââââââââââââââ
   const resetSession = () => {
     setMensajes([])
     setHistorial([])
@@ -132,7 +132,7 @@ export default function Home() {
     return () => clearTimeout(t)
   }, [])
 
-  // Welcome message removed — clean start
+  // Welcome message removed â clean start
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -198,7 +198,7 @@ export default function Home() {
         const d1 = await r1.json()
         // Si el orquestador detecta contenido inapropiado
         if (d1.agente === 'filtro') {
-          addMsg('¿Te gustaría agregar algún otro detalle para llevar en consideración en el presupuesto?', 'ai')
+          addMsg('Â¿Te gustarÃ­a agregar algÃºn otro detalle para llevar en consideraciÃ³n en el presupuesto?', 'ai')
           setFase('inicio')
           setCargando(false); setWaveActive(false)
           return
@@ -222,7 +222,7 @@ export default function Home() {
           setFase('chat')
         }
       } catch (e) {
-        addMsg('Error de conexión. Recarga e intenta de nuevo.', 'ai')
+        addMsg('Error de conexiÃ³n. Recarga e intenta de nuevo.', 'ai')
         setFase('inicio')
       }
       setCargando(false); setWaveActive(false)
@@ -242,7 +242,7 @@ export default function Home() {
           addMsg(d.reply, 'ai')
           setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
         }
-      } catch (e) { addMsg('Error de conexión.', 'ai') }
+      } catch (e) { addMsg('Error de conexiÃ³n.', 'ai') }
       setCargando(false); setWaveActive(false)
     }
   }
@@ -285,10 +285,10 @@ export default function Home() {
         addMsg(d.reply, 'ai')
         setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
       } else {
-        addMsg('¿Qué entregables quieres modificar? Puedo ajustar el alcance y recalcular el precio.', 'ai')
+        addMsg('Â¿QuÃ© entregables quieres modificar? Puedo ajustar el alcance y recalcular el precio.', 'ai')
       }
     } catch (e) {
-      addMsg('Error de conexión. Intenta de nuevo.', 'ai')
+      addMsg('Error de conexiÃ³n. Intenta de nuevo.', 'ai')
     }
     setCargando(false)
     setWaveActive(false)
@@ -299,7 +299,7 @@ export default function Home() {
     setTimeout(() => {
       const s = [
         'I need a brand identity for my new startup',
-        'Necesito una campaña de lanzamiento para mi nueva marca',
+        'Necesito una campaÃ±a de lanzamiento para mi nueva marca',
         'Preciso de uma identidade visual completa',
         'Je veux redesigner mon packaging',
       ]
@@ -314,9 +314,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>GÜÜD Quote AI — Global Creative HÜB</title>
+        <title>GÃÃD Quote AI â Global Creative HÃB</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-        <meta name="description" content="¡Hola! ¿Listo para cotizar tu próximo proyecto creativo? GÜÜD Company — Global Creative HÜB." />
+        <meta name="description" content="Â¡Hola! Â¿Listo para cotizar tu prÃ³ximo proyecto creativo? GÃÃD Company â Global Creative HÃB." />
       </Head>
 
       <div style={S.app}>
@@ -326,17 +326,17 @@ export default function Home() {
           <div style={S.logoWrap}>
             <img
               src="/logo.gif"
-              alt="GÜÜD"
+              alt="GÃÃD"
               style={S.logoImg}
               onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
             />
             <div style={{ display: 'none', flexDirection: 'column', gap: 1 }}>
-              <div style={S.logoText}>GÜÜD</div>
-              <div style={S.logoSub}>Global Creative HÜB</div>
+              <div style={S.logoText}>GÃÃD</div>
+              <div style={S.logoSub}>Global Creative HÃB</div>
             </div>
           </div>
           </a>
-          {/* Lang selector — centered in header */}
+          {/* Lang selector â centered in header */}
           <div style={S.langSelector}>
             {['es','en','pt'].map(l => (
               <button key={l} onClick={() => changeLang(l)} style={{
@@ -357,7 +357,7 @@ export default function Home() {
                 {agenteInfo.label}
               </div>
             )}
-            <a href="/admin" style={S.badge}>Admin →</a>
+            <a href="/admin" style={S.badge}>Admin â</a>
           </div>
         </header>
         <div style={S.inner}>
@@ -382,7 +382,7 @@ export default function Home() {
                 {!input && !voiceInterim && (
                   <div style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1, lineHeight: '1' }}>
                     <span className="fake-caret" style={{ marginRight: 4, marginLeft: 0, verticalAlign: 'middle' }} />
-                    <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: '21px', display: 'block' }}>¿Qué te gustaría cotizar?</span>
+                    <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: '21px', display: 'block' }}>Â¿QuÃ© te gustarÃ­a cotizar?</span>
                   </div>
                 )}
                 <textarea
@@ -432,7 +432,7 @@ export default function Home() {
               {m.rol === 'ai' ? (
                 <MiniOrb />
               ) : (
-                <div style={{ ...S.av, ...S.avU }}>TÚ</div>
+                <div style={{ ...S.av, ...S.avU }}>TÃ</div>
               )}
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t}
@@ -499,7 +499,7 @@ export default function Home() {
                   display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1,
                 }}>
                   <span className="fake-caret" style={{ marginRight: 4, marginLeft: 0 }} />
-                  <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: 1.5 }}>¿Qué te gustaría cotizar?</span>
+                  <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: 1.5 }}>Â¿QuÃ© te gustarÃ­a cotizar?</span>
                 </div>
               )}
               <textarea
@@ -536,7 +536,7 @@ export default function Home() {
                 transition: 'all 0.3s ease',
                 opacity: intentDetected ? 1 : 0.6,
               }}>
-                {intentDetected ? `Detectando: ${intentDetected}` : input.length > 2 ? 'Detectando tipo de proyecto…' : ''}
+                {intentDetected ? `Detectando: ${intentDetected}` : input.length > 2 ? 'Detectando tipo de proyectoâ¦' : ''}
               </div>
   
             </div>
@@ -584,7 +584,7 @@ export default function Home() {
         @keyframes orbglow { 0%,100%{box-shadow:0 0 20px rgba(232,255,0,.1)} 50%{box-shadow:0 0 35px rgba(232,255,0,.2)} }
         
         textarea::placeholder { color: #484644; }
-        /* ─── Mobile / iOS ─── */
+        /* âââ Mobile / iOS âââ */
         @media (max-width: 768px) {
           .guud-app { max-width: 100vw !important; }
           .guud-hdr { padding: 10px 14px !important; }
@@ -596,6 +596,22 @@ export default function Home() {
         .bottom-input-area {
           padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
         }
+
+        @keyframes guud-pulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(232,255,0,0), 0 0 12px rgba(232,255,0,0.15), inset 0 0 12px rgba(232,255,0,0.05);
+            border-color: rgba(232,255,0,0.25);
+          }
+          50% {
+            box-shadow: 0 0 0 4px rgba(232,255,0,0.08), 0 0 24px rgba(232,255,0,0.3), inset 0 0 20px rgba(232,255,0,0.08);
+            border-color: rgba(232,255,0,0.7);
+          }
+        }
+        .input-pulse {
+          animation: guud-pulse 2.5s ease-in-out infinite;
+          border: 1px solid rgba(232,255,0,0.25) !important;
+          border-radius: 22px;
+        }
       `}</style>
     </>
   )
@@ -603,7 +619,7 @@ export default function Home() {
 
 
 
-// ─── useVoiceInput hook ───────────────────────────────────────────────
+// âââ useVoiceInput hook âââââââââââââââââââââââââââââââââââââââââââââââ
 function useVoiceInput({ onResult, onError, autoSend = false }) {
   const [voiceState, setVoiceState] = useStateRef('idle')
   const [interim, setInterim] = useState('')
@@ -619,7 +635,7 @@ function useVoiceInput({ onResult, onError, autoSend = false }) {
     const recog = new SR()
     // Detectar idioma del navegador, fallback a es-CL
     recog.lang = navigator.language || 'es-CL'
-    recog.continuous = true       // no corta solo — espera al botón stop
+    recog.continuous = true       // no corta solo â espera al botÃ³n stop
     recog.interimResults = true   // muestra texto mientras el usuario habla
     recogRef.current = recog
     finalRef.current = ''
@@ -649,7 +665,7 @@ function useVoiceInput({ onResult, onError, autoSend = false }) {
     }
 
     recog.onend = () => {
-      // Solo termina si el usuario presionó stop (no automáticamente)
+      // Solo termina si el usuario presionÃ³ stop (no automÃ¡ticamente)
     }
 
     recog.start()
@@ -681,15 +697,15 @@ function useStateRef(init) {
   return [val, set]
 }
 
-// ─── VoiceButton component ────────────────────────────────────────────
+// âââ VoiceButton component ââââââââââââââââââââââââââââââââââââââââââââ
 function VoiceButton({ voiceState, onStart, onStop }) {
   const isListening = voiceState === 'listening'
   const isLoading = voiceState === 'requesting-permission' || voiceState === 'transcribing'
   const isError = voiceState === 'error' || voiceState === 'error-permission'
   const isUnsupported = voiceState === 'unsupported'
 
-  const label = isListening ? 'Escuchando…'
-    : isLoading ? '…'
+  const label = isListening ? 'Escuchandoâ¦'
+    : isLoading ? 'â¦'
     : isError ? 'Intenta de nuevo'
     : ''
 
@@ -749,7 +765,7 @@ const VBS = {
 }
 
 
-// ─── MiniOrb — orb animado para avatar de chat ───────────────────────
+// âââ MiniOrb â orb animado para avatar de chat âââââââââââââââââââââââ
 function MiniOrb() {
   return (
     <div style={{
@@ -757,7 +773,7 @@ function MiniOrb() {
       position: 'relative', flexShrink: 0,
       overflow: 'visible',
     }}>
-      {/* Ripple waves — 2 sutiles */}
+      {/* Ripple waves â 2 sutiles */}
       <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(232,255,0,0.3)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '0s', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(232,255,0,0.18)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '1s', pointerEvents: 'none' }} />
       {/* Orb core */}
@@ -863,7 +879,7 @@ function OrbCanvas({ state = 'idle' }) {
         ctx.stroke()
       }
 
-      // Core pulse — subtle breathing
+      // Core pulse â subtle breathing
       const pulse = 0.5 + Math.sin(t * 0.019) * 0.1 + Math.sin(t * 0.031) * 0.06
       const coreR = (s === 'processing' ? 8 : s === 'listening' ? 5 : 3) * pulse
       const coreGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 3)
@@ -893,9 +909,9 @@ function OrbCanvas({ state = 'idle' }) {
 }
 
 
-// ─── getCredentialsUrl helper ─────────────────────────────────────────
+// âââ getCredentialsUrl helper âââââââââââââââââââââââââââââââââââââââââ
 
-// ─── SuggestionChip component ─────────────────────────────────────────
+// âââ SuggestionChip component âââââââââââââââââââââââââââââââââââââââââ
 function SuggestionChip({ label, onClick, index = 0 }) {
   const [hovered, setHovered] = useState(false)
   const idleDelay = `${(index % 4) * 1.2}s`
@@ -918,7 +934,7 @@ function SuggestionChip({ label, onClick, index = 0 }) {
         transition: 'color .2s ease',
         outline: 'none',
         zIndex: 0,
-        // Fake border via box-shadow — glow animado
+        // Fake border via box-shadow â glow animado
         boxShadow: hovered
           ? '0 0 0 0.5px #E8FF00, 0 0 10px rgba(232,255,0,0.3), 0 0 20px rgba(232,255,0,0.12)'
           : '0 0 0 0.5px rgba(232,255,0,0.18)',
@@ -957,13 +973,13 @@ function getCredentialsUrl(agente, industria = null) {
   return industria ? `${base}&industria=${encodeURIComponent(industria)}` : base
 }
 
-// ─── RelatedCredentialsBlock component ───────────────────────────────
+// âââ RelatedCredentialsBlock component âââââââââââââââââââââââââââââââ
 function RelatedCredentialsBlock({ agente, projectType }) {
   const url = getCredentialsUrl(agente)
   const labels = {
     branding:   'branding e identidad visual',
     web:        'web y digital',
-    campana:    'campaña creativa',
+    campana:    'campaÃ±a creativa',
     contenido:  'contenido para redes',
     estrategia: 'estrategia creativa',
   }
@@ -984,7 +1000,7 @@ function RelatedCredentialsBlock({ agente, projectType }) {
           Proyectos similares
         </div>
         <div style={{ fontSize: 12, color: 'var(--t2)', lineHeight: 1.45 }}>
-          Hemos trabajado desaïos similares de {label}. Revísa referencias antes de avanzar.
+          Hemos trabajado desaÃ¯os similares de {label}. RevÃ­sa referencias antes de avanzar.
         </div>
       </div>
       <a
@@ -1019,7 +1035,7 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
       <div style={S.qcard}>
         <div style={S.qhdr}>
-          <div style={S.qtag}>{t ? t.estimation : 'Estimación · GÜÜD Company'}</div>
+          <div style={S.qtag}>{t ? t.estimation : 'EstimaciÃ³n Â· GÃÃD Company'}</div>
           <div style={S.qname}>{quote.proyecto}</div>
           <div style={{ fontSize: 11.5, color: 'var(--t2)', marginTop: 2 }}>{quote.servicio}</div>
         </div>
@@ -1036,7 +1052,7 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
           {quote.recomendacion && (
             <div style={{ borderTop: '0.5px solid var(--b1)', marginTop: 4, paddingTop: 12, paddingBottom: 4 }}>
               <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--acc)', fontFamily: 'Unbounded, sans-serif', marginBottom: 8 }}>
-                Asesoría GÜÜD
+                AsesorÃ­a GÃÃD
               </div>
               <div style={{ fontSize: 13, color: 'var(--t1)', lineHeight: 1.7, fontStyle: 'normal' }}>
                 {quote.recomendacion}
@@ -1050,7 +1066,7 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
           <span style={S.qpval}>{fmt(quote.min)}</span>
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
-          <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
+          <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reuniÃ³n con GÃÃD'}</button>
           <button style={S.btnS} onClick={onAjustar}>{t ? t.adjustBtn : 'Ajustar alcance'}</button>
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
             <button onClick={onShare || (() => {})} title="Copiar link" style={{
@@ -1088,7 +1104,7 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
 
 
 
-// ─── playSuccessSound ─────────────────────────────────────────────────
+// âââ playSuccessSound âââââââââââââââââââââââââââââââââââââââââââââââââ
 function playSuccessSound() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)()
@@ -1112,7 +1128,7 @@ function playSuccessSound() {
 }
 
 
-// ─── downloadQuotePDF ─────────────────────────────────────────────────
+// âââ downloadQuotePDF âââââââââââââââââââââââââââââââââââââââââââââââââ
 function downloadQuotePDF(quote) {
   const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
   const date = new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' })
@@ -1121,7 +1137,7 @@ function downloadQuotePDF(quote) {
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Cotización GÜÜD · ${quote.proyecto || 'Proyecto'}</title>
+<title>CotizaciÃ³n GÃÃD Â· ${quote.proyecto || 'Proyecto'}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
   *{margin:0;padding:0;box-sizing:border-box}
@@ -1189,18 +1205,18 @@ function downloadQuotePDF(quote) {
   <!-- Header -->
   <div class="header">
     <div>
-      <div class="logo">G<span>Ü</span>ÜD</div>
-      <div class="logo-sub">Global Creative HÜB</div>
+      <div class="logo">G<span>Ã</span>ÃD</div>
+      <div class="logo-sub">Global Creative HÃB</div>
     </div>
     <div class="header-right">
-      <div class="doc-label">Estimación de proyecto</div>
+      <div class="doc-label">EstimaciÃ³n de proyecto</div>
       <div class="doc-date">${date}</div>
     </div>
   </div>
 
   <!-- Hero -->
   <div class="hero">
-    <div class="tag">Cotización GÜÜD</div>
+    <div class="tag">CotizaciÃ³n GÃÃD</div>
     <div class="project-title">${quote.proyecto || 'Proyecto creativo'}</div>
     ${quote.servicio ? `<div class="service-tag">${quote.servicio}</div>` : ''}
   </div>
@@ -1230,7 +1246,7 @@ function downloadQuotePDF(quote) {
     <!-- Advisory -->
     ${quote.recomendacion ? `
     <div class="advisory">
-      <div class="advisory-label">Asesoría GÜÜD</div>
+      <div class="advisory-label">AsesorÃ­a GÃÃD</div>
       <div class="advisory-text">${quote.recomendacion}</div>
     </div>` : ''}
 
@@ -1238,14 +1254,14 @@ function downloadQuotePDF(quote) {
     <div class="price-section">
       <div class="price-left">
         <div class="price-label">Precio referencial</div>
-        <div class="price-note">Valor estimado · sujeto a scope final</div>
+        <div class="price-note">Valor estimado Â· sujeto a scope final</div>
       </div>
       <div class="price-value">${fmt(quote.min)}</div>
     </div>
 
     <!-- CTA -->
     <div class="cta">
-      <div class="cta-text">¿Listo para avanzar? Agenda tu reunión con GÜÜD</div>
+      <div class="cta-text">Â¿Listo para avanzar? Agenda tu reuniÃ³n con GÃÃD</div>
       <div class="cta-url">guud-quote-ai.vercel.app</div>
     </div>
 
@@ -1254,11 +1270,11 @@ function downloadQuotePDF(quote) {
   <!-- Footer -->
   <div class="footer">
     <div class="footer-left">
-      <div>Este documento es una estimación referencial y no constituye una propuesta formal.</div>
-      <div>Los precios pueden variar según el alcance definitivo del proyecto.</div>
+      <div>Este documento es una estimaciÃ³n referencial y no constituye una propuesta formal.</div>
+      <div>Los precios pueden variar segÃºn el alcance definitivo del proyecto.</div>
     </div>
     <div class="footer-right">
-      <div class="footer-brand">GÜÜD Company</div>
+      <div class="footer-brand">GÃÃD Company</div>
       <div>hola@guudcompany.cl</div>
     </div>
   </div>
@@ -1275,10 +1291,10 @@ function downloadQuotePDF(quote) {
   setTimeout(() => { w.print(); }, 800);
 }
 
-// ─── MeetingScheduler component ──────────────────────────────────────
+// âââ MeetingScheduler component ââââââââââââââââââââââââââââââââââââââ
 function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp }) {
   const soundPlayed = useRef(false)
-  const tl = tProp || { scheduleTitle: 'Agenda una reunión con GÜÜD', scheduleSub: 'Elige un horario.', nameField: 'Tu nombre *', emailField: 'Tu email *', companyField: 'Empresa', phoneField: 'Teléfono', selectDay: 'Selecciona un día', selectTime: 'Horarios', confirmBtn: 'Confirmar reunión', confirming: 'Agendando…', successTitle: 'Reunión confirmada', successMsg: 'Tendrás una reunión', successEmail: 'Te enviamos la invitación a', successDetails: 'con todos los detalles.', successBye: 'Nos vemos.', meetBtn: 'Unirse a Google Meet', newQuote: 'Iniciar nueva cotización', errorMsg: 'No pudimos agendar.', retryBtn: 'Volver a intentar', loadingSlots: 'Cargando…', noSlots: 'Sin disponibilidad.' }
+  const tl = tProp || { scheduleTitle: 'Agenda una reuniÃ³n con GÃÃD', scheduleSub: 'Elige un horario.', nameField: 'Tu nombre *', emailField: 'Tu email *', companyField: 'Empresa', phoneField: 'TelÃ©fono', selectDay: 'Selecciona un dÃ­a', selectTime: 'Horarios', confirmBtn: 'Confirmar reuniÃ³n', confirming: 'Agendandoâ¦', successTitle: 'ReuniÃ³n confirmada', successMsg: 'TendrÃ¡s una reuniÃ³n', successEmail: 'Te enviamos la invitaciÃ³n a', successDetails: 'con todos los detalles.', successBye: 'Nos vemos.', meetBtn: 'Unirse a Google Meet', newQuote: 'Iniciar nueva cotizaciÃ³n', errorMsg: 'No pudimos agendar.', retryBtn: 'Volver a intentar', loadingSlots: 'Cargandoâ¦', noSlots: 'Sin disponibilidad.' }
   const [step, setStep] = useState('idle') // idle | confirming | success | error
   const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '' })
   const [errors, setErrors] = useState({})
@@ -1288,9 +1304,9 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
   const isValidPhone = v => !v || /^[+\d][\d\s\-().]{5,}$/.test(v.trim())
   const validate = f => {
     const e = {}
-    if (!isValidName(f.nombre))    e.nombre   = 'Ingresa tu nombre (mín. 2 caracteres)'
-    if (!isValidEmail(f.email))    e.email    = 'Ingresa un email válido (ej: juan@empresa.com)'
-    if (!isValidPhone(f.telefono)) e.telefono = 'Teléfono inválido'
+    if (!isValidName(f.nombre))    e.nombre   = 'Ingresa tu nombre (mÃ­n. 2 caracteres)'
+    if (!isValidEmail(f.email))    e.email    = 'Ingresa un email vÃ¡lido (ej: juan@empresa.com)'
+    if (!isValidPhone(f.telefono)) e.telefono = 'TelÃ©fono invÃ¡lido'
     return e
   }
   const canConfirm = isValidName(form.nombre) && isValidEmail(form.email) && isValidPhone(form.telefono)
@@ -1353,7 +1369,7 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
     const slotDate = selectedDate ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
     const slotTime = selectedSlot?.time || ''
 
-    // Fire and forget — always show success regardless of API response
+    // Fire and forget â always show success regardless of API response
     try {
       fetch('/api/calendar/create-event', {
         method: 'POST',
@@ -1403,10 +1419,10 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
       </div>
       <div style={MS.successTitle}>{tl.successTitle}</div>
       <div style={MS.successSub}>
-        Tendrás una reunión con un Director Creativo Ejecutivo de GÜÜD Company
+        TendrÃ¡s una reuniÃ³n con un Director Creativo Ejecutivo de GÃÃD Company
         {selectedSlot && selectedDate ? <span> el <strong style={{color:'var(--t1)'}}>{new Date(selectedDate+'T12:00:00').toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'})}</strong> a las <strong style={{color:'var(--t1)'}}>{selectedSlot.time}</strong></span> : ''}.
         <br/><br/>
-        Te enviamos la invitación al calendario a <strong style={{color:'var(--t1)'}}>{form.email}</strong> con todos los detalles.
+        Te enviamos la invitaciÃ³n al calendario a <strong style={{color:'var(--t1)'}}>{form.email}</strong> con todos los detalles.
         <br/><br/>
         <span style={{color:'var(--t3)'}}>Nos vemos.</span>
       </div>
@@ -1433,28 +1449,28 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
         <div style={{display:'flex',flexDirection:'column',gap:2}}>
           <input style={{...MS.input,borderColor:touched.nombre&&errors.nombre?'#ff4d4f':undefined}} placeholder={tl.nameField} value={form.nombre}
             onChange={e=>{setForm(p=>({...p,nombre:e.target.value}));if(touched.nombre)setErrors(v=>({...v,nombre:isValidName(e.target.value)?undefined:'Ingresa tu nombre'}))}}
-            onBlur={()=>{setTouched(p=>({...p,nombre:true}));setErrors(v=>({...v,nombre:isValidName(form.nombre)?undefined:'Ingresa tu nombre (mín. 2 caracteres)'}))}}
+            onBlur={()=>{setTouched(p=>({...p,nombre:true}));setErrors(v=>({...v,nombre:isValidName(form.nombre)?undefined:'Ingresa tu nombre (mÃ­n. 2 caracteres)'}))}}
           />
           {touched.nombre&&errors.nombre&&<span style={{fontSize:11,color:'#ff4d4f',paddingLeft:4,marginTop:2}}>{errors.nombre}</span>}
         </div>
         <div style={{display:'flex',flexDirection:'column',gap:2}}>
           <input style={{...MS.input,borderColor:touched.email&&errors.email?'#ff4d4f':undefined}} placeholder={tl.emailField} type="email" value={form.email}
-            onChange={e=>{setForm(p=>({...p,email:e.target.value}));if(touched.email)setErrors(v=>({...v,email:isValidEmail(e.target.value)?undefined:'Email inválido'}))}}
-            onBlur={()=>{setTouched(p=>({...p,email:true}));setErrors(v=>({...v,email:isValidEmail(form.email)?undefined:'Ingresa un email válido (ej: juan@empresa.com)'}))}}
+            onChange={e=>{setForm(p=>({...p,email:e.target.value}));if(touched.email)setErrors(v=>({...v,email:isValidEmail(e.target.value)?undefined:'Email invÃ¡lido'}))}}
+            onBlur={()=>{setTouched(p=>({...p,email:true}));setErrors(v=>({...v,email:isValidEmail(form.email)?undefined:'Ingresa un email vÃ¡lido (ej: juan@empresa.com)'}))}}
           />
           {touched.email&&errors.email&&<span style={{fontSize:11,color:'#ff4d4f',paddingLeft:4,marginTop:2}}>{errors.email}</span>}
         </div>
         <input style={MS.input} placeholder={tl.companyField} value={form.empresa} onChange={e=>setForm(p=>({...p,empresa:e.target.value}))} />
         <div style={{display:'flex',flexDirection:'column',gap:2}}>
           <input style={{...MS.input,borderColor:touched.telefono&&errors.telefono?'#ff4d4f':undefined}} placeholder={tl.phoneField} value={form.telefono}
-            onChange={e=>{setForm(p=>({...p,telefono:e.target.value}));if(touched.telefono)setErrors(v=>({...v,telefono:isValidPhone(e.target.value)?undefined:'Teléfono inválido'}))}}
-            onBlur={()=>{setTouched(p=>({...p,telefono:true}));setErrors(v=>({...v,telefono:isValidPhone(form.telefono)?undefined:'Teléfono inválido'}))}}
+            onChange={e=>{setForm(p=>({...p,telefono:e.target.value}));if(touched.telefono)setErrors(v=>({...v,telefono:isValidPhone(e.target.value)?undefined:'TelÃ©fono invÃ¡lido'}))}}
+            onBlur={()=>{setTouched(p=>({...p,telefono:true}));setErrors(v=>({...v,telefono:isValidPhone(form.telefono)?undefined:'TelÃ©fono invÃ¡lido'}))}}
           />
           {touched.telefono&&errors.telefono&&<span style={{fontSize:11,color:'#ff4d4f',paddingLeft:4,marginTop:2}}>{errors.telefono}</span>}
         </div>
       </div>
 
-      {/* Selector de día */}
+      {/* Selector de dÃ­a */}
       <div style={MS.sectionLabel}>{tl.selectDay}</div>
       <div style={MS.dateRow}>
         {weekdays.map(day => (
@@ -1466,9 +1482,9 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
         ))}
       </div>
 
-      {/* Horarios — siempre visibles, ocupados tachados */}
+      {/* Horarios â siempre visibles, ocupados tachados */}
       <div style={MS.sectionLabel}>
-        {loadingSlots ? tl.loadingSlots : selectedDate ? 'Horarios · ' + fmtDate(selectedDate) : ''}
+        {loadingSlots ? tl.loadingSlots : selectedDate ? 'Horarios Â· ' + fmtDate(selectedDate) : ''}
       </div>
       <div style={MS.slotGrid}>
         {loadingSlots && <div style={MS.loadingText}>{tl.loadingSlots}</div>}
@@ -1494,7 +1510,7 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
           onClick={confirmar}
           disabled={!canConfirm || step === 'confirming'}
         >
-          {step === 'confirming' ? tl.confirming : tl.confirmBtn + ' · ' + selectedSlot.time}
+          {step === 'confirming' ? tl.confirming : tl.confirmBtn + ' Â· ' + selectedSlot.time}
         </button>
       )}
     </div>
@@ -1539,21 +1555,21 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
           </svg>
         </div>
         <div style={{ fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>
-          ¡Reunión confirmada!
+          Â¡ReuniÃ³n confirmada!
         </div>
         <div style={{ fontSize: 13, color: 'var(--t2)', lineHeight: 1.7, textAlign: 'center', marginBottom: 4 }}>
-          Un Director Creativo Ejecutivo de GÜÜD Company tendrá una reunión contigo
+          Un Director Creativo Ejecutivo de GÃÃD Company tendrÃ¡ una reuniÃ³n contigo
           {slotDate && slotTime ? <span> el <strong style={{color:'var(--t1)'}}>{slotDate}</strong> a las <strong style={{color:'var(--t1)'}}>{slotTime}</strong></span> : ''}.
           <br/><br/>
-          Te enviamos la invitación a <strong style={{color:'var(--t1)'}}>{contacto.email}</strong> con todos los detalles.
+          Te enviamos la invitaciÃ³n a <strong style={{color:'var(--t1)'}}>{contacto.email}</strong> con todos los detalles.
           <br/>
-          <span style={{color:'var(--t3)'}}>¡Nos vemos!</span>
+          <span style={{color:'var(--t3)'}}>Â¡Nos vemos!</span>
         </div>
         <div style={S.jlCard}>
-          <div style={S.jlAvatar}>GÜ</div>
+          <div style={S.jlAvatar}>GÃ</div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 500 }}>Director Creativo Ejecutivo</div>
-            <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>GÜÜD Company</div>
+            <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>GÃÃD Company</div>
           </div>
         </div>
       </div>
