@@ -417,7 +417,7 @@ export default function Home() {
                   }}
                   onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)) { e.preventDefault(); enviar() } }}
                 />
-                <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} />
+                <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} supported={voiceSupported} />
                 <button
                   id="send-btn"
                   style={{ ...S.icoBtn, ...S.snd, ...(!input.trim() || cargando ? S.sndDis : {}) }}
@@ -534,7 +534,7 @@ export default function Home() {
                 }}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)) { e.preventDefault(); enviar() } }}
               />
-              <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} />
+              <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} supported={voiceSupported} />
               <button
                 style={{ ...S.icoBtn, ...S.snd, ...(!input.trim() || cargando ? S.sndDis : {}) }}
                 id="send-btn"
