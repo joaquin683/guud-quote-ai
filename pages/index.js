@@ -674,6 +674,7 @@ function useVoiceInput({ onResult, onError, autoSend = false }) {
       }
       if (finalText) finalRef.current += finalText
       setInterim(interimText)
+      if (typeof onInterim === 'function') onInterim((finalRef.current + interimText).trim())
       if (typeof onInterim === 'function') onInterim(interimText)
     }
 
