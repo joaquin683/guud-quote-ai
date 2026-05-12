@@ -89,6 +89,7 @@ export default function Home() {
 
   const { voiceState, supported: voiceSupported, start: startVoice, stop: stopVoice, interim: voiceInterim } = useVoiceInput({
     autoSend: false,
+    onInterim: (text) => { if (text) setInput(text) },
     onResult: (text, auto) => {
       if (auto) {
         enviar(text)
@@ -673,6 +674,7 @@ function useVoiceInput({ onResult, onError, autoSend = false }) {
       }
       if (finalText) finalRef.current += finalText
       setInterim(interimText)
+      if (typeof onInterim === 'function') onInterim(interimText)
     }
 
     recog.onerror = (e) => {
