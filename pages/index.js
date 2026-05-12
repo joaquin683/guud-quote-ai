@@ -110,6 +110,7 @@ export default function Home() {
   const resetSession = () => {
     setMensajes([])
     setHistorial([])
+    if (voiceState === 'listening') stopVoice()
     setInput('')
     setFase('inicio')
     setAgente(null)
