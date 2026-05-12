@@ -640,7 +640,8 @@ export default function Home() {
 // ─── useVoiceInput hook ───────────────────────────────────────────────
 function useVoiceInput({ onResult, onError, onInterim, autoSend = false }) {
   const [voiceState, setVoiceState] = useState('idle')
-  const [supported] = useState(() => typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window))
+  const [supported, setSupported] = useState(false)
+  useEffect(() => { setSupported('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) }, [])
   const recogRef = useRef(null), finalRef = useRef(''), activeRef = useRef(false)
   const start = () => {
     if (!supported || activeRef.current) return
