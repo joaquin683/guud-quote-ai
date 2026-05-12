@@ -280,15 +280,15 @@ function AdminPanel({ onLogout }) {
 
       {vista==='tarifario'&&(
         <div style={{padding:'24px 0'}}>
-          <TarifarioPanel />
+          <TarifarioTab />
         </div>
       )}
   )
 }
 
 
-// ─── TarifarioPanel ───────────────────────────────────────────────────────
-function TarifarioPanel() {
+// ─── TarifarioTab ───────────────────────────────────────────────────────
+function TarifarioTab() {
   const [sv, setSv] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(null)
