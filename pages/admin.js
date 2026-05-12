@@ -8,7 +8,6 @@ const ESTADOS = { cotizado: { label: 'Cotizado', color: '#E8FF00', bg: 'rgba(232
 const isAgendado = p => p.reunion_agendada === true
 
 export default function Admin() {
-  const [vista, setVista] = useState('cotizaciones')
   const [authed, setAuthed] = useState(false)
   const [pin, setPin] = useState('')
   const [pinError, setPinError] = useState(false)
@@ -92,11 +91,6 @@ function AdminPanel({ onLogout }) {
         </Link>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontSize: 12, color: '#484644' }}>Panel Admin</span>
-          <div style={{display:'flex',gap:4,marginLeft:12}}>
-            {[['cotizaciones','Cotizaciones'],['tarifario','Tarifario']].map(([k,v])=>(
-              <button key={k} onClick={()=>setVista(k)} style={{padding:'4px 12px',borderRadius:6,border:'none',cursor:'pointer',fontSize:11,fontWeight:700,background:vista===k?'#E8FF00':'rgba(255,255,255,.08)',color:vista===k?'#000':'rgba(255,255,255,.5)'}}>{v}</button>
-            ))}
-          </div>
           <button onClick={onLogout} style={{ fontSize: 12, color: '#484644', background: 'none', border: '1px solid #2a2a2a', borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontFamily: 'inherit' }}>Salir</button>
         </div>
       </div>
@@ -119,7 +113,6 @@ function AdminPanel({ onLogout }) {
         )}
 
         <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-      {vista === 'cotizaciones' && (<div>
           <input
             placeholder="Buscar proyecto o contacto…"
             value={busqueda}
@@ -168,149 +161,6 @@ function AdminPanel({ onLogout }) {
             ))}
           </div>
         )}
-      </div>
-    </div>
-      </div>)}
-      {vista === 'tarifario' && <TarifarioTab />}
-  )
-}
-
-function TarifarioTab() {
-  const [sv, setSv] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(null)
-  const [ed, setEd] = useState({})
-  const [cat, setCat] = useState('Todos')
-  const [msg, setMsg] = useState(null)
-  const [initing, setIniting] = useState(false)
-  const fmt = n => new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n||0)
-  const cats = ['Todos',...[...new Set(sv.map(s=>s.categoria))].sort()]
-
-  useEffect(()=>{load()},[])
-
-  function load(){
-    setLoading(true)
-    fetch('/api/tarifario').then(r=>r.json()).then(d=>{
-      setSv(Array.isArray(d)?d:[])
-      setLoading(false)
-    })
-  }
-
-  function doInit(){
-    setIniting(true); setMsg(null)
-    fetch('/api/setup-tarifario',{method:'POST'}).then(r=>r.json()).then(d=>{
-      if(d.ok){setMsg({ok:true,m:''+d.rows+' servicios cargados'}); load()}
-      else setMsg({ok:false,m:d.error||'Error'})
-      setIniting(false)
-    })
-  }
-
-  function startEd(s){ setEd(p=>({...p,[s.id]:{min:s.precio_min,max:s.precio_max,desc:s.descripcion}})) }
-  function stopEd(id){ setEd(p=>{const n={...p};delete n[id];return n}) }
-
-  function doSave(s){
-    setSaving(s.id)
-    const e=ed[s.id]
-    const pmin=Number(String(e.min).replace(/D/g,''))
-    const pmax=Number(String(e.max).replace(/D/g,''))
-    fetch('/api/tarifario',{method:'PUT',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({id:s.id,precio_min:pmin,precio_max:pmax,descripcion:e.desc,activo:s.activo})
-    }).then(r=>r.json()).then(d=>{
-      if(!d.error){
-        setSv(p=>p.map(x=>x.id===s.id?{...x,precio_min:pmin,precio_max:pmax,descripcion:e.desc}:x))
-        stopEd(s.id)
-        setMsg({ok:true,m:s.servicio+' actualizado'})
-        setTimeout(()=>setMsg(null),3000)
-      } else setMsg({ok:false,m:d.error})
-      setSaving(null)
-    })
-  }
-
-  function doToggle(s){
-    fetch('/api/tarifario',{method:'PUT',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({id:s.id,precio_min:s.precio_min,precio_max:s.precio_max,descripcion:s.descripcion,activo:!s.activo})
-    }).then(()=>setSv(p=>p.map(x=>x.id===s.id?{...x,activo:!s.activo}:x)))
-  }
-
-  const shown = cat==='Todos' ? sv : sv.filter(s=>s.categoria===cat)
-
-  if(loading) return <div style={{textAlign:'center',padding:60,color:'rgba(255,255,255,.3)',fontSize:14}}>Cargando tarifario...</div>
-
-  if(!sv.length) return (
-    <div style={{textAlign:'center',padding:60}}>
-      <p style={{color:'rgba(255,255,255,.4)',marginBottom:20,fontSize:14}}>Tabla vacía. Carga los servicios por defecto.</p>
-      <button onClick={doInit} disabled={initing} style={{padding:'10px 28px',borderRadius:8,border:'none',background:'#E8FF00',color:'#000',fontWeight:700,fontSize:14,cursor:'pointer'}}>
-        {initing?'Inicializando...':'Inicializar Tarifario'}
-      </button>
-      {msg&&<p style={{marginTop:14,color:msg.ok?'#E8FF00':'#ff6b6b',fontSize:13}}>{msg.m}</p>}
-    </div>
-  )
-
-  return (
-    <div>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20,flexWrap:'wrap',gap:10}}>
-        <span style={{fontSize:16,fontWeight:700,color:'#fff'}}>Tarifario de Servicios</span>
-        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-          {cats.map(c=>(
-            <button key={c} onClick={()=>setCat(c)} style={{padding:'4px 13px',borderRadius:20,border:'none',cursor:'pointer',fontSize:12,fontWeight:600,background:cat===c?'#E8FF00':'rgba(255,255,255,.07)',color:cat===c?'#000':'rgba(255,255,255,.45)'}}>
-              {c}
-            </button>
-          ))}
-        </div>
-      </div>
-      {msg&&<div style={{padding:'8px 14px',borderRadius:8,marginBottom:12,background:msg.ok?'rgba(232,255,0,.08)':'rgba(255,107,107,.08)',color:msg.ok?'#E8FF00':'#ff6b6b',fontSize:13}}>{msg.m}</div>}
-      {shown.map(s=>{
-        const e=ed[s.id]
-        return (
-          <div key={s.id} style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:10,padding:'14px 16px',marginBottom:8,opacity:s.activo?1:0.45}}>
-            {e?(
-              <div>
-                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
-                  <span style={{fontWeight:600,fontSize:14,color:'#fff',flex:1}}>{s.servicio}</span>
-                  <span style={{fontSize:11,color:'rgba(255,255,255,.35)',background:'rgba(255,255,255,.06)',borderRadius:4,padding:'2px 7px'}}>{s.categoria}</span>
-                </div>
-                <div style={{display:'flex',gap:8,marginBottom:10,flexWrap:'wrap',alignItems:'flex-end'}}>
-                  <div>
-                    <div style={{fontSize:11,color:'rgba(255,255,255,.35)',marginBottom:3}}>Precio min</div>
-                    <input value={e.min} onChange={ev=>setEd(p=>({...p,[s.id]:{...p[s.id],min:ev.target.value}}))} style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(232,255,0,.35)',borderRadius:6,padding:'5px 9px',color:'#fff',fontSize:13,width:130}} />
-                  </div>
-                  <div>
-                    <div style={{fontSize:11,color:'rgba(255,255,255,.35)',marginBottom:3}}>Precio max</div>
-                    <input value={e.max} onChange={ev=>setEd(p=>({...p,[s.id]:{...p[s.id],max:ev.target.value}}))} style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(232,255,0,.35)',borderRadius:6,padding:'5px 9px',color:'#fff',fontSize:13,width:130}} />
-                  </div>
-                  <div style={{flex:1,minWidth:150}}>
-                    <div style={{fontSize:11,color:'rgba(255,255,255,.35)',marginBottom:3}}>Descripcion</div>
-                    <input value={e.desc} onChange={ev=>setEd(p=>({...p,[s.id]:{...p[s.id],desc:ev.target.value}}))} style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(232,255,0,.35)',borderRadius:6,padding:'5px 9px',color:'#fff',fontSize:13,width:'100%'}} />
-                  </div>
-                </div>
-                <div style={{display:'flex',gap:6,justifyContent:'flex-end'}}>
-                  <button onClick={()=>stopEd(s.id)} style={{padding:'4px 12px',borderRadius:6,border:'none',background:'rgba(255,255,255,.07)',color:'rgba(255,255,255,.4)',fontSize:12,cursor:'pointer'}}>Cancelar</button>
-                  <button onClick={()=>doSave(s)} disabled={saving===s.id} style={{padding:'4px 12px',borderRadius:6,border:'none',background:'#E8FF00',color:'#000',fontWeight:700,fontSize:12,cursor:'pointer'}}>
-                    {saving===s.id?'Guardando...':'Guardar'}
-                  </button>
-                </div>
-              </div>
-            ):(
-              <div>
-                <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
-                  <span style={{fontWeight:600,fontSize:14,color:'#fff',flex:1}}>{s.servicio}</span>
-                  <span style={{fontSize:11,color:'rgba(255,255,255,.35)',background:'rgba(255,255,255,.06)',borderRadius:4,padding:'2px 7px'}}>{s.categoria}</span>
-                  <span style={{fontWeight:700,fontSize:14,color:'#E8FF00'}}>{fmt(s.precio_min)} — {fmt(s.precio_max)}</span>
-                  <button onClick={()=>doToggle(s)} style={{width:36,height:20,borderRadius:10,background:s.activo?'#E8FF00':'rgba(255,255,255,.12)',border:'none',cursor:'pointer',position:'relative',flexShrink:0}}>
-                    <span style={{position:'absolute',top:3,left:s.activo?19:3,width:14,height:14,borderRadius:'50%',background:s.activo?'#000':'rgba(255,255,255,.5)',display:'block'}} />
-                  </button>
-                  <button onClick={()=>startEd(s)} style={{padding:'4px 12px',borderRadius:6,border:'1px solid rgba(255,255,255,.12)',background:'transparent',color:'rgba(255,255,255,.45)',fontSize:12,cursor:'pointer',flexShrink:0}}>Editar</button>
-                </div>
-                {s.descripcion&&<div style={{fontSize:12,color:'rgba(255,255,255,.38)',marginTop:5}}>{s.descripcion}</div>}
-              </div>
-            )}
-          </div>
-        )
-      })}
-      <div style={{marginTop:16,textAlign:'right'}}>
-        <button onClick={doInit} disabled={initing} style={{padding:'6px 16px',borderRadius:6,border:'1px solid rgba(255,255,255,.1)',background:'transparent',color:'rgba(255,255,255,.3)',fontSize:12,cursor:'pointer'}}>
-          {initing?'Reiniciando...':'Reinicializar servicios'}
-        </button>
       </div>
     </div>
   )
