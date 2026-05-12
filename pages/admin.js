@@ -289,194 +289,140 @@ function AdminPanel({ onLogout }) {
 
 // ─── TarifarioPanel ───────────────────────────────────────────────────────
 function TarifarioPanel() {
-  const [servicios, setServicios] = useState([])
+  const [sv, setSv] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(null)
-  const [editando, setEditando] = useState({})
-  const [filter, setFilter] = useState('Todos')
+  const [ed, setEd] = useState({})
+  const [cat, setCat] = useState('Todos')
   const [msg, setMsg] = useState(null)
-  const [initing, setIniting] = useState(false)
+  const [init, setInit] = useState(false)
+  const fmt = n => new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n||0)
+  const cats = ['Todos',...[...new Set(sv.map(s=>s.categoria))].sort()]
 
-  const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n || 0)
-  const cats = ['Todos', ...[...new Set(servicios.map(s => s.categoria))].sort()]
+  useEffect(()=>{load()},[])
 
-  useEffect(() => { load() }, [])
-
-  async function load() {
+  function load(){
     setLoading(true)
-    const r = await fetch('/api/tarifario')
-    const d = await r.json()
-    setServicios(Array.isArray(d) ? d : [])
-    setLoading(false)
+    fetch('/api/tarifario').then(r=>r.json()).then(d=>{
+      setSv(Array.isArray(d)?d:[])
+      setLoading(false)
+    })
   }
 
-  async function initTabla() {
-    setIniting(true)
-    setMsg(null)
-    const r = await fetch('/api/setup-tarifario', { method: 'POST' })
-    const d = await r.json()
-    if (d.ok) {
-      setMsg({ t: 'ok', m: 'Tarifario inicializado — ' + d.rows + ' servicios cargados' })
-      load()
-    } else {
-      setMsg({ t: 'err', m: d.error || 'Error al inicializar' })
-    }
-    setIniting(false)
+  function doInit(){
+    setInit(true); setMsg(null)
+    fetch('/api/setup-tarifario',{method:'POST'}).then(r=>r.json()).then(d=>{
+      if(d.ok){setMsg({ok:true,m:''+d.rows+' servicios cargados'}); load()}
+      else setMsg({ok:false,m:d.error||'Error'})
+      setInit(false)
+    })
   }
 
-  function startEdit(s) {
-    setEditando(prev => ({ ...prev, [s.id]: { min: s.precio_min, max: s.precio_max, desc: s.descripcion } }))
-  }
+  function startEd(s){ setEd(p=>({...p,[s.id]:{min:s.precio_min,max:s.precio_max,desc:s.descripcion}})) }
+  function stopEd(id){ setEd(p=>{const n={...p};delete n[id];return n}) }
 
-  function cancelEdit(id) {
-    setEditando(prev => { const n = { ...prev }; delete n[id]; return n })
-  }
-
-  async function save(s) {
+  function doSave(s){
     setSaving(s.id)
-    const e = editando[s.id]
-    const pmin = Number(String(e.min).replace(/D/g, ''))
-    const pmax = Number(String(e.max).replace(/D/g, ''))
-    const r = await fetch('/api/tarifario', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: s.id, precio_min: pmin, precio_max: pmax, descripcion: e.desc, activo: s.activo })
+    const e=ed[s.id]
+    const pmin=Number(String(e.min).replace(/D/g,''))
+    const pmax=Number(String(e.max).replace(/D/g,''))
+    fetch('/api/tarifario',{method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:s.id,precio_min:pmin,precio_max:pmax,descripcion:e.desc,activo:s.activo})
+    }).then(r=>r.json()).then(d=>{
+      if(!d.error){
+        setSv(p=>p.map(x=>x.id===s.id?{...x,precio_min:pmin,precio_max:pmax,descripcion:e.desc}:x))
+        stopEd(s.id)
+        setMsg({ok:true,m:s.servicio+' actualizado'})
+        setTimeout(()=>setMsg(null),3000)
+      } else setMsg({ok:false,m:d.error})
+      setSaving(null)
     })
-    const d = await r.json()
-    if (!d.error) {
-      setServicios(prev => prev.map(x => x.id === s.id ? { ...x, precio_min: pmin, precio_max: pmax, descripcion: e.desc } : x))
-      cancelEdit(s.id)
-      setMsg({ t: 'ok', m: s.servicio + ' actualizado' })
-      setTimeout(() => setMsg(null), 3000)
-    } else {
-      setMsg({ t: 'err', m: d.error })
-    }
-    setSaving(null)
   }
 
-  async function toggle(s) {
-    await fetch('/api/tarifario', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: s.id, precio_min: s.precio_min, precio_max: s.precio_max, descripcion: s.descripcion, activo: !s.activo })
-    })
-    setServicios(prev => prev.map(x => x.id === s.id ? { ...x, activo: !s.activo } : x))
+  function doToggle(s){
+    fetch('/api/tarifario',{method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:s.id,precio_min:s.precio_min,precio_max:s.precio_max,descripcion:s.descripcion,activo:!s.activo})
+    }).then(()=>setSv(p=>p.map(x=>x.id===s.id?{...x,activo:!s.activo}:x)))
   }
 
-  const shown = filter === 'Todos' ? servicios : servicios.filter(s => s.categoria === filter)
+  const shown = cat==='Todos' ? sv : sv.filter(s=>s.categoria===cat)
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 60, color: 'rgba(255,255,255,.3)', fontSize: 14 }}>Cargando tarifario...</div>
+  if(loading) return <div style={{textAlign:'center',padding:60,color:'rgba(255,255,255,.3)',fontSize:14}}>Cargando tarifario...</div>
 
-  if (!servicios.length) return (
-    <div style={{ textAlign: 'center', padding: 60 }}>
-      <p style={{ color: 'rgba(255,255,255,.4)', marginBottom: 20, fontSize: 14 }}>La tabla tarifario no tiene datos. Inicializala con los servicios por defecto.</p>
-      <button onClick={initTabla} disabled={initing} style={{ padding: '10px 28px', borderRadius: 8, border: 'none', background: '#E8FF00', color: '#000', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
-        {initing ? 'Inicializando...' : 'Inicializar Tarifario'}
+  if(!sv.length) return (
+    <div style={{textAlign:'center',padding:60}}>
+      <p style={{color:'rgba(255,255,255,.4)',marginBottom:20,fontSize:14}}>Tabla vacía. Carga los servicios por defecto.</p>
+      <button onClick={doInit} disabled={init} style={{padding:'10px 28px',borderRadius:8,border:'none',background:'#E8FF00',color:'#000',fontWeight:700,fontSize:14,cursor:'pointer'}}>
+        {init?'Inicializando...':'Inicializar Tarifario'}
       </button>
-      {msg && <p style={{ marginTop: 14, color: msg.t === 'ok' ? '#E8FF00' : '#ff6b6b', fontSize: 13 }}>{msg.m}</p>}
+      {msg&&<p style={{marginTop:14,color:msg.ok?'#E8FF00':'#ff6b6b',fontSize:13}}>{msg.m}</p>}
     </div>
   )
 
   return (
-    <div style={{ padding: '20px 0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 10 }}>
-        <span style={{ fontSize: 17, fontWeight: 700, color: '#fff' }}>Tarifario de Servicios</span>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {cats.map(c => (
-            <button key={c} onClick={() => setFilter(c)} style={{
-              padding: '4px 13px', borderRadius: 20, border: 'none', cursor: 'pointer',
-              fontSize: 12, fontWeight: 600,
-              background: filter === c ? '#E8FF00' : 'rgba(255,255,255,.07)',
-              color: filter === c ? '#000' : 'rgba(255,255,255,.45)',
-              transition: 'all .15s'
-            }}>{c}</button>
+    <div style={{padding:'20px 0'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20,flexWrap:'wrap',gap:10}}>
+        <span style={{fontSize:17,fontWeight:700,color:'#fff'}}>Tarifario de Servicios</span>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+          {cats.map(c=>(
+            <button key={c} onClick={()=>setCat(c)} style={{padding:'4px 13px',borderRadius:20,border:'none',cursor:'pointer',fontSize:12,fontWeight:600,background:cat===c?'#E8FF00':'rgba(255,255,255,.07)',color:cat===c?'#000':'rgba(255,255,255,.45)'}}>
+              {c}
+            </button>
           ))}
         </div>
       </div>
-      {msg && (
-        <div style={{
-          padding: '8px 14px', borderRadius: 8, marginBottom: 12,
-          background: msg.t === 'ok' ? 'rgba(232,255,0,.08)' : 'rgba(255,107,107,.08)',
-          color: msg.t === 'ok' ? '#E8FF00' : '#ff6b6b', fontSize: 13
-        }}>{msg.m}</div>
-      )}
-      {shown.map(s => {
-        const e = editando[s.id]
+      {msg&&<div style={{padding:'8px 14px',borderRadius:8,marginBottom:12,background:msg.ok?'rgba(232,255,0,.08)':'rgba(255,107,107,.08)',color:msg.ok?'#E8FF00':'#ff6b6b',fontSize:13}}>{msg.m}</div>}
+      {shown.map(s=>{
+        const e=ed[s.id]
         return (
-          <div key={s.id} style={{
-            background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)',
-            borderRadius: 10, padding: '14px 16px', marginBottom: 8,
-            opacity: s.activo ? 1 : 0.45, transition: 'opacity .2s'
-          }}>
-            {e ? (
+          <div key={s.id} style={{background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:10,padding:'14px 16px',marginBottom:8,opacity:s.activo?1:0.45}}>
+            {e?(
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 600, fontSize: 14, color: '#fff', flex: 1 }}>{s.servicio}</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,.35)', background: 'rgba(255,255,255,.06)', borderRadius: 4, padding: '2px 8px' }}>{s.categoria}</span>
+                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
+                  <span style={{fontWeight:600,fontSize:14,color:'#fff',flex:1}}>{s.servicio}</span>
+                  <span style={{fontSize:11,color:'rgba(255,255,255,.35)',background:'rgba(255,255,255,.06)',borderRadius:4,padding:'2px 7px'}}>{s.categoria}</span>
                 </div>
-                <div style={{ display: 'flex', gap: 10, marginBottom: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <div style={{display:'flex',gap:8,marginBottom:10,flexWrap:'wrap',alignItems:'flex-end'}}>
                   <div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginBottom: 3 }}>Precio mín (CLP)</div>
-                    <input
-                      style={{ background: 'rgba(255,255,255,.07)', border: '1px solid rgba(232,255,0,.35)', borderRadius: 6, padding: '5px 9px', color: '#fff', fontSize: 13, width: 130 }}
-                      value={e.min}
-                      onChange={ev => setEditando(prev => ({ ...prev, [s.id]: { ...prev[s.id], min: ev.target.value } }))}
-                    />
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.35)',marginBottom:3}}>Precio mín</div>
+                    <input value={e.min} onChange={ev=>setEd(p=>({...p,[s.id]:{...p[s.id],min:ev.target.value}}))} style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(232,255,0,.35)',borderRadius:6,padding:'5px 9px',color:'#fff',fontSize:13,width:130}} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginBottom: 3 }}>Precio máx (CLP)</div>
-                    <input
-                      style={{ background: 'rgba(255,255,255,.07)', border: '1px solid rgba(232,255,0,.35)', borderRadius: 6, padding: '5px 9px', color: '#fff', fontSize: 13, width: 130 }}
-                      value={e.max}
-                      onChange={ev => setEditando(prev => ({ ...prev, [s.id]: { ...prev[s.id], max: ev.target.value } }))}
-                    />
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.35)',marginBottom:3}}>Precio máx</div>
+                    <input value={e.max} onChange={ev=>setEd(p=>({...p,[s.id]:{...p[s.id],max:ev.target.value}}))} style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(232,255,0,.35)',borderRadius:6,padding:'5px 9px',color:'#fff',fontSize:13,width:130}} />
                   </div>
-                  <div style={{ flex: 1, minWidth: 160 }}>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,.35)', marginBottom: 3 }}>Descripción</div>
-                    <input
-                      style={{ background: 'rgba(255,255,255,.07)', border: '1px solid rgba(232,255,0,.35)', borderRadius: 6, padding: '5px 9px', color: '#fff', fontSize: 13, width: '100%' }}
-                      value={e.desc}
-                      onChange={ev => setEditando(prev => ({ ...prev, [s.id]: { ...prev[s.id], desc: ev.target.value } }))}
-                    />
+                  <div style={{flex:1,minWidth:150}}>
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.35)',marginBottom:3}}>Descripción</div>
+                    <input value={e.desc} onChange={ev=>setEd(p=>({...p,[s.id]:{...p[s.id],desc:ev.target.value}}))} style={{background:'rgba(255,255,255,.07)',border:'1px solid rgba(232,255,0,.35)',borderRadius:6,padding:'5px 9px',color:'#fff',fontSize:13,width:'100%'}} />
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                  <button onClick={() => cancelEdit(s.id)} style={{ padding: '4px 12px', borderRadius: 6, border: 'none', background: 'rgba(255,255,255,.07)', color: 'rgba(255,255,255,.4)', fontSize: 12, cursor: 'pointer' }}>Cancelar</button>
-                  <button onClick={() => save(s)} disabled={saving === s.id} style={{ padding: '4px 12px', borderRadius: 6, border: 'none', background: '#E8FF00', color: '#000', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>
-                    {saving === s.id ? 'Guardando...' : 'Guardar'}
+                <div style={{display:'flex',gap:6,justifyContent:'flex-end'}}>
+                  <button onClick={()=>stopEd(s.id)} style={{padding:'4px 12px',borderRadius:6,border:'none',background:'rgba(255,255,255,.07)',color:'rgba(255,255,255,.4)',fontSize:12,cursor:'pointer'}}>Cancelar</button>
+                  <button onClick={()=>doSave(s)} disabled={saving===s.id} style={{padding:'4px 12px',borderRadius:6,border:'none',background:'#E8FF00',color:'#000',fontWeight:700,fontSize:12,cursor:'pointer'}}>
+                    {saving===s.id?'Guardando...':'Guardar'}
                   </button>
                 </div>
               </div>
-            ) : (
+            ):(
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 600, fontSize: 14, color: '#fff', flex: 1 }}>{s.servicio}</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,.35)', background: 'rgba(255,255,255,.06)', borderRadius: 4, padding: '2px 8px' }}>{s.categoria}</span>
-                  <span style={{ fontWeight: 700, fontSize: 14, color: '#E8FF00' }}>{fmt(s.precio_min)} — {fmt(s.precio_max)}</span>
-                  <button onClick={() => toggle(s)} style={{
-                    width: 36, height: 20, borderRadius: 10,
-                    background: s.activo ? '#E8FF00' : 'rgba(255,255,255,.12)',
-                    border: 'none', cursor: 'pointer', position: 'relative', transition: 'background .2s', flexShrink: 0
-                  }}>
-                    <span style={{
-                      position: 'absolute', top: 3,
-                      left: s.activo ? 19 : 3,
-                      width: 14, height: 14, borderRadius: '50%',
-                      background: s.activo ? '#000' : 'rgba(255,255,255,.5)',
-                      transition: 'left .2s', display: 'block'
-                    }} />
+                <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+                  <span style={{fontWeight:600,fontSize:14,color:'#fff',flex:1}}>{s.servicio}</span>
+                  <span style={{fontSize:11,color:'rgba(255,255,255,.35)',background:'rgba(255,255,255,.06)',borderRadius:4,padding:'2px 7px'}}>{s.categoria}</span>
+                  <span style={{fontWeight:700,fontSize:14,color:'#E8FF00'}}>{fmt(s.precio_min)} — {fmt(s.precio_max)}</span>
+                  <button onClick={()=>doToggle(s)} style={{width:36,height:20,borderRadius:10,background:s.activo?'#E8FF00':'rgba(255,255,255,.12)',border:'none',cursor:'pointer',position:'relative',flexShrink:0}}>
+                    <span style={{position:'absolute',top:3,left:s.activo?19:3,width:14,height:14,borderRadius:'50%',background:s.activo?'#000':'rgba(255,255,255,.5)',display:'block'}} />
                   </button>
-                  <button onClick={() => startEdit(s)} style={{ padding: '4px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,.12)', background: 'transparent', color: 'rgba(255,255,255,.45)', fontSize: 12, cursor: 'pointer' }}>Editar</button>
+                  <button onClick={()=>startEd(s)} style={{padding:'4px 12px',borderRadius:6,border:'1px solid rgba(255,255,255,.12)',background:'transparent',color:'rgba(255,255,255,.45)',fontSize:12,cursor:'pointer',flexShrink:0}}>Editar</button>
                 </div>
-                {s.descripcion && <div style={{ fontSize: 12, color: 'rgba(255,255,255,.38)', marginTop: 5 }}>{s.descripcion}</div>}
+                {s.descripcion&&<div style={{fontSize:12,color:'rgba(255,255,255,.38)',marginTop:5}}>{s.descripcion}</div>}
               </div>
             )}
           </div>
         )
       })}
-      <div style={{ marginTop: 16, textAlign: 'right' }}>
-        <button onClick={initTabla} disabled={initing} style={{ padding: '6px 16px', borderRadius: 6, border: '1px solid rgba(255,255,255,.1)', background: 'transparent', color: 'rgba(255,255,255,.3)', fontSize: 12, cursor: 'pointer' }}>
-          {initing ? 'Reiniciando...' : 'Reinicializar servicios'}
+      <div style={{marginTop:16,textAlign:'right'}}>
+        <button onClick={doInit} disabled={init} style={{padding:'6px 16px',borderRadius:6,border:'1px solid rgba(255,255,255,.1)',background:'transparent',color:'rgba(255,255,255,.3)',fontSize:12,cursor:'pointer'}}>
+          {init?'Reiniciando...':'Reinicializar servicios'}
         </button>
       </div>
     </div>
