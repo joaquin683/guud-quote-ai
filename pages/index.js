@@ -90,18 +90,10 @@ export default function Home() {
   const { voiceState, supported: voiceSupported, start: startVoice, stop: stopVoice, interim: voiceInterim } = useVoiceInput({
     autoSend: false,
     onInterim: (text) => { if (text) setInput(text) },
-    onResult: (text, auto) => {
-      if (auto) {
-        enviar(text)
-      } else {
-        setInput(text)
-        setTimeout(() => {
-          if (inputRef.current) {
-            inputRef.current.style.height = 'auto'
-            inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 96) + 'px'
-          }
-          document.getElementById('send-btn')?.removeAttribute('disabled')
-        }, 50)
+    onResult: (text) => {
+      if (text && text.trim()) {
+        setInput('')
+        enviar(text.trim())
       }
     },
     onError: () => {},
