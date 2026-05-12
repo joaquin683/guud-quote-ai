@@ -280,8 +280,167 @@ function AdminPanel({ onLogout }) {
 
       {vista==='tarifario'&&(
         <div style={{padding:'24px 0'}}>
-          <TarifarioTab/>
+          <TarifarioPanel />
         </div>
       )}
+  )
+}
+
+
+// ─── TarifarioPanel ───────────────────────────────────────────────────────
+function TarifarioPanel() {
+  const [servicios, setServicios] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(null)
+  const [editando, setEditando] = useState({})
+  const [filter, setFilter] = useState('Todos')
+  const [msg, setMsg] = useState(null)
+  const [initing, setIniting] = useState(false)
+
+  const fmt = n => new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n||0)
+  const cats = ['Todos',...[...new Set(servicios.map(s=>s.categoria))].sort()]
+
+  useEffect(()=>{ load() },[])
+
+  async function load() {
+    setLoading(true)
+    const r = await fetch('/api/tarifario')
+    const d = await r.json()
+    setServicios(Array.isArray(d) ? d : [])
+    setLoading(false)
+  }
+
+  async function initTabla() {
+    setIniting(true); setMsg(null)
+    const r = await fetch('/api/setup-tarifario',{method:'POST'})
+    const d = await r.json()
+    if(d.ok){ setMsg({t:'ok',m:'Tarifario inicializado — '+d.rows+' servicios cargados ✓'}); load() }
+    else setMsg({t:'err',m:d.error||'Error al inicializar'})
+    setIniting(false)
+  }
+
+  function startEdit(s) {
+    setEditando(p=>({...p,[s.id]:{min:s.precio_min,max:s.precio_max,desc:s.descripcion}}))
+  }
+  function cancelEdit(id){ setEditando(p=>{const n={...p};delete n[id];return n}) }
+
+  async function save(s) {
+    setSaving(s.id)
+    const e = editando[s.id]
+    const r = await fetch('/api/tarifario',{
+      method:'PUT', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id:s.id, precio_min:Number(String(e.min).replace(/D/g,'')), precio_max:Number(String(e.max).replace(/D/g,'')), descripcion:e.desc, activo:s.activo})
+    })
+    const d = await r.json()
+    if(!d.error){
+      setServicios(p=>p.map(x=>x.id===s.id?{...x,precio_min:Number(String(e.min).replace(/D/g,'')),precio_max:Number(String(e.max).replace(/D/g,'')),descripcion:e.desc}:x))
+      cancelEdit(s.id)
+      setMsg({t:'ok',m:s.servicio+' actualizado ✓'})
+      setTimeout(()=>setMsg(null),3000)
+    } else setMsg({t:'err',m:d.error})
+    setSaving(null)
+  }
+
+  async function toggle(s) {
+    await fetch('/api/tarifario',{method:'PUT',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id:s.id,precio_min:s.precio_min,precio_max:s.precio_max,descripcion:s.descripcion,activo:!s.activo})})
+    setServicios(p=>p.map(x=>x.id===s.id?{...x,activo:!s.activo}:x))
+  }
+
+  const shown = filter==='Todos' ? servicios : servicios.filter(s=>s.categoria===filter)
+
+  if(loading) return <div style={{textAlign:'center',padding:60,color:'rgba(255,255,255,.3)'}}>Cargando tarifario...</div>
+
+  if(!servicios.length) return (
+    <div style={{textAlign:'center',padding:60}}>
+      <p style={{color:'rgba(255,255,255,.4)',marginBottom:20,fontSize:14}}>La tabla tarifario está vacía. Inicializala con los servicios por defecto.</p>
+      <button onClick={initTabla} disabled={initing} style={{padding:'10px 28px',borderRadius:8,border:'none',background:'#E8FF00',color:'#000',fontWeight:700,fontSize:14,cursor:'pointer'}}>
+        {initing?'Inicializando...':'🚀 Inicializar Tarifario'}
+      </button>
+      {msg&&<p style={{marginTop:14,color:msg.t==='ok'?'#E8FF00':'#ff6b6b',fontSize:13}}>{msg.m}</p>}
+    </div>
+  )
+
+  const C = {
+    wrap:{padding:'20px 0'},
+    top:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20,flexWrap:'wrap',gap:10},
+    title:{fontSize:17,fontWeight:700,color:'#fff'},
+    cats:{display:'flex',gap:6,flexWrap:'wrap'},
+    catBtn:(a)=>({padding:'4px 13px',borderRadius:20,border:'none',cursor:'pointer',fontSize:12,fontWeight:600,background:a?'#E8FF00':'rgba(255,255,255,.07)',color:a?'#000':'rgba(255,255,255,.45)',transition:'all .15s'}),
+    card:(activo)=>({background:'rgba(255,255,255,.04)',border:'1px solid rgba(255,255,255,.08)',borderRadius:10,padding:'14px 16px',marginBottom:8,opacity:activo?1:0.4,transition:'opacity .2s'}),
+    row:{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'},
+    name:{fontWeight:600,fontSize:14,color:'#fff',flex:1,minWidth:120},
+    badge:{fontSize:11,fontWeight:600,color:'rgba(255,255,255,.35)',background:'rgba(255,255,255,.06)',borderRadius:4,padding:'2px 8px',flexShrink:0},
+    price:{fontWeight:700,fontSize:14,color:'#E8FF00',flexShrink:0},
+    desc:{fontSize:12,color:'rgba(255,255,255,.38)',marginTop:5},
+    toggle:(on)=>({width:36,height:20,borderRadius:10,background:on?'#E8FF00':'rgba(255,255,255,.12)',position:'relative',cursor:'pointer',border:'none',transition:'background .2s',flexShrink:0}),
+    dot:(on)=>({position:'absolute',top:3,left:on?19:3,width:14,height:14,borderRadius:'50%',background:on?'#000':'rgba(255,255,255,.5)',transition:'left .2s'}),
+    inp:{background:'rgba(255,255,255,.07)',border:'1px solid rgba(232,255,0,.35)',borderRadius:6,padding:'5px 9px',color:'#fff',fontSize:13,width:130},
+    inpDesc:{background:'rgba(255,255,255,.07)',border:'1px solid rgba(232,255,0,.35)',borderRadius:6,padding:'5px 9px',color:'#fff',fontSize:13,flex:1,minWidth:160},
+    btnE:{padding:'4px 12px',borderRadius:6,border:'1px solid rgba(255,255,255,.12)',background:'transparent',color:'rgba(255,255,255,.45)',fontSize:12,cursor:'pointer',flexShrink:0},
+    btnS:{padding:'4px 12px',borderRadius:6,border:'none',background:'#E8FF00',color:'#000',fontWeight:700,fontSize:12,cursor:'pointer',flexShrink:0},
+    btnC:{padding:'4px 12px',borderRadius:6,border:'none',background:'rgba(255,255,255,.07)',color:'rgba(255,255,255,.4)',fontSize:12,cursor:'pointer',flexShrink:0},
+  }
+
+  return (
+    <div style={C.wrap}>
+      <div style={C.top}>
+        <span style={C.title}>Tarifario de Servicios</span>
+        <div style={C.cats}>
+          {cats.map(c=><button key={c} onClick={()=>setFilter(c)} style={C.catBtn(filter===c)}>{c}</button>)}
+        </div>
+      </div>
+      {msg&&<div style={{padding:'8px 14px',borderRadius:8,marginBottom:12,background:msg.t==='ok'?'rgba(232,255,0,.08)':'rgba(255,107,107,.08)',color:msg.t==='ok'?'#E8FF00':'#ff6b6b',fontSize:13}}>{msg.m}</div>}
+      {shown.map(s=>{
+        const e=editando[s.id]
+        return (
+          <div key={s.id} style={C.card(s.activo)}>
+            {e?(
+              <div>
+                <div style={{...C.row,marginBottom:10}}>
+                  <span style={C.name}>{s.servicio}</span>
+                  <span style={C.badge}>{s.categoria}</span>
+                  <button onClick={()=>toggle(s)} style={C.toggle(s.activo)}><span style={C.dot(s.activo)}/></button>
+                </div>
+                <div style={{...C.row,marginBottom:10}}>
+                  <div>
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.35)',marginBottom:3}}>Precio mín</div>
+                    <input style={C.inp} value={e.min} onChange={ev=>setEditando(p=>({...p,[s.id]:{...p[s.id],min:ev.target.value}}))} />
+                  </div>
+                  <div>
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.35)',marginBottom:3}}>Precio máx</div>
+                    <input style={C.inp} value={e.max} onChange={ev=>setEditando(p=>({...p,[s.id]:{...p[s.id],max:ev.target.value}}))} />
+                  </div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:11,color:'rgba(255,255,255,.35)',marginBottom:3}}>Descripción</div>
+                    <input style={C.inpDesc} value={e.desc} onChange={ev=>setEditando(p=>({...p,[s.id]:{...p[s.id],desc:ev.target.value}}))} />
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:6,justifyContent:'flex-end'}}>
+                  <button onClick={()=>cancelEdit(s.id)} style={C.btnC}>Cancelar</button>
+                  <button onClick={()=>save(s)} disabled={saving===s.id} style={C.btnS}>{saving===s.id?'Guardando...':'Guardar'}</button>
+                </div>
+              </div>
+            ):(
+              <div>
+                <div style={C.row}>
+                  <span style={C.name}>{s.servicio}</span>
+                  <span style={C.badge}>{s.categoria}</span>
+                  <span style={C.price}>{fmt(s.precio_min)} — {fmt(s.precio_max)}</span>
+                  <button onClick={()=>toggle(s)} style={C.toggle(s.activo)}><span style={C.dot(s.activo)}/></button>
+                  <button onClick={()=>startEdit(s)} style={C.btnE}>Editar</button>
+                </div>
+                {s.descripcion&&<div style={C.desc}>{s.descripcion}</div>}
+              </div>
+            )}
+          </div>
+        )
+      })}
+      <div style={{marginTop:16,textAlign:'right'}}>
+        <button onClick={initTabla} disabled={initing} style={{padding:'6px 16px',borderRadius:6,border:'1px solid rgba(255,255,255,.1)',background:'transparent',color:'rgba(255,255,255,.3)',fontSize:12,cursor:'pointer'}}>
+          {initing?'Reiniciando...':'↺ Reinicializar servicios'}
+        </button>
+      </div>
+    </div>
   )
 }
