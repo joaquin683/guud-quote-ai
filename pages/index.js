@@ -415,7 +415,7 @@ export default function Home() {
                     e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px'
                     setIntentDetected(detectIntent(e.target.value))
                   }}
-                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)) { e.preventDefault(); enviar() } }}
                 />
                 <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} />
                 <button
@@ -532,7 +532,7 @@ export default function Home() {
                   e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px'
                   setIntentDetected(detectIntent(e.target.value))
                 }}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)) { e.preventDefault(); enviar() } }}
               />
               <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} />
               <button
@@ -638,142 +638,83 @@ export default function Home() {
 
 
 // ─── useVoiceInput hook ───────────────────────────────────────────────
-function useVoiceInput({ onResult, onError, autoSend = false }) {
-  const [voiceState, setVoiceState] = useStateRef('idle')
-  const [interim, setInterim] = useState('')
-  const recogRef = useRef(null)
-  const finalRef = useRef('')
-
-  const supported = typeof window !== 'undefined' &&
-    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)
-
+function useVoiceInput({ onResult, onError, onInterim, autoSend = false }) {
+  const [voiceState, setVoiceState] = useState('idle')
+  const [supported] = useState(() => typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window))
+  const recogRef = useRef(null), finalRef = useRef(''), activeRef = useRef(false)
   const start = () => {
-    if (!supported) { setVoiceState('unsupported'); return }
+    if (!supported || activeRef.current) return
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition
     const recog = new SR()
-    // Detectar idioma del navegador, fallback a es-CL
-    recog.lang = navigator.language || 'es-CL'
-    recog.continuous = true       // no corta solo — espera al botón stop
-    recog.interimResults = true   // muestra texto mientras el usuario habla
-    recogRef.current = recog
-    finalRef.current = ''
-    setInterim('')
-
-    setVoiceState('requesting-permission')
+    recog.lang = 'es-ES'; recog.continuous = true; recog.interimResults = true; recog.maxAlternatives = 1
+    finalRef.current = ''; activeRef.current = true; recogRef.current = recog
     recog.onstart = () => setVoiceState('listening')
-
     recog.onresult = (e) => {
-      let interimText = ''
-      let finalText = ''
+      let interim = '', nf = ''
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) {
-          finalText += e.results[i][0].transcript + ' '
-        } else {
-          interimText += e.results[i][0].transcript
-        }
+        const t = e.results[i][0].transcript
+        if (e.results[i].isFinal) nf += t; else interim += t
       }
-      if (finalText) finalRef.current += finalText
-      setInterim(interimText)
-      if (typeof onInterim === 'function') onInterim((finalRef.current + interimText).trim())
-      if (typeof onInterim === 'function') onInterim(interimText)
+      if (nf) finalRef.current += nf + ' '
+      const full = (finalRef.current + interim).trim()
+      if (typeof onInterim === 'function' && full) onInterim(full)
     }
-
-    recog.onerror = (e) => {
-      if (e.error === 'not-allowed') setVoiceState('error-permission')
-      else if (e.error !== 'aborted') setVoiceState('error')
-      setTimeout(() => setVoiceState('idle'), 2500)
-    }
-
+    recog.onerror = (e) => { if (e.error !== 'no-speech') { if (onError) onError(e.error); setVoiceState('idle') } }
     recog.onend = () => {
-      // Solo termina si el usuario presionó stop (no automáticamente)
+      activeRef.current = false; setVoiceState('idle')
+      const text = finalRef.current.trim(); finalRef.current = ''
+      if (text && onResult) onResult(text, autoSend)
     }
-
     recog.start()
   }
-
-  const stop = () => {
-    recogRef.current?.stop()
-    recogRef.current = null
-    setInterim('')
-    const text = finalRef.current.trim()
-    if (text) {
-      onResult(text, autoSend)
-    }
-    setVoiceState('idle')
-    finalRef.current = ''
-  }
-
-  return { voiceState, supported, start, stop, interim }
+  const stop = () => { if (recogRef.current) { recogRef.current.stop(); recogRef.current = null } activeRef.current = false }
+  return { voiceState, supported, start, stop }
 }
-
-function useStateRef(init) {
-  const [val, setVal] = useState(init)
-  const ref = useRef(val)
-  const set = (v) => {
-    const next = typeof v === 'function' ? v(ref.current) : v
-    ref.current = next
-    setVal(next)
-  }
-  return [val, set]
-}
-
-// ─── VoiceButton component ────────────────────────────────────────────
-function VoiceButton({ voiceState, onStart, onStop }) {
-  const isListening = voiceState === 'listening'
-  const isLoading = voiceState === 'requesting-permission' || voiceState === 'transcribing'
-  const isError = voiceState === 'error' || voiceState === 'error-permission'
-  const isUnsupported = voiceState === 'unsupported'
-
-  const label = isListening ? 'Escuchando…'
-    : isLoading ? '…'
-    : isError ? 'Intenta de nuevo'
-    : ''
-
+function VoiceBars() {
+  const [h, setH] = useState([4,10,16,8])
+  useEffect(() => {
+    const id = setInterval(() => setH([
+      4+Math.random()*14, 4+Math.random()*14,
+      4+Math.random()*14, 4+Math.random()*14,
+    ]), 130)
+    return () => clearInterval(id)
+  }, [])
   return (
-    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-      {label && (
-        <span style={{
-          position: 'absolute', right: 44, whiteSpace: 'nowrap',
-          fontSize: 11, color: isError ? '#ff6b6b' : '#E8FF00',
-          letterSpacing: '0.04em', pointerEvents: 'none',
-          animation: 'fadeIn .2s ease',
-        }}>{label}</span>
+    <span style={{ display:'flex', alignItems:'center', gap:3, height:20 }}>
+      {h.map((v,i) => (
+        <span key={i} style={{
+          display:'block', width:3, borderRadius:2,
+          background:'#E8FF00', height:v+'px',
+          transition:'height .1s ease',
+        }} />
+      ))}
+    </span>
+  )
+}
+
+function VoiceButton({ voiceState, onStart, onStop, supported }) {
+  const on = voiceState === 'listening'
+  if (!supported) return null
+  return (
+    <button onClick={on ? onStop : onStart} title={on ? 'Detener' : 'Hablar'} style={{
+      flexShrink:0, width:36, height:36, borderRadius:'50%',
+      border: on ? '2px solid rgba(232,255,0,.75)' : '1.5px solid rgba(255,255,255,.12)',
+      background: on ? 'rgba(232,255,0,.08)' : 'transparent',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      cursor:'pointer', outline:'none',
+      boxShadow: on ? '0 0 14px rgba(232,255,0,.2)' : 'none',
+      transition:'all .2s',
+    }}>
+      {on ? <VoiceBars /> : (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="rgba(255,255,255,.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
       )}
-      {isListening && (
-        <div style={{ position: 'absolute', right: 44, display: 'flex', gap: 2, alignItems: 'flex-end', height: 16, paddingRight: label ? 80 : 0 }}>
-          {[0,1,2,3,4].map(i => (
-            <div key={i} style={{
-              width: 2, background: '#E8FF00', borderRadius: 2,
-              animation: `voiceWave .8s ease-in-out ${i * 0.1}s infinite alternate`,
-              height: [8,14,10,16,8][i],
-            }} />
-          ))}
-        </div>
-      )}
-      <button
-        style={{
-          ...VBS.btn,
-          ...(isListening ? VBS.listening : {}),
-          ...(isError ? VBS.error : {}),
-          ...(isUnsupported ? VBS.disabled : {}),
-          opacity: isUnsupported ? 0.4 : 1,
-        }}
-        onClick={isListening ? onStop : onStart}
-        disabled={isUnsupported || isLoading}
-        title={isUnsupported ? 'Tu navegador no permite dictado por voz' : isListening ? 'Cancelar' : 'Hablar'}
-      >
-        {isListening ? (
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="#080808" stroke="none">
-            <rect x="4" y="4" width="16" height="16" rx="2"/>
-          </svg>
-        ) : (
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
-          </svg>
-        )}
-      </button>
-    </div>
+    </button>
   )
 }
 
