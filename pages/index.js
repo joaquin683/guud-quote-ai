@@ -27,6 +27,7 @@ const INITIAL_CHIPS = [
   'Pautar en redes',
   'Algo diferente',
   'Desarrollar una app',
+            <button onClick={() => handleSugg('Necesito fotos y video para mi marca')} style={S.chip}>Producción audiovisual</button>
 ]
 
 // AGENT_CHIPS moved to INITIAL_CHIPS
@@ -43,6 +44,7 @@ const INTENT_MAP = [
   { label: 'Ads',        keys: ['ads','pauta','publicidad','anuncio','google ads','meta ads','facebook ads','instagram ads','sem','ppc','display'] },
   { label: 'Guerrilla',  keys: ['guerrilla','accion','disruptiv','urbano','viral','calle','sorpresa','instalacion'] },
   { label: 'Producto',   keys: ['app','aplicacion','mvp','producto digital','software','plataforma','web app','saas','sistema'] },
+  { label: 'Producción', keys: ['foto','fotos','fotografia','video','filmacion','filmar','grabar','grabacion','drone','dron','sesion','spot','reel de produccion','making of','cobertura','audiovisual','camara','produccion audiovisual','rodaje'] },
 ]
 
 function detectIntent(text) {
