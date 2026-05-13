@@ -6,7 +6,7 @@
     "precio_min": 900000,
     "precio_max": 1200000,
     "descripcion": "Naming, logo, paleta de color, tipografia",
-    "activo": false,
+    "activo": true,
     "orden": 1
   },
   {
