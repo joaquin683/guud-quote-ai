@@ -27,7 +27,6 @@ const INITIAL_CHIPS = [
   'Pautar en redes',
   'Algo diferente',
   'Desarrollar una app',
-            <button onClick={() => handleSugg('Necesito fotos y video para mi marca')} style={S.chip}>Producción audiovisual</button>
 ]
 
 // AGENT_CHIPS moved to INITIAL_CHIPS
