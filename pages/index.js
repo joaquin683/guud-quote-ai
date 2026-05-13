@@ -480,6 +480,7 @@ export default function Home() {
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t}
                 onDownloadPDF={m.extra.quote ? () => guudDownloadPDF(m.extra.quote) : null}
+                />
               ) : m.extra?.type === 'confirmado' ? (
                 <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} />
               ) : (
