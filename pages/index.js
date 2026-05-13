@@ -56,31 +56,92 @@ const WELCOME_MSG = '¡Hola! ¿Listo para cotizar tu próximo proyecto creativo 
 function guudDownloadPDF(q) {
   if (typeof window === 'undefined' || !q) return
   var fmt = function(n) { return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n||0) }
-  var esc = function(s) { return String(s||'').replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;'}) }
-  var html = ['<!DOCTYPE html><html><head><meta charset=utf-8><title>Cotizacion GUUD</title>',
-    '<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#fff;color:#111;padding:40px;max-width:640px;margin:0 auto}',
-    'h1{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:28px}',
-    'h2{font-size:22px;font-weight:700;margin-bottom:4px}.svc{font-size:13px;color:#555;margin-bottom:28px}',
-    'table{width:100%;border-collapse:collapse;margin-bottom:28px}td{padding:9px 0;border-bottom:1px solid #eee;font-size:13px;vertical-align:top}td.lb{color:#888;width:38%}',
-    '.pr{font-size:32px;font-weight:700;margin:24px 0 6px}.note{font-size:11px;color:#aaa;margin-bottom:28px}',
-    '.ft{margin-top:36px;padding-top:14px;border-top:1px solid #eee;font-size:10px;color:#bbb;display:flex;justify-content:space-between}',
-    '</style></head><body>',
-    '<h1>Cotizacion GUUD Company</h1><h2>'+esc(q.proyecto)+'</h2><div class=svc>'+esc(q.servicio)+'</div>',
-    '<table><tr><td class=lb>Entregables</td><td>'+esc(q.entregables)+'</td></tr>',
-    '<tr><td class=lb>Tiempo estimado</td><td>'+esc(q.tiempo)+'</td></tr>',
-    (q.recomendacion ? '<tr><td class=lb>Recomendacion</td><td>'+esc(q.recomendacion)+'</td></tr>' : ''),
-    '</table><div class=pr>Desde '+fmt(q.min)+'</div>',
-    '<div class=note>Precio referencial. El valor definitivo se confirma en la reunion.</div>',
-    '<div class=ft><span>GUUD Company</span><span>guud-quote-ai.vercel.app</span></div>',
-    '</body></html>'
-  ].join('')
-  var blob = new Blob([html],{type:'text/html'})
-  var url = URL.createObjectURL(blob)
-  var a = document.createElement('a')
-  a.href = url
-  a.download = 'cotizacion-guud-'+(q.proyecto||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,30)+'.html'
-  document.body.appendChild(a); a.click(); document.body.removeChild(a)
-  setTimeout(function(){ URL.revokeObjectURL(url) }, 1000)
+  // Cargar jsPDF dinámicamente desde CDN
+  var script = document.createElement('script')
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  script.onload = function() {
+    var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' })
+    var W = 210, margin = 20, y = 20
+    // Header
+    doc.setFillColor(232, 255, 0)
+    doc.rect(0, 0, W, 14, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(0, 0, 0)
+    doc.text('GUUD COMPANY', margin, 9)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.text('Global Creative Hub', W - margin, 9, { align: 'right' })
+    y = 30
+    // Título
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(20)
+    doc.setTextColor(17, 17, 17)
+    var titleLines = doc.splitTextToSize(String(q.proyecto || ''), W - margin * 2)
+    doc.text(titleLines, margin, y)
+    y += titleLines.length * 9 + 4
+    // Servicio
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    doc.setTextColor(100, 100, 100)
+    doc.text(String(q.servicio || ''), margin, y)
+    y += 12
+    // Línea separadora
+    doc.setDrawColor(220, 220, 220)
+    doc.line(margin, y, W - margin, y)
+    y += 8
+    // Tabla de datos
+    var rows = [
+      ['Entregables', String(q.entregables || '')],
+      ['Tiempo estimado', String(q.tiempo || '')],
+    ]
+    if (q.recomendacion) rows.push(['Recomendación', String(q.recomendacion)])
+    doc.setFontSize(10)
+    rows.forEach(function(row) {
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(130, 130, 130)
+      doc.text(row[0], margin, y)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(30, 30, 30)
+      var valLines = doc.splitTextToSize(row[1], W - margin - 70)
+      doc.text(valLines, 70, y)
+      y += Math.max(valLines.length * 6, 8) + 4
+      doc.setDrawColor(240, 240, 240)
+      doc.line(margin, y - 2, W - margin, y - 2)
+    })
+    y += 10
+    // Precio
+    doc.setFillColor(17, 17, 17)
+    doc.rect(margin, y, W - margin * 2, 22, 'F')
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(180, 180, 180)
+    doc.text('PRECIO REFERENCIAL', margin + 6, y + 7)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(18)
+    doc.setTextColor(232, 255, 0)
+    doc.text('Desde ' + fmt(q.min), margin + 6, y + 17)
+    y += 30
+    // Nota
+    doc.setFont('helvetica', 'italic')
+    doc.setFontSize(8)
+    doc.setTextColor(150, 150, 150)
+    doc.text('Precio referencial. El valor definitivo se confirma en la reunión de proyecto.', margin, y)
+    y = 267
+    // Footer
+    doc.setDrawColor(220, 220, 220)
+    doc.line(margin, y, W - margin, y)
+    y += 6
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(170, 170, 170)
+    doc.text('GUUD Company', margin, y)
+    doc.text('guud-quote-ai.vercel.app', W - margin, y, { align: 'right' })
+    // Descargar
+    var slug = (q.proyecto || 'cotizacion').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30)
+    doc.save('cotizacion-guud-' + slug + '.pdf')
+  }
+  document.head.appendChild(script)
 }
 
 export default function Home() {
