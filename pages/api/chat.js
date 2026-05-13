@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
   try {
-    const { agente, historial, lang } = req.body
+    const { agente, historial, lang, meetLink: reunionLink } = req.body
 
     const [servicios, talentos] = await Promise.all([getServicios(), getTalentos()])
     const langNames = { es: 'español', en: 'English', pt: 'português (brasileño)' }
@@ -84,7 +84,7 @@ export default async function handler(req, res) {
               <div class="price-val">Desde ${fmt(quote.min)}</div>
               <div class="note">El valor definitivo se confirma en la reunión de proyecto.</div>
             </div>
-            <a href="${baseUrl}" class="cta">Agendar reunión con GÜÜD →</a>
+            <a href="${reunionLink || baseUrl}" class="cta">${reunionLink ? 'Confirmar reunión →' : 'Agendar reunión con GÜÜD →'}</a>
           </div>
           <div class="footer">GÜÜD Company · Global Creative Hub · ${baseUrl}</div>
         </div></body></html>`
