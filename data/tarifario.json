@@ -1,0 +1,212 @@
+[
+  {
+    "id": "1",
+    "servicio": "Branding Esencial",
+    "categoria": "Branding",
+    "precio_min": 800000,
+    "precio_max": 1200000,
+    "descripcion": "Naming, logo, paleta de color, tipografia",
+    "activo": true,
+    "orden": 1
+  },
+  {
+    "id": "2",
+    "servicio": "Branding Completo",
+    "categoria": "Branding",
+    "precio_min": 1500000,
+    "precio_max": 2500000,
+    "descripcion": "Identidad visual completa + manual de marca",
+    "activo": true,
+    "orden": 2
+  },
+  {
+    "id": "3",
+    "servicio": "Rebranding",
+    "categoria": "Branding",
+    "precio_min": 1200000,
+    "precio_max": 2000000,
+    "descripcion": "Renovacion de identidad existente",
+    "activo": true,
+    "orden": 3
+  },
+  {
+    "id": "4",
+    "servicio": "Landing Page",
+    "categoria": "Web",
+    "precio_min": 600000,
+    "precio_max": 1000000,
+    "descripcion": "1 pagina de alta conversion, responsive",
+    "activo": true,
+    "orden": 1
+  },
+  {
+    "id": "5",
+    "servicio": "Sitio Web Corporativo",
+    "categoria": "Web",
+    "precio_min": 1200000,
+    "precio_max": 2500000,
+    "descripcion": "5-10 paginas, CMS, diseno a medida",
+    "activo": true,
+    "orden": 2
+  },
+  {
+    "id": "6",
+    "servicio": "E-commerce",
+    "categoria": "Web",
+    "precio_min": 2000000,
+    "precio_max": 4000000,
+    "descripcion": "Tienda online con pasarela de pago",
+    "activo": true,
+    "orden": 3
+  },
+  {
+    "id": "7",
+    "servicio": "Key Visual + Concepto",
+    "categoria": "Campana",
+    "precio_min": 600000,
+    "precio_max": 1200000,
+    "descripcion": "Concepto creativo + imagen principal",
+    "activo": true,
+    "orden": 1
+  },
+  {
+    "id": "8",
+    "servicio": "Campana Digital Completa",
+    "categoria": "Campana",
+    "precio_min": 1500000,
+    "precio_max": 3000000,
+    "descripcion": "Estrategia + piezas para todos los canales",
+    "activo": true,
+    "orden": 2
+  },
+  {
+    "id": "9",
+    "servicio": "Lanzamiento de Marca",
+    "categoria": "Campana",
+    "precio_min": 2500000,
+    "precio_max": 5000000,
+    "descripcion": "Campana 360 con activaciones",
+    "activo": true,
+    "orden": 3
+  },
+  {
+    "id": "10",
+    "servicio": "Pack Redes Sociales",
+    "categoria": "Contenido",
+    "precio_min": 300000,
+    "precio_max": 600000,
+    "descripcion": "12 piezas mensuales para RRSS",
+    "activo": true,
+    "orden": 1
+  },
+  {
+    "id": "11",
+    "servicio": "Gestion Mensual RRSS",
+    "categoria": "Contenido",
+    "precio_min": 500000,
+    "precio_max": 900000,
+    "descripcion": "Contenido + gestion de 2 plataformas",
+    "activo": true,
+    "orden": 2
+  },
+  {
+    "id": "12",
+    "servicio": "Produccion Audiovisual",
+    "categoria": "Contenido",
+    "precio_min": 800000,
+    "precio_max": 2000000,
+    "descripcion": "Video corporativo o reel de marca",
+    "activo": true,
+    "orden": 3
+  },
+  {
+    "id": "13",
+    "servicio": "Consultoria de Marca",
+    "categoria": "Estrategia",
+    "precio_min": 400000,
+    "precio_max": 800000,
+    "descripcion": "Sesion estrategica + informe",
+    "activo": true,
+    "orden": 1
+  },
+  {
+    "id": "14",
+    "servicio": "Plan Estrategico",
+    "categoria": "Estrategia",
+    "precio_min": 1000000,
+    "precio_max": 2500000,
+    "descripcion": "Estrategia de comunicacion anual",
+    "activo": true,
+    "orden": 2
+  },
+  {
+    "id": "15",
+    "servicio": "Activacion BTL",
+    "categoria": "BTL",
+    "precio_min": 1500000,
+    "precio_max": 4000000,
+    "descripcion": "Evento o activacion de marca",
+    "activo": true,
+    "orden": 1
+  },
+  {
+    "id": "16",
+    "servicio": "Experiencia de Marca",
+    "categoria": "BTL",
+    "precio_min": 3000000,
+    "precio_max": 8000000,
+    "descripcion": "Experiencia inmersiva completa",
+    "activo": true,
+    "orden": 2
+  },
+  {
+    "id": "17",
+    "servicio": "Setup Campana Ads",
+    "categoria": "Ads",
+    "precio_min": 300000,
+    "precio_max": 500000,
+    "descripcion": "Config + creatividades Meta/Google Ads",
+    "activo": true,
+    "orden": 1
+  },
+  {
+    "id": "18",
+    "servicio": "Gestion Mensual Ads",
+    "categoria": "Ads",
+    "precio_min": 400000,
+    "precio_max": 700000,
+    "descripcion": "Optimizacion mensual de campanas",
+    "activo": true,
+    "orden": 2
+  },
+  {
+    "id": "19",
+    "servicio": "Accion Guerrilla",
+    "categoria": "Guerrilla",
+    "precio_min": 800000,
+    "precio_max": 2500000,
+    "descripcion": "Accion creativa disruptiva en espacio urbano",
+    "activo": true,
+    "orden": 1
+  },
+  {
+    "id": "20",
+    "servicio": "MVP Digital",
+    "categoria": "Producto",
+    "precio_min": 3000000,
+    "precio_max": 7000000,
+    "descripcion": "Producto digital minimo viable",
+    "activo": true,
+    "orden": 1
+  },
+  {
+    "id": "21",
+    "servicio": "App Movil",
+    "categoria": "Producto",
+    "precio_min": 6000000,
+    "precio_max": 15000000,
+    "descripcion": "Aplicacion iOS/Android completa",
+    "activo": true,
+    "orden": 2
+  }
+]
