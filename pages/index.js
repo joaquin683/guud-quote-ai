@@ -39,6 +39,10 @@ const INTENT_MAP = [
   { label: 'Campaña', keys: ['campaña', 'lanzamiento', 'ads', 'publicidad', 'anuncio', 'key visual', 'kv', 'pauta'] },
   { label: 'Contenido',   keys: ['redes', 'contenido', 'social', 'posts', 'instagram', 'tiktok', 'reels', 'stories'] },
   { label: 'Estrategia',  keys: ['estrategia', 'consultoría', 'posicionamiento', 'plan', 'consultoria', 'asesoría'] },
+  { label: 'BTL',        keys: ['btl','evento','activacion','pop-up','experiencia','montaje','road show','branded','presencial','stand','feria'] },
+  { label: 'Ads',        keys: ['ads','pauta','publicidad','anuncio','google ads','meta ads','facebook ads','instagram ads','sem','ppc','display'] },
+  { label: 'Guerrilla',  keys: ['guerrilla','accion','disruptiv','urbano','viral','calle','sorpresa','instalacion'] },
+  { label: 'Producto',   keys: ['app','aplicacion','mvp','producto digital','software','plataforma','web app','saas','sistema'] },
 ]
 
 function detectIntent(text) {
@@ -47,7 +51,7 @@ function detectIntent(text) {
   const found = INTENT_MAP.filter(cat =>
     cat.keys.some(k => lower.includes(k))
   ).map(cat => cat.label)
-  return found.length > 0 ? found.join(' / ') : null
+  return found.length > 0 ? found.join(' + ') : null
 }
 
 const WELCOME_MSG = '¡Hola! ¿Listo para cotizar tu próximo proyecto creativo en segundos?'
