@@ -448,12 +448,18 @@ export default function Home() {
               )}
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t}
-                onDownloadPDF={() => { analytics.quotePdfDownloaded(agente); downloadQuotePDF(m.extra.quote, proyectoId) }}
-                onShare={proyectoId ? () => {
-                const url = window.location.origin + '/cotizacion/' + proyectoId;
-                if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => alert('Link copiado al portapapeles'));
-                else alert(url);
-              } : null} />
+                onDownloadPDF={m.extra.quote ? () => {
+                  var q = m.extra.quote
+                  var params = new URLSearchParams({p:q.proyecto,s:q.servicio,e:q.entregables,t:q.tiempo,min:q.min,max:q.max,r:q.recomendacion||''})
+                  fetch('/cotizacion?' + params).then(function(r){return r.text()}).then(function(html){
+                    var blob = new Blob([html],{type:'text/html'})
+                    var url = URL.createObjectURL(blob)
+                    var a = document.createElement('a')
+                    a.href=url; a.download='cotizacion-guud-'+(q.proyecto||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,30)+'.html'
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a)
+                    setTimeout(function(){URL.revokeObjectURL(url)},1000)
+                  })
+                } : null}
               ) : m.extra?.type === 'confirmado' ? (
                 <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} />
               ) : (
