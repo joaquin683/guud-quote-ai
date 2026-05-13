@@ -1037,7 +1037,7 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
           ) : (
             <>
               <span style={{ fontSize: 11, color: 'var(--t2)' }}>{t ? t.priceLabel : 'Precio referencial'}</span>
-              <span style={S.qpval}>{fmt(quote.min)}</span>
+              <span style={S.qpval}>Desde {fmt(quote.min)}</span>
             </>
           )}
         </div>
@@ -1045,19 +1045,6 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
           <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
           <button style={S.btnS} onClick={onAjustar}>{t ? t.adjustBtn : 'Ajustar alcance'}</button>
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button onClick={onShare || (() => {})} title="Copiar link" style={{
-              display: 'flex', alignItems: 'center', gap: 6,
-              padding: '7px 14px', borderRadius: 10, border: '0.5px solid var(--b2)',
-              background: 'none', color: 'var(--t2)', cursor: 'pointer', fontSize: 12,
-              transition: 'all .15s', flex: 1, justifyContent: 'center',
-              opacity: onShare ? 1 : 0.5,
-            }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-              </svg>
-              Compartir
-            </button>
             <button onClick={onDownloadPDF || (() => {})} title="Descargar PDF" style={{
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '7px 14px', borderRadius: 10, border: '0.5px solid var(--b2)',
