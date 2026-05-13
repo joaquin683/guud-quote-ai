@@ -52,6 +52,37 @@ function detectIntent(text) {
 
 const WELCOME_MSG = '¡Hola! ¿Listo para cotizar tu próximo proyecto creativo en segundos?'
 
+
+function guudDownloadPDF(q) {
+  if (typeof window === 'undefined' || !q) return
+  var fmt = function(n) { return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n||0) }
+  var esc = function(s) { return String(s||'').replace(/[&<>]/g,function(c){return c==='&'?'&amp;':c==='<'?'&lt;':'&gt;'}) }
+  var html = ['<!DOCTYPE html><html><head><meta charset=utf-8><title>Cotizacion GUUD</title>',
+    '<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#fff;color:#111;padding:40px;max-width:640px;margin:0 auto}',
+    'h1{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:28px}',
+    'h2{font-size:22px;font-weight:700;margin-bottom:4px}.svc{font-size:13px;color:#555;margin-bottom:28px}',
+    'table{width:100%;border-collapse:collapse;margin-bottom:28px}td{padding:9px 0;border-bottom:1px solid #eee;font-size:13px;vertical-align:top}td.lb{color:#888;width:38%}',
+    '.pr{font-size:32px;font-weight:700;margin:24px 0 6px}.note{font-size:11px;color:#aaa;margin-bottom:28px}',
+    '.ft{margin-top:36px;padding-top:14px;border-top:1px solid #eee;font-size:10px;color:#bbb;display:flex;justify-content:space-between}',
+    '</style></head><body>',
+    '<h1>Cotizacion GUUD Company</h1><h2>'+esc(q.proyecto)+'</h2><div class=svc>'+esc(q.servicio)+'</div>',
+    '<table><tr><td class=lb>Entregables</td><td>'+esc(q.entregables)+'</td></tr>',
+    '<tr><td class=lb>Tiempo estimado</td><td>'+esc(q.tiempo)+'</td></tr>',
+    (q.recomendacion ? '<tr><td class=lb>Recomendacion</td><td>'+esc(q.recomendacion)+'</td></tr>' : ''),
+    '</table><div class=pr>Desde '+fmt(q.min)+'</div>',
+    '<div class=note>Precio referencial. El valor definitivo se confirma en la reunion.</div>',
+    '<div class=ft><span>GUUD Company</span><span>guud-quote-ai.vercel.app</span></div>',
+    '</body></html>'
+  ].join('')
+  var blob = new Blob([html],{type:'text/html'})
+  var url = URL.createObjectURL(blob)
+  var a = document.createElement('a')
+  a.href = url
+  a.download = 'cotizacion-guud-'+(q.proyecto||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,30)+'.html'
+  document.body.appendChild(a); a.click(); document.body.removeChild(a)
+  setTimeout(function(){ URL.revokeObjectURL(url) }, 1000)
+}
+
 export default function Home() {
   const [fase, setFase]             = useState('inicio')
   const [agente, setAgente]         = useState(null)
@@ -448,18 +479,7 @@ export default function Home() {
               )}
               {m.extra?.type === 'quote' ? (
                 <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t}
-                onDownloadPDF={m.extra.quote ? () => {
-                  var q = m.extra.quote
-                  var params = new URLSearchParams({p:q.proyecto,s:q.servicio,e:q.entregables,t:q.tiempo,min:q.min,max:q.max,r:q.recomendacion||''})
-                  fetch('/cotizacion?' + params).then(function(r){return r.text()}).then(function(html){
-                    var blob = new Blob([html],{type:'text/html'})
-                    var url = URL.createObjectURL(blob)
-                    var a = document.createElement('a')
-                    a.href=url; a.download='cotizacion-guud-'+(q.proyecto||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,30)+'.html'
-                    document.body.appendChild(a); a.click(); document.body.removeChild(a)
-                    setTimeout(function(){URL.revokeObjectURL(url)},1000)
-                  })
-                } : null}
+                onDownloadPDF={m.extra.quote ? () => guudDownloadPDF(m.extra.quote) : null}
               ) : m.extra?.type === 'confirmado' ? (
                 <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} />
               ) : (
