@@ -113,5 +113,55 @@ export default async function handler(req, res) {
     console.error('GCal OAuth error:', err.message)
   }
 
+  // Email de confirmación post-agendamiento
+  if (meetLink && email) {
+    try {
+      const baseUrl = process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'https://guud-quote-ai.vercel.app'
+      const slotLabel = slotDate ? new Date(slotDate).toLocaleString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' }) : ''
+      const htmlConfirm = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:system-ui,sans-serif;background:#f5f5f5;padding:40px 20px}
+        .card{background:#fff;max-width:560px;margin:0 auto;border-radius:12px;overflow:hidden}
+        .header{background:#111;padding:24px 28px}
+        .logo{color:#E8FF00;font-size:18px;font-weight:700;letter-spacing:-.5px}
+        .sub{color:rgba(255,255,255,.45);font-size:11px;margin-top:2px}
+        .body{padding:28px}
+        h1{font-size:19px;font-weight:700;margin-bottom:6px;color:#111}
+        .lead{font-size:13px;color:#666;margin-bottom:20px}
+        .row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:13px}
+        .label{color:#888;font-weight:500}.val{color:#111;text-align:right;max-width:60%}
+        .meet-block{margin:20px 0;background:#f7f7f7;border-radius:8px;padding:16px 18px;border-left:3px solid #E8FF00}
+        .meet-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#888;margin-bottom:6px}
+        .meet-date{font-size:15px;font-weight:600;color:#111}
+        .cta{display:block;text-align:center;background:#111;color:#E8FF00;font-weight:700;font-size:14px;padding:14px;border-radius:8px;text-decoration:none;margin-top:20px;letter-spacing:.02em}
+        .footer{padding:16px 28px;background:#fafafa;border-top:1px solid #f0f0f0;font-size:11px;color:#aaa;text-align:center}
+      </style></head><body>
+      <div class="card">
+        <div class="header"><div class="logo">GÜÜD</div><div class="sub">Global Creative Hub</div></div>
+        <div class="body">
+          <h1>Reunión confirmada</h1>
+          <p class="lead">Hola ${nombre}, tu reunión con GÜÜD Company está lista. Aquí tienes el resumen.</p>
+          ${servicio ? '<div class="row"><span class="label">Servicio</span><span class="val">'+servicio+'</span></div>' : ''}
+          ${proyecto ? '<div class="row"><span class="label">Proyecto</span><span class="val">'+proyecto+'</span></div>' : ''}
+          ${slotLabel ? '<div class="meet-block"><div class="meet-label">Fecha y hora</div><div class="meet-date">'+slotLabel+'</div></div>' : ''}
+          <a href="${meetLink}" class="cta">Confirmar reunión →</a>
+        </div>
+        <div class="footer">GÜÜD Company · Si necesitas reagendar, responde este email.</div>
+      </div></body></html>`
+
+      await fetch(baseUrl + '/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: email,
+          subject: 'Reunión confirmada con GÜÜD — ' + (slotLabel || ''),
+          html: htmlConfirm
+        })
+      })
+    } catch (emailErr) {
+      console.error('Confirm email error:', emailErr.message)
+    }
+  }
+
   res.status(200).json({ success: true, eventId, meetLink, gcalError })
 }
