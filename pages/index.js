@@ -369,7 +369,7 @@ export default function Home() {
                 {agenteInfo.label}
               </div>
             )}
-            <a href="/admin" style={S.badge}>Admin →</a>
+
           </div>
         </header>
         <div style={S.inner}>
