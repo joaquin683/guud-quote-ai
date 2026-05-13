@@ -3,7 +3,7 @@
     "id": "1",
     "servicio": "Branding Esencial",
     "categoria": "Branding",
-    "precio_min": 800000,
+    "precio_min": 900000,
     "precio_max": 1200000,
     "descripcion": "Naming, logo, paleta de color, tipografia",
     "activo": true,
