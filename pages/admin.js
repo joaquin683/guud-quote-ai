@@ -80,7 +80,18 @@ function AdminPanel({ onLogout }) {
 
   const badge = (estado) => {
     const e = ESTADOS[estado] || { label: estado, color: '#888', bg: 'rgba(136,136,136,0.1)' }
-    return <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: e.bg, color: e.color, fontWeight: 600 }}>{e.label}</span>
+    return <select
+              value={p.estado}
+              onChange={ev => { ev.stopPropagation(); actualizarEstado(p.id, ev.target.value); }}
+              onClick={ev => ev.stopPropagation()}
+              style={{ fontSize: 12, fontWeight: 500, padding: '3px 10px', borderRadius: 20,
+                background: e.bg, color: e.color, border: '1px solid ' + e.color + '44',
+                cursor: 'pointer', outline: 'none', appearance: 'none', WebkitAppearance: 'none' }}
+            >
+              {Object.entries(ESTADOS).map(([k, v]) => (
+                <option key={k} value={k} style={{ background: '#111', color: '#fff' }}>{v.label}</option>
+              ))}
+            </select>
   }
 
   return (
@@ -97,6 +108,12 @@ function AdminPanel({ onLogout }) {
         </Link>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontSize: 12, color: '#484644' }}>Panel Admin</span>
+          <a href="/tarifario" style={{ fontSize: 12, color: '#888', textDecoration: 'none',
+            padding: '5px 12px', borderRadius: 8, border: '0.5px solid rgba(255,255,255,0.15)',
+            transition: 'all .15s' }}
+            onMouseEnter={e => e.target.style.color='#E8FF00'}
+            onMouseLeave={e => e.target.style.color='#888'}
+          >Tarifario →</a>
           <button onClick={onLogout} style={{ fontSize: 12, color: '#484644', background: 'none', border: '1px solid #2a2a2a', borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontFamily: 'inherit' }}>Salir</button>
         </div>
       </div>
