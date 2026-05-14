@@ -11,7 +11,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'GÜÜD Company <onboarding@resend.dev>',
+        from: 'GÜÜD Company <' + (process.env.GUUD_EMAIL || 'onboarding@resend.dev') + '>',
         to: [to],
         subject,
         html,
