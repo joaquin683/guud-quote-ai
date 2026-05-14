@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const servicios = await getServicios()
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 256,
       system: buildOrchestratorPrompt(servicios),
       messages: [{ role: 'user', content: mensaje }],
