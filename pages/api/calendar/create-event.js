@@ -32,7 +32,7 @@ export default async function handler(req, res) {
       proyecto    ? 'Proyecto: '    + proyecto    : '',
       servicio    ? 'Servicio: '    + servicio    : '',
       entregables ? 'Entregables: ' + entregables : '',
-      precio      ? 'Precio: '      + precio      : '',
+      precio      ? 'Precio desde: '      + precio      : '',
       tiempo      ? 'Tiempo: '      + tiempo      : '',
       asesoria    ? 'Asesoria:\n'  + asesoria    : '',
     ].filter(Boolean).join('\n')
