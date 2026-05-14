@@ -100,7 +100,7 @@ export default function Tarifario() {
             <div style={{fontWeight:700,fontSize:18,color:'#fff'}}>Tarifario de Servicios</div>
             <div style={{fontSize:12,color:'rgba(255,255,255,.35)',marginTop:2}}>Edita precios y descripciones en tiempo real</div>
           </div>
-          <Link href="/admin" style={{fontSize:12,color:'rgba(255,255,255,.4)',textDecoration:'none',padding:'6px 14px',borderRadius:6,border:'1px solid rgba(255,255,255,.1)'}}>Admin</Link>
+          <Link href="/admin" style={{fontSize:12,color:'rgba(255,255,255,.7)',textDecoration:'none',padding:'6px 14px',borderRadius:6,border:'1px solid rgba(255,255,255,.1)'}}>Admin</Link>
         </div>
 
         <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:20}}>
