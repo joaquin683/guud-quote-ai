@@ -208,5 +208,50 @@
     "descripcion": "Aplicacion iOS/Android completa",
     "activo": true,
     "orden": 2
+  },
+  {
+    "id": "prod-foto",
+    "nombre": "Sesión Fotográfica",
+    "descripcion": "Producto, marca, retrato, lookbook o e-commerce",
+    "categoria": "Produccion",
+    "precio_min": 300000,
+    "precio_max": 1500000,
+    "activo": true
+  },
+  {
+    "id": "prod-video",
+    "nombre": "Video Corporativo",
+    "descripcion": "Presentación de empresa, cultura o equipo (1-2 min editado)",
+    "categoria": "Produccion",
+    "precio_min": 800000,
+    "precio_max": 2000000,
+    "activo": true
+  },
+  {
+    "id": "prod-spot",
+    "nombre": "Spot Publicitario",
+    "descripcion": "30-60 seg, producción completa para TV o digital",
+    "categoria": "Produccion",
+    "precio_min": 1500000,
+    "precio_max": 4000000,
+    "activo": true
+  },
+  {
+    "id": "prod-drone",
+    "nombre": "Producción con Drone",
+    "descripcion": "Aéreo, paisajes, eventos, arquitectura (media jornada)",
+    "categoria": "Produccion",
+    "precio_min": 400000,
+    "precio_max": 900000,
+    "activo": true
+  },
+  {
+    "id": "prod-reel",
+    "nombre": "Reel de Marca",
+    "descripcion": "Contenido corto 15-30 seg para Instagram/TikTok/YouTube",
+    "categoria": "Produccion",
+    "precio_min": 500000,
+    "precio_max": 1200000,
+    "activo": true
   }
 ]
