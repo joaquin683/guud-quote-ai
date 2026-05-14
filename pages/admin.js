@@ -4,7 +4,13 @@ import Link from 'next/link'
 
 const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
 const fmtDate = d => new Date(d).toLocaleString('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-const ESTADOS = { cotizado: { label: 'Cotizado', color: '#E8FF00', bg: 'rgba(232,255,0,0.1)' }, meeting_scheduled: { label: 'Reunión agendada', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' }, en_proceso: { label: 'En proceso', color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' }, cerrado: { label: 'Cerrado', color: '#f87171', bg: 'rgba(248,113,113,0.1)' } }
+const ESTADOS = {
+  cotizado:    { label: 'Cotizado',       color: '#E8FF00', bg: 'rgba(232,255,0,0.12)' },
+  contactado:  { label: 'Contactado',     color: '#5DCAA5', bg: 'rgba(93,202,165,0.12)' },
+  negociacion: { label: 'En negociación', color: '#EF9F27', bg: 'rgba(239,159,39,0.12)' },
+  cerrado:     { label: 'Cerrado',        color: '#1D9E75', bg: 'rgba(29,158,117,0.12)' },
+  perdido:     { label: 'Perdido',        color: '#E24B4A', bg: 'rgba(226,75,74,0.12)'  },
+}, meeting_scheduled: { label: 'Reunión agendada', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' }, en_proceso: { label: 'En proceso', color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' }, cerrado: { label: 'Cerrado', color: '#f87171', bg: 'rgba(248,113,113,0.1)' } }
 const isAgendado = p => p.reunion_agendada === true
 
 export default function Admin() {
