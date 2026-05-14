@@ -10,7 +10,7 @@ const ESTADOS = {
   negociacion: { label: 'En negociación', color: '#EF9F27', bg: 'rgba(239,159,39,0.12)' },
   cerrado:     { label: 'Cerrado',        color: '#1D9E75', bg: 'rgba(29,158,117,0.12)' },
   perdido:     { label: 'Perdido',        color: '#E24B4A', bg: 'rgba(226,75,74,0.12)' },
-}, meeting_scheduled: { label: 'Reunión agendada', color: '#4ade80', bg: 'rgba(74,222,128,0.1)' }, en_proceso: { label: 'En proceso', color: '#60a5fa', bg: 'rgba(96,165,250,0.1)' }, cerrado: { label: 'Cerrado', color: '#f87171', bg: 'rgba(248,113,113,0.1)' } }
+}
 const isAgendado = p => p.reunion_agendada === true
 
 export default function Admin() {
@@ -80,20 +80,27 @@ function AdminPanel({ onLogout }) {
 
   const badge = (estado) => {
     const e = ESTADOS[estado] || { label: estado, color: '#888', bg: 'rgba(136,136,136,0.1)' }
-    return <select
-              value={p.estado}
-              onChange={ev => { ev.stopPropagation(); actualizarEstado(p.id, ev.target.value); }}
-              onClick={ev => ev.stopPropagation()}
-              style={{ fontSize: 12, fontWeight: 500, padding: '3px 10px', borderRadius: 20,
-                background: e.bg, color: e.color, border: '1px solid ' + e.color + '44',
-                cursor: 'pointer', outline: 'none', appearance: 'none', WebkitAppearance: 'none' }}
-            >
-              {Object.entries(ESTADOS).map(([k, v]) => (
-                <option key={k} value={k} style={{ background: '#111', color: '#fff' }}>{v.label}</option>
-              ))}
-            </select>
+    return <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 20, background: e.bg, color: e.color, fontWeight: 600 }}>{e.label}</span>
   }
 
+
+  const actualizarEstado = async (id, nuevoEstado) => {
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/proyectos?id=eq.' + id, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ estado: nuevoEstado })
+      })
+      setProyectos(prev => prev.map(p => p.id === id ? { ...p, estado: nuevoEstado } : p))
+    } catch(err) { console.error('Error actualizando estado:', err) }
+  }
   return (
     <div style={{ minHeight: '100vh', background: '#080808', color: '#F2F0E8', fontFamily: 'system-ui, sans-serif' }}>
       <Head><title>Admin · GÜÜD</title></Head>
@@ -109,10 +116,7 @@ function AdminPanel({ onLogout }) {
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <span style={{ fontSize: 12, color: '#484644' }}>Panel Admin</span>
           <a href="/tarifario" style={{ fontSize: 12, color: '#888', textDecoration: 'none',
-            padding: '5px 12px', borderRadius: 8, border: '0.5px solid rgba(255,255,255,0.15)',
-            transition: 'all .15s' }}
-            onMouseEnter={e => e.target.style.color='#E8FF00'}
-            onMouseLeave={e => e.target.style.color='#888'}
+            padding: '5px 12px', borderRadius: 8, border: '0.5px solid rgba(255,255,255,0.15)' }}
           >Tarifario →</a>
           <button onClick={onLogout} style={{ fontSize: 12, color: '#484644', background: 'none', border: '1px solid #2a2a2a', borderRadius: 6, padding: '4px 12px', cursor: 'pointer', fontFamily: 'inherit' }}>Salir</button>
         </div>
