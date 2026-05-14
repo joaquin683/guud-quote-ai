@@ -4,7 +4,43 @@ import { buildAgentPrompt } from '../../lib/agentes'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+const rateLimitMap = new Map()
+const RATE_LIMIT_MAX = 20
+const RATE_LIMIT_WINDOW = 60 * 60 * 1000
+
+function getRateLimit(ip) {
+  const now = Date.now()
+  if (!rateLimitMap.has(ip)) {
+    rateLimitMap.set(ip, [])
+  }
+  const timestamps = rateLimitMap.get(ip).filter(t => now - t < RATE_LIMIT_WINDOW)
+  rateLimitMap.set(ip, timestamps)
+  return { count: timestamps.length, remaining: RATE_LIMIT_MAX - timestamps.length }
+}
+
+function recordRequest(ip) {
+  const now = Date.now()
+  const timestamps = rateLimitMap.get(ip) || []
+  timestamps.push(now)
+  rateLimitMap.set(ip, timestamps)
+  if (rateLimitMap.size > 5000) {
+    const oldest = [...rateLimitMap.entries()]
+      .sort((a,b) => Math.min(...a[1]) - Math.min(...b[1]))[0][0]
+    rateLimitMap.delete(oldest)
+  }
+}
+
 export default async function handler(req, res) {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown'
+  const { count, remaining } = getRateLimit(ip)
+  if (count >= RATE_LIMIT_MAX) {
+    return res.status(429).json({
+      error: 'Demasiadas solicitudes. Intenta nuevamente en unos minutos.',
+      retryAfter: 60
+    })
+  }
+  recordRequest(ip)
+
   if (req.method !== 'POST') return res.status(405).end()
 
   try {
