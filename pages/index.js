@@ -544,7 +544,7 @@ export default function Home() {
                 <div style={{ ...S.av, ...S.avU }}>TÚ</div>
               )}
               {m.extra?.type === 'quote' ? (
-                <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={ajustarAlcance} t={t}
+                <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={cotizarDeNuevo} t={t}
                 onDownloadPDF={m.extra.quote ? () => guudDownloadPDF(m.extra.quote) : null}
                 />
               ) : m.extra?.type === 'confirmado' ? (
@@ -1136,7 +1136,7 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
           <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
-          <button style={S.btnS} onClick={onAjustar}>{t ? t.adjustBtn : 'Ajustar alcance'}</button>
+          <button style={S.btnS} onClick={onAjustar}>{'Cotizar de nuevo'}</button>
           <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
             <button onClick={onDownloadPDF || (() => {})} title="Descargar PDF" style={{
               display: 'flex', alignItems: 'center', gap: 6,
