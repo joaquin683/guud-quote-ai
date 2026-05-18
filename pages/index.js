@@ -371,36 +371,11 @@ export default function Home() {
     setFase('confirmado'); setAgendando(false); setCargando(false)
   }
 
-  const ajustarAlcance = async () => {
-    analytics.quoteAdjusted(agente)
-    const msg = 'Quiero ajustar el alcance del proyecto.'
-    addMsg(msg, 'user')
-    const hist = [...historial, { role: 'user', content: msg }]
-    setHistorial(hist)
-    setFase('chat')
-    setCargando(true)
-    setWaveActive(true)
-    try {
-      const r = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agente, historial: hist })
-      })
-      const d = await r.json()
-      if (d.quote) {
-        setFase('cotizado')
-        addMsg(null, 'ai', { type: 'quote', quote: d.quote })
-      } else if (d.reply) {
-        addMsg(d.reply, 'ai')
-        setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
-      } else {
-        addMsg('¿Qué entregables quieres modificar? Puedo ajustar el alcance y recalcular el precio.', 'ai')
-      }
-    } catch (e) {
-      addMsg('Error de conexión. Intenta de nuevo.', 'ai')
-    }
-    setCargando(false)
-    setWaveActive(false)
+  const cotizarDeNuevo = () => {
+    setMensajes([])
+    setHistorial([])
+    setAgente(null)
+    setFase('inicio')
   }
 
   const toggleMic = () => {
