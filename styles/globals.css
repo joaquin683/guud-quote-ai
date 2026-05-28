@@ -34,3 +34,7 @@ body {
 button { cursor: pointer; font-family: inherit; }
 input, textarea { font-family: inherit; }
 a { color: inherit; text-decoration: none; }
+
+
+/* Idiomas ocultos — activar cuando sea el momento */
+.lang-selector { display: none !important; }
