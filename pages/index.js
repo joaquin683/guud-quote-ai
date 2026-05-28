@@ -160,7 +160,23 @@ export default function Home() {
   const [mini, setMini]             = useState(false)
   const [hasStartedChat, setHasStartedChat] = useState(false)
 
-{/* idiomas ocultos */}  }, [hasStartedChat])
+  // Language
+  const [lang, setLang] = useState(() => {
+    if (typeof window === 'undefined') return 'es'
+    const saved = localStorage.getItem('guud_language')
+    if (saved && ['es','en','pt'].includes(saved)) return saved
+    const browser = navigator.language?.substring(0,2) || 'es'
+    return ['es','en','pt'].includes(browser) ? browser : 'es'
+  })
+  const t = getT(lang)
+  const changeLang = (l) => { setLang(l); localStorage.setItem('guud_language', l) }
+  // Refocus when not in chat
+  useEffect(() => {
+    if (!hasStartedChat) {
+      const t = setTimeout(() => inputRef.current?.focus(), 150)
+      return () => clearTimeout(t)
+    }
+  }, [hasStartedChat])
   const [waveActive, setWaveActive] = useState(false)
   const [agendando, setAgendando]   = useState(false)
   const [contacto, setContacto]     = useState({ nombre: '', email: '' })
@@ -1584,7 +1600,7 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
           <div style={S.jlAvatar}>GÜ</div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 500 }}>Director Creativo Ejecutivo</div>
-            <div style={{display:'none', fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>GÜÜD Company</div>
+            <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>GÜÜD Company</div>
           </div>
         </div>
       </div>
