@@ -1600,7 +1600,7 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
           <div style={S.jlAvatar}>GÜ</div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 500 }}>Director Creativo Ejecutivo</div>
-            <div style={{ fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>GÜÜD Company</div>
+            <div style={{display:'none', fontSize: 11, color: 'var(--t2)', marginTop: 1 }}>GÜÜD Company</div>
           </div>
         </div>
       </div>
