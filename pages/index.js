@@ -422,7 +422,7 @@ export default function Home() {
           </a>
           {/* Lang selector — centered in header */}
           <div style={S.langSelector}>
-            {['es','en','pt'].map(l => (
+            {false && ['es','en','pt'].map(l => (
               <button key={l} onClick={() => changeLang(l)} style={{
                 fontSize: 10, padding: '3px 10px', borderRadius: 20, border: 'none',
                 background: lang === l ? '#E8FF00' : 'none',
