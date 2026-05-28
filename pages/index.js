@@ -160,23 +160,7 @@ export default function Home() {
   const [mini, setMini]             = useState(false)
   const [hasStartedChat, setHasStartedChat] = useState(false)
 
-  // Language
-  const [lang, setLang] = useState(() => {
-    if (typeof window === 'undefined') return 'es'
-    const saved = localStorage.getItem('guud_language')
-    if (saved && ['es','en','pt'].includes(saved)) return saved
-    const browser = navigator.language?.substring(0,2) || 'es'
-    return ['es','en','pt'].includes(browser) ? browser : 'es'
-  })
-  const t = getT(lang)
-  const changeLang = (l) => { setLang(l); localStorage.setItem('guud_language', l) }
-  // Refocus when not in chat
-  useEffect(() => {
-    if (!hasStartedChat) {
-      const t = setTimeout(() => inputRef.current?.focus(), 150)
-      return () => clearTimeout(t)
-    }
-  }, [hasStartedChat])
+{/* idiomas ocultos */}  }, [hasStartedChat])
   const [waveActive, setWaveActive] = useState(false)
   const [agendando, setAgendando]   = useState(false)
   const [contacto, setContacto]     = useState({ nombre: '', email: '' })
