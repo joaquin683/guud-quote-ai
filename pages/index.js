@@ -421,7 +421,7 @@ export default function Home() {
           </div>
           </a>
           {/* Lang selector — centered in header */}
-          <div style={S.langSelector}>
+          <div style={S.langSelector} className="lang-selector">
             {false && ['es','en','pt'].map(l => (
               <button key={l} onClick={() => changeLang(l)} style={{
                 fontSize: 10, padding: '3px 10px', borderRadius: 20, border: 'none',
