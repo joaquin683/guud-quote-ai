@@ -1028,7 +1028,7 @@ function RelatedCredentialsBlock({ agente, projectType }) {
         </div onClick={() => window.open('https://www.guudcompany.cl/hub','_blank')} style={{cursor:'pointer'}}>
       </div>
       <a
-        href={url}
+        href="https://www.guudcompany.cl/hub"
         target="_blank"
         rel="noopener noreferrer"
         style={{
