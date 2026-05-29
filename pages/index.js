@@ -992,8 +992,8 @@ function getCredentialsUrl(agente, industria = null) {
     estrategia: 'estrategia',
   }
   const servicio = map[agente] || null
-  if (!servicio) return '/credenciales'
-  const base = `/credenciales?servicio=${servicio}`
+  if (!servicio) return 'https://www.guudcompany.cl/hub'
+  const base = 'https://www.guudcompany.cl/hub'
   return industria ? `${base}&industria=${encodeURIComponent(industria)}` : base
 }
 
