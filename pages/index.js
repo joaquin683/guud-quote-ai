@@ -978,6 +978,986 @@ function SuggestionChip({ label, onClick, index = 0 }) {
           zIndex: -1,
         }} />
       )}
+      {labe onClick={() => window.open('https://www.guudcompany.cl/hub','_blank')} style={{cursor:'pointer'}}>import { useState, useRef, useEffect } from 'react'
+import Head from 'next/head'
+import { getT } from '../lib/translations'
+import { analytics } from '../lib/analytics'
+
+const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
+
+const AGENT_LABELS = {
+  branding:   { label: 'Especialista Branding',  color: '#E8FF00' },
+  web:        { label: 'Especialista Web',        color: '#E8FF00' },
+  campana:    { label: 'Especialista Campaña',    color: '#E8FF00' },
+  contenido:  { label: 'Especialista Contenido',  color: '#E8FF00' },
+  estrategia: { label: 'Consultor Estratégico',   color: '#E8FF00' },
+  btl:        { label: 'Especialista BTL',           color: '#E8FF00' },
+  ads:        { label: 'Especialista Ads',           color: '#E8FF00' },
+  guerrilla:  { label: 'Creativo Guerrilla',         color: '#E8FF00' },
+  producto:   { label: 'Desarrollo de Producto',     color: '#E8FF00' },
+}
+
+const INITIAL_CHIPS = [
+  'Crear mi marca',
+  'Necesito una web',
+  'Lanzar una campaña',
+  'Contenido para mis redes',
+  'No sé por dónde empezar',
+  'Activar mi marca',
+  'Pautar en redes',
+  'Algo diferente',
+  'Desarrollar una app',
+]
+
+// AGENT_CHIPS moved to INITIAL_CHIPS
+
+
+// Detección de intención en tiempo real
+const INTENT_MAP = [
+  { label: 'Branding',    keys: ['marca', 'brand', 'logo', 'identidad', 'naming', 'nombre', 'rebranding', 'rediseño'] },
+  { label: 'Web',         keys: ['web', 'landing', 'ecommerce', 'página', 'sitio', 'tienda', 'pág', 'wordpress', 'shopify'] },
+  { label: 'Campaña', keys: ['campaña', 'lanzamiento', 'ads', 'publicidad', 'anuncio', 'key visual', 'kv', 'pauta'] },
+  { label: 'Contenido',   keys: ['redes', 'contenido', 'social', 'posts', 'instagram', 'tiktok', 'reels', 'stories'] },
+  { label: 'Estrategia',  keys: ['estrategia', 'consultoría', 'posicionamiento', 'plan', 'consultoria', 'asesoría'] },
+  { label: 'BTL',        keys: ['btl','evento','activacion','pop-up','experiencia','montaje','road show','branded','presencial','stand','feria'] },
+  { label: 'Ads',        keys: ['ads','pauta','publicidad','anuncio','google ads','meta ads','facebook ads','instagram ads','sem','ppc','display'] },
+  { label: 'Guerrilla',  keys: ['guerrilla','accion','disruptiv','urbano','viral','calle','sorpresa','instalacion'] },
+  { label: 'Producto',   keys: ['app','aplicacion','mvp','producto digital','software','plataforma','web app','saas','sistema'] },
+  { label: 'Producción', keys: ['foto','fotos','fotografia','video','filmacion','filmar','grabar','grabacion','drone','dron','sesion','spot','reel de produccion','making of','cobertura','audiovisual','camara','produccion audiovisual','rodaje'] },
+]
+
+function detectIntent(text) {
+  if (!text || text.trim().length < 3) return null
+  const lower = text.toLowerCase()
+  const found = INTENT_MAP.filter(cat =>
+    cat.keys.some(k => lower.includes(k))
+  ).map(cat => cat.label)
+  return found.length > 0 ? found.join(' + ') : null
+}
+
+const WELCOME_MSG = '¡Hola! ¿Listo para cotizar tu próximo proyecto creativo en segundos?'
+
+
+function guudDownloadPDF(q) {
+  if (typeof window === 'undefined' || !q) return
+  var fmt = function(n) { return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n||0) }
+  // Cargar jsPDF dinámicamente desde CDN
+  var script = document.createElement('script')
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  script.onload = function() {
+    var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' })
+    var W = 210, margin = 20, y = 20
+    // Header
+    doc.setFillColor(232, 255, 0)
+    doc.rect(0, 0, W, 14, 'F')
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.setTextColor(0, 0, 0)
+    doc.text('GUUD COMPANY', margin, 9)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.text('Global Creative Hub', W - margin, 9, { align: 'right' })
+    y = 30
+    // Título
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(20)
+    doc.setTextColor(17, 17, 17)
+    var titleLines = doc.splitTextToSize(String(q.proyecto || ''), W - margin * 2)
+    doc.text(titleLines, margin, y)
+    y += titleLines.length * 9 + 4
+    // Servicio
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    doc.setTextColor(100, 100, 100)
+    doc.text(String(q.servicio || ''), margin, y)
+    y += 12
+    // Línea separadora
+    doc.setDrawColor(220, 220, 220)
+    doc.line(margin, y, W - margin, y)
+    y += 8
+    // Tabla de datos
+    var rows = [
+      ['Entregables', String(q.entregables || '')],
+      ['Tiempo estimado', String(q.tiempo || '')],
+    ]
+    if (q.recomendacion) rows.push(['Recomendación', String(q.recomendacion)])
+    doc.setFontSize(10)
+    rows.forEach(function(row) {
+      doc.setFont('helvetica', 'bold')
+      doc.setTextColor(130, 130, 130)
+      doc.text(row[0], margin, y)
+      doc.setFont('helvetica', 'normal')
+      doc.setTextColor(30, 30, 30)
+      var valLines = doc.splitTextToSize(row[1], W - margin - 70)
+      doc.text(valLines, 70, y)
+      y += Math.max(valLines.length * 6, 8) + 4
+      doc.setDrawColor(240, 240, 240)
+      doc.line(margin, y - 2, W - margin, y - 2)
+    })
+    y += 10
+    // Precio
+    doc.setFillColor(17, 17, 17)
+    doc.rect(margin, y, W - margin * 2, 22, 'F')
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(9)
+    doc.setTextColor(180, 180, 180)
+    doc.text('PRECIO REFERENCIAL', margin + 6, y + 7)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(18)
+    doc.setTextColor(232, 255, 0)
+    doc.text('Desde ' + fmt(q.min), margin + 6, y + 17)
+    y += 30
+    // Nota
+    doc.setFont('helvetica', 'italic')
+    doc.setFontSize(8)
+    doc.setTextColor(150, 150, 150)
+    doc.text('Precio referencial. El valor definitivo se confirma en la reunión de proyecto.', margin, y)
+    y = 267
+    // Footer
+    doc.setDrawColor(220, 220, 220)
+    doc.line(margin, y, W - margin, y)
+    y += 6
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(170, 170, 170)
+    doc.text('GUUD Company', margin, y)
+    doc.text('guud-quote-ai.vercel.app', W - margin, y, { align: 'right' })
+    // Descargar
+    var slug = (q.proyecto || 'cotizacion').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30)
+    doc.save('cotizacion-guud-' + slug + '.pdf')
+  }
+  document.head.appendChild(script)
+}
+
+export default function Home() {
+  const [fase, setFase]             = useState('inicio')
+  const [agente, setAgente]         = useState(null)
+  const [historial, setHistorial]   = useState([])
+  const [mensajes, setMensajes]     = useState([])
+  const [input, setInput]           = useState('')
+  const [cargando, setCargando]     = useState(false)
+  const [micActivo, setMicActivo]   = useState(false)
+  const [mini, setMini]             = useState(false)
+  const [hasStartedChat, setHasStartedChat] = useState(false)
+
+  // Language
+  const [lang, setLang] = useState(() => {
+    if (typeof window === 'undefined') return 'es'
+    const saved = localStorage.getItem('guud_language')
+    if (saved && ['es','en','pt'].includes(saved)) return saved
+    const browser = navigator.language?.substring(0,2) || 'es'
+    return ['es','en','pt'].includes(browser) ? browser : 'es'
+  })
+  const t = getT(lang)
+  const changeLang = (l) => { setLang(l); localStorage.setItem('guud_language', l) }
+  // Refocus when not in chat
+  useEffect(() => {
+    if (!hasStartedChat) {
+      const t = setTimeout(() => inputRef.current?.focus(), 150)
+      return () => clearTimeout(t)
+    }
+  }, [hasStartedChat])
+  const [waveActive, setWaveActive] = useState(false)
+  const [agendando, setAgendando]   = useState(false)
+  const [contacto, setContacto]     = useState({ nombre: '', email: '' })
+  const [proyectoId, setProyectoId] = useState(null)
+  const [welcomeDone, setWelcomeDone] = useState(false)
+  const [intentDetected, setIntentDetected] = useState(null)
+
+  const { voiceState, supported: voiceSupported, start: startVoice, stop: stopVoice, interim: voiceInterim } = useVoiceInput({
+    autoSend: false,
+    onInterim: (text) => { if (text) setInput(text) },
+    onResult: (text) => {
+      if (text && text.trim()) {
+        setInput('')
+        enviar(text.trim())
+      }
+    },
+    onError: () => {},
+  })
+
+  const chatRef   = useRef(null)
+  const inputRef  = useRef(null)
+  const agendarRef = useRef(null)
+  const canvasRef = useRef(null)
+  const rafRef    = useRef(null)
+  const wtRef     = useRef(0)
+
+  // ─── resetSession ────────────────────────────────────────────────
+  const resetSession = () => {
+    setMensajes([])
+    setHistorial([])
+    if (voiceState === 'listening') stopVoice()
+    setInput('')
+    setFase('inicio')
+    setAgente(null)
+    setCargando(false)
+    setWaveActive(false)
+    setMicActivo(false)
+    setAgendando(false)
+    setContacto({ nombre: '', email: '' })
+    setProyectoId(null)
+    setHasStartedChat(false)
+    setIntentDetected(null)
+    setTimeout(() => inputRef.current?.focus(), 150)
+  }
+
+  // Autofocus input on mount
+  useEffect(() => {
+    const t = setTimeout(() => inputRef.current?.focus(), 100)
+    return () => clearTimeout(t)
+  }, [])
+
+  // Welcome message removed — clean start
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const draw = () => {
+      const w = canvas.width, h = canvas.height
+      ctx.clearRect(0, 0, w, h)
+      const lines = [
+        { a: waveActive ? 14 : 3,  f: 0.09, p: 0,             op: 0.7,  lw: 2   },
+        { a: waveActive ? 9  : 2,  f: 0.11, p: Math.PI * .4,  op: 0.35, lw: 1.2 },
+        { a: waveActive ? 5  : 1,  f: 0.14, p: Math.PI * 1.3, op: 0.18, lw: 0.8 },
+      ]
+      lines.forEach(l => {
+        ctx.beginPath()
+        ctx.strokeStyle = `rgba(232,255,0,${l.op})`
+        ctx.lineWidth = l.lw
+        for (let x = 0; x <= w; x += 1.5) {
+          const y = h / 2 + Math.sin(x * l.f + wtRef.current + l.p) * l.a
+          x < 1 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+        }
+        ctx.stroke()
+      })
+      wtRef.current += waveActive ? 0.07 : 0.015
+      rafRef.current = requestAnimationFrame(draw)
+    }
+    draw()
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [waveActive])
+
+  useEffect(() => {
+    chatRef.current?.scrollTo({ top: 9999, behavior: 'smooth' })
+  }, [mensajes, cargando])
+
+  // ─── Refoco el input siempre que termina de cargar o llega un mensaje ──
+  useEffect(() => {
+    if (!cargando && inputRef.current) {
+      // Timeout más largo para dejar que QuoteCard y scroll terminen
+      setTimeout(() => {
+        if (inputRef.current && document.activeElement !== inputRef.current) {
+          inputRef.current.focus()
+        }
+      }, 150)
+    }
+  }, [cargando, mensajes])
+
+  // Scroll to agendar card when it appears
+  useEffect(() => {
+    if (agendando) {
+      setTimeout(() => {
+        agendarRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+    }
+  }, [agendando])
+
+  const addMsg = (texto, rol, extra = null) =>
+    setMensajes(prev => [...prev, { texto, rol, extra, id: Date.now() + Math.random() }])
+
+  const enviar = async (texto) => {
+    const msg = texto || input.trim()
+    if (!msg || cargando) return
+    setInput('')
+    if (voiceState === 'listening') stopVoice()
+    if (inputRef.current) { inputRef.current.style.height = 'auto'; inputRef.current.focus() }
+    setMini(true)
+    setHasStartedChat(true); analytics.chatStarted(agente || 'pending')
+    addMsg(msg, 'user')
+
+    if (fase === 'inicio') {
+      setCargando(true); setWaveActive(true); setFase('orquestando')
+      try {
+        const r1 = await fetch('/api/orquestar', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mensaje: msg }),
+        })
+        const d1 = await r1.json()
+        // Si el orquestador detecta contenido inapropiado
+        if (d1.agente === 'filtro') {
+          addMsg('¿Te gustaría agregar algún otro detalle para llevar en consideración en el presupuesto?', 'ai')
+          setFase('inicio')
+          setCargando(false); setWaveActive(false)
+          return
+        }
+        const ag = d1.agente || 'estrategia'
+        setAgente(ag)
+        const hist = [{ role: 'user', content: msg }]
+        setHistorial(hist)
+        const r2 = await fetch('/api/chat', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agente: ag, historial: hist, lang }),
+        })
+        const d2 = await r2.json()
+        if (d2.quote) {
+          analytics.quoteGenerated(agente, d2.quote.min, d2.quote.proyecto)
+          setFase('cotizado')
+          addMsg(null, 'ai', { type: 'quote', quote: d2.quote })
+        } else {
+          addMsg(d2.reply, 'ai')
+          setHistorial(p => [...p, { role: 'assistant', content: d2.reply }])
+          setFase('chat')
+        }
+      } catch (e) {
+        addMsg('Error de conexión. Recarga e intenta de nuevo.', 'ai')
+        setFase('inicio')
+      }
+      setCargando(false); setWaveActive(false)
+    } else {
+      const hist = [...historial, { role: 'user', content: msg }]
+      setHistorial(hist); setCargando(true); setWaveActive(true)
+      try {
+        const r = await fetch('/api/chat', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agente, historial: hist, lang }),
+        })
+        const d = await r.json()
+        if (d.quote) {
+          setFase('cotizado')
+          addMsg(null, 'ai', { type: 'quote', quote: d.quote })
+        } else {
+          addMsg(d.reply, 'ai')
+          setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
+        }
+      } catch (e) { addMsg('Error de conexión.', 'ai') }
+      setCargando(false); setWaveActive(false)
+    }
+  }
+
+  const aceptarCotizacion = () => { analytics.quoteAccepted(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min); setAgendando(true) }
+
+  const confirmarReunion = async () => {
+    if (!contacto.nombre || !contacto.email) return
+    setCargando(true)
+    try {
+      if (proyectoId) await fetch('/api/agendar', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proyecto_id: proyectoId, ...contacto }),
+      })
+    } catch (_) {}
+    addMsg(null, 'ai', { type: 'confirmado', contacto })
+    setFase('confirmado'); setAgendando(false); setCargando(false)
+  }
+
+  const cotizarDeNuevo = () => {
+    setMensajes([])
+    setHistorial([])
+    setAgente(null)
+    setFase('inicio')
+  }
+
+  const toggleMic = () => {
+    setMicActivo(true)
+    setTimeout(() => {
+      const s = [
+        'I need a brand identity for my new startup',
+        'Necesito una campaña de lanzamiento para mi nueva marca',
+        'Preciso de uma identidade visual completa',
+        'Je veux redesigner mon packaging',
+      ]
+      setInput(s[Math.floor(Math.random() * s.length)])
+      setMicActivo(false)
+      inputRef.current?.focus()
+    }, 1800)
+  }
+
+  const agenteInfo = agente ? AGENT_LABELS[agente] : null
+
+  return (
+    <>
+      <Head>
+        <title>GÜÜD Quote AI — Global Creative HÜB</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+        <meta name="description" content="¡Hola! ¿Listo para cotizar tu próximo proyecto creativo? GÜÜD Company — Global Creative HÜB." />
+      </Head>
+
+      <div style={S.app}>
+        <div style={S.amb} />
+        <header style={S.hdr}>
+          <a href="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} onClick={e => { e.preventDefault(); resetSession(); }}>
+          <div style={S.logoWrap}>
+            <img
+              src="/logo.gif"
+              alt="GÜÜD"
+              style={S.logoImg}
+              onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+            />
+            <div style={{ display: 'none', flexDirection: 'column', gap: 1 }}>
+              <div style={S.logoText}>GÜÜD</div>
+              <div style={S.logoSub}>Global Creative HÜB</div>
+            </div>
+          </div>
+          </a>
+          {/* Lang selector — centered in header */}
+          <div style={S.langSelector} className="lang-selector">
+            {false && ['es','en','pt'].map(l => (
+              <button key={l} onClick={() => changeLang(l)} style={{
+                fontSize: 10, padding: '3px 10px', borderRadius: 20, border: 'none',
+                background: lang === l ? '#E8FF00' : 'none',
+                color: lang === l ? '#080808' : 'var(--t3)',
+                cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+                fontWeight: lang === l ? 700 : 400, letterSpacing: '.06em',
+                transition: 'all .2s',
+              }}>
+                {l === 'es' ? 'ES' : l === 'en' ? 'EN' : 'PT'}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {agenteInfo && (
+              <div style={{ ...S.badge, borderColor: 'rgba(0,0,0,0.2)', color: '#080808', background: 'rgba(0,0,0,0.1)' }}>
+                {agenteInfo.label}
+              </div>
+            )}
+
+          </div>
+        </header>
+        <div style={S.inner}>
+        {!hasStartedChat && (
+          <div style={S.heroCenter}>
+            <div style={S.orbWrap}>
+              <div style={S.ring1} />
+              <div style={S.ring2} />
+              <div style={S.ripple1} />
+              <div style={S.ripple2} />
+              <div style={S.ripple3} />
+              <div style={S.ripple4} />
+              <div style={S.orb}>
+                <video key="orb-video" src="/orb.mp4" autoPlay loop muted playsInline
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+              </div>
+            </div>
+            <div style={S.heroTitle}>{t.heroTitle}</div>
+            {/* Input centered below title */}
+            <div style={S.heroInputWrap}>
+              <div style={S.inputBox} className="input-pulse">
+                {!input && !voiceInterim && (
+                  <div style={{ position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1, lineHeight: '1' }}>
+                    <span className="fake-caret" style={{ marginRight: 4, marginLeft: 0, verticalAlign: 'middle' }} />
+                    <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: '21px', display: 'block' }}>¿Qué te gustaría cotizar?</span>
+                  </div>
+                )}
+                <textarea
+                  ref={inputRef}
+                  style={S.textarea}
+                  placeholder=""
+                  rows={1}
+                  value={input}
+                  onChange={e => {
+                    setInput(e.target.value)
+                    e.target.style.height = 'auto'
+                    e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px'
+                    setIntentDetected(detectIntent(e.target.value))
+                  }}
+                  onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)) { e.preventDefault(); enviar() } }}
+                />
+                <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} supported={voiceSupported} />
+                <button
+                  id="send-btn"
+                  style={{ ...S.icoBtn, ...S.snd, ...(!input.trim() || cargando ? S.sndDis : {}) }}
+                  onClick={() => enviar()}
+                  disabled={!input.trim() || cargando}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, minHeight: 16 }}>
+                <div style={{ fontSize: 11, color: '#E8FF00', letterSpacing: '0.04em', transition: 'all 0.3s ease', opacity: intentDetected ? 1 : 0.6 }}>
+                  {intentDetected ? t.detectingPrefix + intentDetected : input.length > 2 ? t.detecting : ''}
+                </div>
+
+              </div>
+            </div>
+            {/* Chips centered */}
+            <div style={S.chipsHero}>
+              {t.chips.map((chip, i) => (
+                <SuggestionChip key={i} label={chip} index={i} onClick={() => enviar(chip)} />
+              ))}
+            </div>
+          </div>
+        )}
+                {hasStartedChat && <div ref={chatRef} style={S.chat}>
+          {mensajes.map(m => (
+            <div key={m.id} style={{ ...S.row, ...(m.rol === 'user' ? S.rowUser : {}) }}>
+              {m.rol === 'ai' ? (
+                <MiniOrb />
+              ) : (
+                <div style={{ ...S.av, ...S.avU }}>TÚ</div>
+              )}
+              {m.extra?.type === 'quote' ? (
+                <QuoteCard quote={m.extra.quote} onAceptar={aceptarCotizacion} onAjustar={cotizarDeNuevo} t={t}
+                onDownloadPDF={m.extra.quote ? () => guudDownloadPDF(m.extra.quote) : null}
+                />
+              ) : m.extra?.type === 'confirmado' ? (
+                <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} />
+              ) : (
+                <div style={{ ...S.bub, ...(m.rol === 'user' ? S.bubUser : S.bubAi) }}>
+                  {m.texto}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {cargando && (
+            <div style={S.row}>
+              <MiniOrb />
+              <div style={{ ...S.bub, ...S.bubAi, padding: 0 }}>
+                <div style={S.dots}>
+                  {[0, .18, .36].map((d, i) => <span key={i} style={{ ...S.dot, animationDelay: `${d}s` }} />)}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {agendando && (
+            <div style={S.row}>
+              <MiniOrb />
+              <div ref={agendarRef} style={{ flex: 1, minWidth: 0, maxWidth: '100%', overflow: 'hidden', animation: 'up .3s ease' }}>
+                <MeetingScheduler
+                  quote={mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote}
+                  proyectoId={proyectoId}
+                  t={t}
+                  onReset={() => { setAgendando(false); resetSession(); }}
+                  onConfirmed={({ nombre, email, meetLink }) => {
+                    addMsg(null, 'ai', { type: 'confirmado', contacto: { nombre, email }, meetLink, slotDate, slotTime })
+                    analytics.meetingScheduled(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min)
+                    setFase('confirmado')
+                    setAgendando(false)
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        }
+
+
+
+
+
+        {fase !== 'confirmado' && hasStartedChat && (
+          <div style={S.inputArea}>
+            <div style={{ ...S.inputBox, position: 'relative' }} className="input-pulse">
+              {!input && !voiceInterim && (
+                <div style={{
+                  position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+                  display: 'flex', alignItems: 'center', pointerEvents: 'none', zIndex: 1,
+                }}>
+                  <span className="fake-caret" style={{ marginRight: 4, marginLeft: 0 }} />
+                  <span style={{ fontSize: 14, color: 'var(--t3)', lineHeight: 1.5 }}>¿Qué te gustaría cotizar?</span>
+                </div>
+              )}
+              <textarea
+                ref={inputRef}
+                style={S.textarea}
+                placeholder=""
+                rows={1}
+                value={input}
+                onChange={e => {
+                  setInput(e.target.value)
+                  e.target.style.height = 'auto'
+                  e.target.style.height = Math.min(e.target.scrollHeight, 96) + 'px'
+                  setIntentDetected(detectIntent(e.target.value))
+                }}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)) { e.preventDefault(); enviar() } }}
+              />
+              <VoiceButton voiceState={voiceState} onStart={startVoice} onStop={stopVoice} supported={voiceSupported} />
+              <button
+                style={{ ...S.icoBtn, ...S.snd, ...(!input.trim() || cargando ? S.sndDis : {}) }}
+                id="send-btn"
+                onClick={() => enviar()}
+                disabled={!input.trim() || cargando}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8, minHeight: 16 }}>
+              <div style={{
+                fontSize: 11,
+                color: '#E8FF00',
+                letterSpacing: '0.04em',
+                transition: 'all 0.3s ease',
+                opacity: intentDetected ? 1 : 0.6,
+              }}>
+                {intentDetected ? `Detectando: ${intentDetected}` : input.length > 2 ? 'Detectando tipo de proyecto…' : ''}
+              </div>
+  
+            </div>
+          </div>
+        )}
+        </div>
+        {/* Footer */}
+        <footer style={{
+          textAlign: 'center',
+          padding: '12px 20px',
+          fontSize: 11,
+          color: '#E8FF00',
+          letterSpacing: '0.05em',
+          flexShrink: 0,
+        }}>
+          {t.footer}
+        </footer>
+      </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes dot { 0%,80%,100%{transform:scale(1);opacity:.3} 40%{transform:scale(1.4);opacity:1} }
+        @keyframes up { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes mpulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,255,0,.2)} 50%{box-shadow:0 0 0 6px transparent} }
+        @keyframes caretPulse { 0%,100%{opacity:1} 50%{opacity:0} }
+        @keyframes successPop { 0%{transform:scale(0.5);opacity:0} 60%{transform:scale(1.08)} 80%{transform:scale(0.97)} 100%{transform:scale(1);opacity:1} }
+        @keyframes successGlow { 0%{box-shadow:0 0 0 0 rgba(232,255,0,0)} 40%{box-shadow:0 0 0 12px rgba(232,255,0,0.25), 0 0 24px rgba(232,255,0,0.15)} 100%{box-shadow:0 0 0 0 rgba(232,255,0,0)} }
+        @keyframes checkDraw { 0%{stroke-dashoffset:30} 100%{stroke-dashoffset:0} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes chipSweep { from{background-position:100% 0} to{background-position:-100% 0} }
+        @keyframes chipIdleGlow {
+          0%,100% { box-shadow: 0 0 0 0.5px rgba(232,255,0,0.15); }
+          50%      { box-shadow: 0 0 0 0.5px rgba(232,255,0,0.4), 0 0 8px rgba(232,255,0,0.12); }
+        }
+        @keyframes rippleWave {
+          0%   { transform: scale(0.85); opacity: 0.5; }
+          70%  { transform: scale(1.5);  opacity: 0.12; }
+          100% { transform: scale(1.7);  opacity: 0; }
+        }
+        @keyframes chipGlowPulse { 0%,100%{box-shadow:0 0 0 0.5px #E8FF00, 0 0 8px rgba(232,255,0,0.25)} 50%{box-shadow:0 0 0 0.5px #E8FF00, 0 0 14px rgba(232,255,0,0.4), 0 0 24px rgba(232,255,0,0.15)} }
+        textarea { caret-color: transparent !important; }
+        textarea::placeholder { color: transparent !important; }
+        .fake-caret { display:inline-block; width:2px; height:14px; background:#E8FF00; border-radius:1px; animation:caretPulse 1s step-end infinite; vertical-align:middle; flex-shrink:0; }
+        @keyframes orbglow { 0%,100%{box-shadow:0 0 20px rgba(232,255,0,.1)} 50%{box-shadow:0 0 35px rgba(232,255,0,.2)} }
+        
+        textarea::placeholder { color: #484644; }
+        /* ─── Mobile / iOS ─── */
+        @media (max-width: 768px) {
+          .guud-app { max-width: 100vw !important; }
+          .guud-hdr { padding: 10px 14px !important; }
+          .hero-title-initial { font-size: 20px !important; line-height:1.25 !important; padding:0 16px !important; }
+        }
+        @media (max-width: 600px) {
+          textarea, input, select { font-size: 16px !important; }
+        }
+        .bottom-input-area {
+          padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+        }
+
+        @keyframes guud-pulse {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(232,255,0,0), 0 0 12px rgba(232,255,0,0.15), inset 0 0 12px rgba(232,255,0,0.05);
+            border-color: rgba(232,255,0,0.25);
+          }
+          50% {
+            box-shadow: 0 0 0 4px rgba(232,255,0,0.08), 0 0 24px rgba(232,255,0,0.3), inset 0 0 20px rgba(232,255,0,0.08);
+            border-color: rgba(232,255,0,0.7);
+          }
+        }
+        .input-pulse {
+          animation: guud-pulse 2.5s ease-in-out infinite;
+          border: 1px solid rgba(232,255,0,0.25) !important;
+          border-radius: 22px;
+        }
+      `}</style>
+    </>
+  )
+}
+
+
+
+// ─── useVoiceInput hook ───────────────────────────────────────────────
+function useVoiceInput({ onResult, onError, onInterim, autoSend = false }) {
+  const [voiceState, setVoiceState] = useState('idle')
+  const [supported, setSupported] = useState(false)
+  useEffect(() => { setSupported('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) }, [])
+  const recogRef = useRef(null), finalRef = useRef(''), activeRef = useRef(false)
+  const start = () => {
+    if (!supported || activeRef.current) return
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    const recog = new SR()
+    recog.lang = 'es-ES'; recog.continuous = true; recog.interimResults = true; recog.maxAlternatives = 1
+    finalRef.current = ''; activeRef.current = true; recogRef.current = recog
+    recog.onstart = () => setVoiceState('listening')
+    recog.onresult = (e) => {
+      let interim = '', nf = ''
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const t = e.results[i][0].transcript
+        if (e.results[i].isFinal) nf += t; else interim += t
+      }
+      if (nf) finalRef.current += nf + ' '
+      const full = (finalRef.current + interim).trim()
+      if (typeof onInterim === 'function' && full) onInterim(full)
+    }
+    recog.onerror = (e) => { if (e.error !== 'no-speech') { if (onError) onError(e.error); setVoiceState('idle') } }
+    recog.onend = () => {
+      activeRef.current = false; setVoiceState('idle')
+      const text = finalRef.current.trim(); finalRef.current = ''
+      if (text && onResult) onResult(text, autoSend)
+    }
+    recog.start()
+  }
+  const stop = () => { if (recogRef.current) { recogRef.current.stop(); recogRef.current = null } activeRef.current = false }
+  return { voiceState, supported, start, stop }
+}
+function VoiceBars() {
+  const [h, setH] = useState([4,10,16,8])
+  useEffect(() => {
+    const id = setInterval(() => setH([
+      4+Math.random()*14, 4+Math.random()*14,
+      4+Math.random()*14, 4+Math.random()*14,
+    ]), 130)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <span style={{ display:'flex', alignItems:'center', gap:3, height:20 }}>
+      {h.map((v,i) => (
+        <span key={i} style={{
+          display:'block', width:3, borderRadius:2,
+          background:'#E8FF00', height:v+'px',
+          transition:'height .1s ease',
+        }} />
+      ))}
+    </span>
+  )
+}
+
+function VoiceButton({ voiceState, onStart, onStop, supported }) {
+  const on = voiceState === 'listening'
+  if (!supported) return null
+  return (
+    <button onClick={on ? onStop : onStart} title={on ? 'Detener' : 'Hablar'} style={{
+      flexShrink:0, width:36, height:36, borderRadius:'50%',
+      border: on ? '2px solid rgba(232,255,0,.75)' : '1.5px solid rgba(255,255,255,.12)',
+      background: on ? 'rgba(232,255,0,.08)' : 'transparent',
+      display:'flex', alignItems:'center', justifyContent:'center',
+      cursor:'pointer', outline:'none',
+      boxShadow: on ? '0 0 14px rgba(232,255,0,.2)' : 'none',
+      transition:'all .2s',
+    }}>
+      {on ? <VoiceBars /> : (
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+          stroke="rgba(255,255,255,.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      )}
+    </button>
+  )
+}
+
+const VBS = {
+  btn: { width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .2s', border: '0.5px solid var(--b2)', background: 'none', color: 'var(--t3)', cursor: 'pointer' },
+  listening: { background: '#E8FF00', borderColor: '#E8FF00', color: '#080808', boxShadow: '0 0 0 4px rgba(232,255,0,0.15)' },
+  error: { borderColor: 'rgba(255,107,107,0.5)', color: '#ff6b6b' },
+  disabled: { cursor: 'not-allowed' },
+}
+
+
+// ─── MiniOrb — orb animado para avatar de chat ───────────────────────
+function MiniOrb() {
+  return (
+    <div style={{
+      width: 36, height: 36, borderRadius: '50%',
+      position: 'relative', flexShrink: 0,
+      overflow: 'visible',
+    }}>
+      {/* Ripple waves — 2 sutiles */}
+      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(232,255,0,0.3)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '0s', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', border: '1px solid rgba(232,255,0,0.18)', animation: 'rippleWave 3s ease-out infinite', animationDelay: '1s', pointerEvents: 'none' }} />
+      {/* Orb core */}
+      <div style={{
+        position: 'absolute', inset: 0, borderRadius: '50%',
+        overflow: 'hidden',
+        border: '1px solid rgba(232,255,0,0.25)',
+        background: '#080808',
+      }}>
+        <video
+          src="/orb.mp4"
+          autoPlay loop muted playsInline
+          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function OrbCanvas({ state = 'idle' }) {
+  const canvasRef = useRef(null)
+  const rafRef = useRef(null)
+  const tRef = useRef(0)
+  const noiseRef = useRef([])
+  const stateRef = useRef(state)
+
+  useEffect(() => { stateRef.current = state }, [state])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    const W = canvas.width
+    const H = canvas.height
+    const cx = W / 2
+    const cy = H / 2
+
+    // Perlin-like noise using multiple sine waves with irrational frequencies
+    const noise = (x, t, seed = 0) => {
+      const f1 = 0.013, f2 = 0.021, f3 = 0.037, f4 = 0.053
+      const t1 = 0.0071, t2 = 0.0113, t3 = 0.0197, t4 = 0.0317
+      return (
+        Math.sin(x * f1 + t * t1 + seed) * 0.38 +
+        Math.sin(x * f2 + t * t2 + seed * 1.7) * 0.27 +
+        Math.sin(x * f3 + t * t3 + seed * 2.3) * 0.19 +
+        Math.sin(x * f4 + t * t4 + seed * 3.1) * 0.16
+      )
+    }
+
+    const draw = () => {
+      const s = stateRef.current
+      tRef.current += s === 'processing' ? 1.4 : s === 'listening' ? 0.9 : 0.45
+
+      const t = tRef.current
+      ctx.clearRect(0, 0, W, H)
+
+      // Background glow
+      const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.48)
+      const glowAlpha = s === 'processing' ? 0.18 : s === 'listening' ? 0.12 : 0.07
+      bgGlow.addColorStop(0, `rgba(200,255,30,${glowAlpha})`)
+      bgGlow.addColorStop(0.6, `rgba(120,220,0,${glowAlpha * 0.4})`)
+      bgGlow.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = bgGlow
+      ctx.fillRect(0, 0, W, H)
+
+      // Draw multiple fluid wave layers
+      const layers = s === 'processing' ? 5 : s === 'listening' ? 4 : 3
+
+      for (let layer = 0; layer < layers; layer++) {
+        const seed = layer * 4.71
+        const layerT = t + layer * 23.7
+        const amp = s === 'processing'
+          ? 18 + layer * 4 + Math.sin(t * 0.023 + seed) * 6
+          : s === 'listening'
+          ? 12 + layer * 3 + Math.sin(t * 0.017 + seed) * 4
+          : 7 + layer * 2 + Math.sin(t * 0.011 + seed) * 2.5
+
+        const yOffset = (layer - layers / 2) * (s === 'processing' ? 8 : s === 'listening' ? 5 : 3)
+        const alpha = (1 - layer / layers) * (s === 'processing' ? 0.85 : s === 'listening' ? 0.7 : 0.55)
+
+        ctx.beginPath()
+        const pts = 120
+        for (let i = 0; i <= pts; i++) {
+          const x = (i / pts) * W
+          const nx = noise(i * 2.5, layerT, seed)
+          const nx2 = noise(i * 1.3, layerT * 0.7, seed + 10)
+          const y = cy + yOffset + nx * amp + nx2 * amp * 0.4
+
+          if (i === 0) ctx.moveTo(x, y)
+          else ctx.lineTo(x, y)
+        }
+
+        // Color shift by layer and state
+        const hue = s === 'processing' ? 75 + layer * 8 : s === 'listening' ? 80 + layer * 6 : 85 + layer * 4
+        const sat = s === 'processing' ? 100 : s === 'listening' ? 95 : 88
+        const lum = s === 'processing' ? 60 + layer * 5 : 65 + layer * 3
+        const lw = s === 'processing' ? 2.5 - layer * 0.3 : s === 'listening' ? 2 - layer * 0.25 : 1.5 - layer * 0.2
+
+        ctx.strokeStyle = `hsla(${hue},${sat}%,${lum}%,${alpha})`
+        ctx.lineWidth = Math.max(0.4, lw)
+        ctx.shadowColor = `hsla(${hue},100%,70%,0.6)`
+        ctx.shadowBlur = s === 'processing' ? 12 : s === 'listening' ? 8 : 4
+        ctx.stroke()
+      }
+
+      // Core pulse — subtle breathing
+      const pulse = 0.5 + Math.sin(t * 0.019) * 0.1 + Math.sin(t * 0.031) * 0.06
+      const coreR = (s === 'processing' ? 8 : s === 'listening' ? 5 : 3) * pulse
+      const coreGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 3)
+      coreGlow.addColorStop(0, `rgba(220,255,80,${s === 'processing' ? 0.9 : 0.5})`)
+      coreGlow.addColorStop(1, 'rgba(180,255,0,0)')
+      ctx.fillStyle = coreGlow
+      ctx.beginPath()
+      ctx.arc(cx, cy, coreR * 3, 0, Math.PI * 2)
+      ctx.fill()
+
+      ctx.shadowBlur = 0
+      rafRef.current = requestAnimationFrame(draw)
+    }
+
+    draw()
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={200}
+      height={200}
+      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+    />
+  )
+}
+
+
+// ─── getCredentialsUrl helper ─────────────────────────────────────────
+
+// ─── SuggestionChip component ─────────────────────────────────────────
+function SuggestionChip({ label, onClick, index = 0 }) {
+  const [hovered, setHovered] = useState(false)
+  const idleDelay = `${(index % 4) * 1.2}s`
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'relative',
+        padding: '7px 14px',
+        borderRadius: 20,
+        border: 'none',
+        background: 'none',
+        fontSize: 12,
+        color: hovered ? '#E8FF00' : 'var(--t2)',
+        cursor: 'pointer',
+        fontFamily: 'DM Sans, sans-serif',
+        transition: 'color .2s ease',
+        outline: 'none',
+        zIndex: 0,
+        // Fake border via box-shadow — glow animado
+        boxShadow: hovered
+          ? '0 0 0 0.5px #E8FF00, 0 0 10px rgba(232,255,0,0.3), 0 0 20px rgba(232,255,0,0.12)'
+          : '0 0 0 0.5px rgba(232,255,0,0.18)',
+        animation: hovered ? 'none' : `chipIdleGlow 5s ease-in-out ${idleDelay} infinite`,
+      }}
+    >
+      {/* Gradient sweep effect on hover */}
+      {hovered && (
+        <span style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: 20,
+          background: 'linear-gradient(90deg, transparent 0%, rgba(232,255,0,0.06) 50%, transparent 100%)',
+          backgroundSize: '200% 100%',
+          animation: 'chipSweep .6s ease forwards',
+          pointerEvents: 'none',
+          zIndex: -1,
+        }} />
+      )}
       {label}
     </button>
   )
@@ -1036,7 +2016,16 @@ function RelatedCredentialsBlock({ agente, projectType }) {
           color: '#080808',
           border: '0.5px solid #E8FF00',
           borderRadius: 8,
-         <a href="https://www.guudcompany.cl/hub" target="_blank" rel="noopener noreferrer" { e.target.style.background = '#d4f040'; e.target.style.borderColor = '#d4f040'; }}
+          padding: '7px 13px',
+          whiteSpace: 'nowrap',
+          textDecoration: 'none',
+          transition: 'all .18s',
+          fontFamily: 'DM Sans, sans-serif',
+          flexShrink: 0,
+          background: '#E8FF00',
+          fontWeight: 600,
+        }}
+        onMouseEnter={e => { e.target.style.background = '#d4f040'; e.target.style.borderColor = '#d4f040'; }}
         onMouseLeave={e => { e.target.style.background = '#E8FF00'; e.target.style.borderColor = '#E8FF00'; }}
       >
         Ver proyectos similares
