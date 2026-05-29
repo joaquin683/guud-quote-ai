@@ -1025,7 +1025,7 @@ function RelatedCredentialsBlock({ agente, projectType }) {
         </div>
         <div style={{ fontSize: 12, color: 'var(--t2)', lineHeight: 1.45 }}>
           Hemos trabajado desaïos similares de {label}. Revísa referencias antes de avanzar.
-        </div>
+        </div onClick={() => window.open('https://www.guudcompany.cl/hub','_blank')} style={{cursor:'pointer'}}>
       </div>
       <a
         href={url}
