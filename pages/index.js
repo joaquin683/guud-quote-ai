@@ -999,7 +999,7 @@ function getCredentialsUrl(agente, industria = null) {
 
 // ─── RelatedCredentialsBlock component ───────────────────────────────
 function RelatedCredentialsBlock({ agente, projectType }) {
-  const url = getCredentialsUrl(agente)
+  const url = 'https://www.guudcompany.cl/hub'
   const labels = {
     branding:   'branding e identidad visual',
     web:        'web y digital',
