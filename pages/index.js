@@ -1025,7 +1025,7 @@ function RelatedCredentialsBlock({ agente, projectType }) {
         </div>
         <div style={{ fontSize: 12, color: 'var(--t2)', lineHeight: 1.45 }}>
           Hemos trabajado desaïos similares de {label}. Revísa referencias antes de avanzar.
-        </div onClick={() => window.open('https://www.guudcompany.cl/hub','_blank')} style={{cursor:'pointer'}}>
+        </div>
       </div>
       <a
         href="https://www.guudcompany.cl/hub"
@@ -1110,8 +1110,8 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
           )}
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
-          <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
-          <button style={S.btnS} onClick={onAjustar}>{'Cotizar de nuevo'}</button>
+          </button>
+          </button>
           <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
             <button onClick={onDownloadPDF || (() => {})} title="Descargar PDF" style={{
               display: 'flex', alignItems: 'center', gap: 6,
@@ -1458,14 +1458,14 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
         <span style={{color:'var(--t3)'}}>Nos vemos.</span>
       </div>
       {meetLink && <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>{tl.meetBtn}</a>}
-      <button onClick={() => onReset?.()} style={{ ...MS.btnSecondary, marginTop: 4 }}>{tl.newQuote}</button>
+      </button>
     </div>
   )}
 
   if (step === 'error') return (
     <div style={MS.card}>
       <div style={MS.errorText}>{tl.errorMsg}</div>
-      <button style={MS.btnSecondary} onClick={() => setStep('idle')}>{tl.retryBtn}</button>
+      </button>
     </div>
   )
 
