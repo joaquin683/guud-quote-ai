@@ -1042,10 +1042,10 @@ function RelatedCredentialsBlock({ agente, projectType }) {
           transition: 'all .18s',
           fontFamily: 'DM Sans, sans-serif',
           flexShrink: 0,
-          background: '#E8FF00',
-          fontWeight: 600,
-        }}
-        onMouseEnter={e = onClick={() => window.open('https://www.guudcompany.cl/hub','_blank')} style={{cursor:'pointer'}}> { e.target.style.background = '#d4f040'; e.target.style.borderColor = '#d4f040'; }}
+      <a
+        href="https://www.guudcompany.cl/hub"
+        target="_blank"
+        rel="noopener noreferrer" window.open('https://www.guudcompany.cl/hub','_blank')} style={{cursor:'pointer'}}> { e.target.style.background = '#d4f040'; e.target.style.borderColor = '#d4f040'; }}
         onMouseLeave={e => { e.target.style.background = '#E8FF00'; e.target.style.borderColor = '#E8FF00'; }}
       >
         Ver proyectos similares
