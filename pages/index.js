@@ -1045,7 +1045,7 @@ function RelatedCredentialsBlock({ agente, projectType }) {
           background: '#E8FF00',
           fontWeight: 600,
         }}
-        onMouseEnter={e => { e.target.style.background = '#d4f040'; e.target.style.borderColor = '#d4f040'; }}
+        onMouseEnter={e = onClick={() => window.open('https://www.guudcompany.cl/hub','_blank')} style={{cursor:'pointer'}}> { e.target.style.background = '#d4f040'; e.target.style.borderColor = '#d4f040'; }}
         onMouseLeave={e => { e.target.style.background = '#E8FF00'; e.target.style.borderColor = '#E8FF00'; }}
       >
         Ver proyectos similares
