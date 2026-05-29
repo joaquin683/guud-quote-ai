@@ -992,14 +992,14 @@ function getCredentialsUrl(agente, industria = null) {
     estrategia: 'estrategia',
   }
   const servicio = map[agente] || null
-  if (!servicio) return 'https://www.guudcompany.cl/hub'
-  const base = 'https://www.guudcompany.cl/hub'
+  if (!servicio) return '/credenciales'
+  const base = `/credenciales?servicio=${servicio}`
   return industria ? `${base}&industria=${encodeURIComponent(industria)}` : base
 }
 
 // ─── RelatedCredentialsBlock component ───────────────────────────────
 function RelatedCredentialsBlock({ agente, projectType }) {
-  const url = 'https://www.guudcompany.cl/hub'
+  const url = getCredentialsUrl(agente)
   const labels = {
     branding:   'branding e identidad visual',
     web:        'web y digital',
@@ -1028,7 +1028,7 @@ function RelatedCredentialsBlock({ agente, projectType }) {
         </div>
       </div>
       <a
-        href="https://www.guudcompany.cl/hub"
+        href={url}
         target="_blank"
         rel="noopener noreferrer"
         style={{
@@ -1036,16 +1036,7 @@ function RelatedCredentialsBlock({ agente, projectType }) {
           color: '#080808',
           border: '0.5px solid #E8FF00',
           borderRadius: 8,
-          padding: '7px 13px',
-          whiteSpace: 'nowrap',
-          textDecoration: 'none',
-          transition: 'all .18s',
-          fontFamily: 'DM Sans, sans-serif',
-          flexShrink: 0,
-      <a
-        href="https://www.guudcompany.cl/hub"
-        target="_blank"
-        rel="noopener noreferrer" window.open('https://www.guudcompany.cl/hub','_blank')} style={{cursor:'pointer'}}> { e.target.style.background = '#d4f040'; e.target.style.borderColor = '#d4f040'; }}
+         <a href="https://www.guudcompany.cl/hub" target="_blank" rel="noopener noreferrer" { e.target.style.background = '#d4f040'; e.target.style.borderColor = '#d4f040'; }}
         onMouseLeave={e => { e.target.style.background = '#E8FF00'; e.target.style.borderColor = '#E8FF00'; }}
       >
         Ver proyectos similares
@@ -1110,8 +1101,8 @@ function QuoteCard({ quote, onAceptar, onAjustar, t, onShare, onDownloadPDF }) {
           )}
         </div>
         <div style={{ padding: '12px 16px', display: 'flex', gap: 9 }}>
-          </button>
-          </button>
+          <button style={{...S.btnP, letterSpacing: '0.01em'}} onClick={onAceptar}>{'Agendar reunión con GÜÜD'}</button>
+          <button style={S.btnS} onClick={onAjustar}>{'Cotizar de nuevo'}</button>
           <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
             <button onClick={onDownloadPDF || (() => {})} title="Descargar PDF" style={{
               display: 'flex', alignItems: 'center', gap: 6,
@@ -1458,14 +1449,14 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
         <span style={{color:'var(--t3)'}}>Nos vemos.</span>
       </div>
       {meetLink && <a href={meetLink} target="_blank" rel="noopener noreferrer" style={MS.meetLink}>{tl.meetBtn}</a>}
-      </button>
+      <button onClick={() => onReset?.()} style={{ ...MS.btnSecondary, marginTop: 4 }}>{tl.newQuote}</button>
     </div>
   )}
 
   if (step === 'error') return (
     <div style={MS.card}>
       <div style={MS.errorText}>{tl.errorMsg}</div>
-      </button>
+      <button style={MS.btnSecondary} onClick={() => setStep('idle')}>{tl.retryBtn}</button>
     </div>
   )
 
