@@ -1,14 +1,17 @@
 
-export default function handler(req, res) {
-  const cid = process.env.GOOGLE_OAUTH_CLIENT_ID || '';
-  const sec = process.env.GOOGLE_OAUTH_CLIENT_SECRET || '';
-  const ref = process.env.GOOGLE_OAUTH_REFRESH_TOKEN || '';
-  res.status(200).json({
-    cid_start: cid.slice(0,15),
-    cid_len: cid.length,
-    sec_end: sec.slice(-8),
-    sec_len: sec.length,
-    ref_end: ref.slice(-10),
-    ref_len: ref.length
-  });
+import { google } from 'googleapis';
+export default async function handler(req, res) {
+  const REDIRECT = 'https://guud-quote-ai.vercel.app/api/oauth-callback';
+  const code = req.query.code;
+  if (!code) {
+    const c = new google.auth.OAuth2(process.env.GOOGLE_OAUTH_CLIENT_ID, process.env.GOOGLE_OAUTH_CLIENT_SECRET, REDIRECT);
+    return res.redirect(c.generateAuthUrl({ access_type: 'offline', scope: ['https://www.googleapis.com/auth/calendar'], prompt: 'consent' }));
+  }
+  const c = new google.auth.OAuth2(process.env.GOOGLE_OAUTH_CLIENT_ID, process.env.GOOGLE_OAUTH_CLIENT_SECRET, REDIRECT);
+  try {
+    const { tokens } = await c.getToken(code);
+    return res.status(200).send('REFRESH_TOKEN:' + tokens.refresh_token + ':END');
+  } catch(e) {
+    return res.status(500).json({ error: e.message });
+  }
 }
