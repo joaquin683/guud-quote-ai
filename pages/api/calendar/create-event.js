@@ -165,3 +165,5 @@ export default async function handler(req, res) {
 
   res.status(200).json({ success: true, eventId, meetLink, gcalError })
 }
+
+// oauth updated: 575457646854 - 2026-06-01T21:39:53.804Z
