@@ -114,7 +114,7 @@ export default async function handler(req, res) {
   }
 
   // Email de confirmación post-agendamiento
-  if (meetLink && email) {
+  if (meetLink && e) {
     try {
       const baseUrl = process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'https://guud-quote-ai.vercel.app'
       const slotLabel = slotDate ? new Date(slotDate).toLocaleString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' }) : ''
@@ -153,7 +153,7 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          to: email,
+          to: e,
           subject: 'Reunión confirmada con GÜÜD — ' + (slotLabel || ''),
           html: htmlConfirm
         })
