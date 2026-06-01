@@ -48,12 +48,12 @@ export default async function handler(req, res) {
         end:   { dateTime: endTime.toISOString(),   timeZone: 'America/Santiago' },
         attendees: [
           { email: e },
-          { email: process.env.GUUD_EMAIL || 'contacto@guudcompany.cl', displayName: 'GÜÜD Company' },
-          { email: 'tomas@guudcompany.cl', displayName: 'Tomás · GÜÜD Company' },
-          { email: 'joaquin@guudcompany.cl', displayName: 'Joaquín · GÜÜD Company' },
+          { email: process.env.GUUD_EMAIL || 'contacto@guudcompany.cl', displayName: 'GÃÃD Company' },
+          { email: 'tomas@guudcompany.cl', displayName: 'TomÃ¡s Â· GÃÃD Company' },
+          { email: 'joaquin@guudcompany.cl', displayName: 'JoaquÃ­n Â· GÃÃD Company' },
         ],
         organizer: {
-          displayName: 'GÜÜD Company',
+          displayName: 'GÃÃD Company',
           email: process.env.GUUD_EMAIL || 'contacto@guudcompany.cl',
         },
         conferenceData: {
@@ -68,33 +68,33 @@ export default async function handler(req, res) {
     eventId = data.id || null
     meetLink = data.conferenceData?.entryPoints?.find(ep => ep.entryPointType === 'video')?.uri || null
 
-    // ─── Email de confirmación al cliente ────────────────────────────────
+    // âââ Email de confirmaciÃ³n al cliente ââââââââââââââââââââââââââââââââ
     try {
       const fecha = new Date(slot_iso).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Santiago' })
       const hora  = new Date(slot_iso).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' })
       const html = `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;background:#0A0A0A;color:#F2F0E8;padding:36px;border-radius:12px">
-        <div style="font-size:20px;font-weight:700;margin-bottom:20px">GÜÜD Company</div>
-        <h2 style="font-size:18px;margin:0 0 6px">¡Reunión confirmada!</h2>
-        <p style="color:#888;font-size:14px;margin:0 0 24px">Hola ${n}, ya tienes tu reunión con el equipo creativo de GÜÜD.</p>
+        <div style="font-size:20px;font-weight:700;margin-bottom:20px">GÃÃD Company</div>
+        <h2 style="font-size:18px;margin:0 0 6px">Â¡ReuniÃ³n confirmada!</h2>
+        <p style="color:#888;font-size:14px;margin:0 0 24px">Hola ${n}, ya tienes tu reuniÃ³n con el equipo creativo de GÃÃD.</p>
         <div style="background:#111;border:1px solid #1f1f1f;border-radius:10px;padding:18px 20px;margin-bottom:20px">
           ${proyecto ? `<div style="font-size:12px;color:#666;margin-bottom:3px">Proyecto</div><div style="font-weight:600;margin-bottom:14px">${proyecto}</div>` : ''}
           <div style="font-size:12px;color:#666;margin-bottom:3px">Fecha y hora</div>
-          <div style="font-weight:600;margin-bottom:14px">${fecha} · ${hora}</div>
-          ${meetLink ? `<a href="${meetLink}" style="display:inline-block;background:#E8FF00;color:#0A0A0A;font-weight:700;font-size:13px;padding:10px 18px;border-radius:8px;text-decoration:none">Unirse a Google Meet →</a>` : ''}
+          <div style="font-weight:600;margin-bottom:14px">${fecha} Â· ${hora}</div>
+          ${meetLink ? `<a href="${meetLink}" style="display:inline-block;background:#E8FF00;color:#0A0A0A;font-weight:700;font-size:13px;padding:10px 18px;border-radius:8px;text-decoration:none">Unirse a Google Meet â</a>` : ''}
         </div>
         ${precio ? `<div style="background:#111;border:1px solid #1f1f1f;border-radius:10px;padding:14px 18px;margin-bottom:20px">
-          <div style="font-size:11px;color:#666;margin-bottom:2px">Estimación referencial</div>
+          <div style="font-size:11px;color:#666;margin-bottom:2px">EstimaciÃ³n referencial</div>
           <div style="font-size:20px;font-weight:700;color:#E8FF00">${precio}</div>
         </div>` : ''}
-        <p style="font-size:12px;color:#444;margin-top:20px;border-top:1px solid #1a1a1a;padding-top:16px">GÜÜD Company · Global Creative HÜB · guudcompany.cl</p>
+        <p style="font-size:12px;color:#444;margin-top:20px;border-top:1px solid #1a1a1a;padding-top:16px">GÃÃD Company Â· Global Creative HÃB Â· guudcompany.cl</p>
       </div>`
 
       const raw = Buffer.from([
         'Content-Type: text/html; charset=utf-8',
         'MIME-Version: 1.0',
         `To: ${e}`,
-        `From: GÜÜD Company <${process.env.GUUD_EMAIL || 'hola@guudcompany.cl'}>`,
-        `Subject: Reunión confirmada · GÜÜD Company · ${fecha}`,
+        `From: GÃÃD Company <${process.env.GUUD_EMAIL || 'hola@guudcompany.cl'}>`,
+        `Subject: ReuniÃ³n confirmada Â· GÃÃD Company Â· ${fecha}`,
         '', html
       ].join('\n')).toString('base64').replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')
 
@@ -113,7 +113,7 @@ export default async function handler(req, res) {
     console.error('GCal OAuth error:', err.message)
   }
 
-  // Email de confirmación post-agendamiento
+  // Email de confirmaciÃ³n post-agendamiento
   if (meetLink && email) {
     try {
       const baseUrl = process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'https://guud-quote-ai.vercel.app'
@@ -137,16 +137,16 @@ export default async function handler(req, res) {
         .footer{padding:16px 28px;background:#fafafa;border-top:1px solid #f0f0f0;font-size:11px;color:#aaa;text-align:center}
       </style></head><body>
       <div class="card">
-        <div class="header"><div class="logo">GÜÜD</div><div class="sub">Global Creative Hub</div></div>
+        <div class="header"><div class="logo">GÃÃD</div><div class="sub">Global Creative Hub</div></div>
         <div class="body">
-          <h1>Reunión confirmada</h1>
-          <p class="lead">Hola ${nombre}, tu reunión con GÜÜD Company está lista. Aquí tienes el resumen.</p>
+          <h1>ReuniÃ³n confirmada</h1>
+          <p class="lead">Hola ${nombre}, tu reuniÃ³n con GÃÃD Company estÃ¡ lista. AquÃ­ tienes el resumen.</p>
           ${servicio ? '<div class="row"><span class="label">Servicio</span><span class="val">'+servicio+'</span></div>' : ''}
           ${proyecto ? '<div class="row"><span class="label">Proyecto</span><span class="val">'+proyecto+'</span></div>' : ''}
           ${slotLabel ? '<div class="meet-block"><div class="meet-label">Fecha y hora</div><div class="meet-date">'+slotLabel+'</div></div>' : ''}
-          <a href="${meetLink}" class="cta">Confirmar reunión →</a>
+          <a href="${meetLink}" class="cta">Confirmar reuniÃ³n â</a>
         </div>
-        <div class="footer">GÜÜD Company · Si necesitas reagendar, responde este email.</div>
+        <div class="footer">GÃÃD Company Â· Si necesitas reagendar, responde este email.</div>
       </div></body></html>`
 
       await fetch(baseUrl + '/api/send-email', {
@@ -154,7 +154,7 @@ export default async function handler(req, res) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           to: email,
-          subject: 'Reunión confirmada con GÜÜD — ' + (slotLabel || ''),
+          subject: 'ReuniÃ³n confirmada con GÃÃD â ' + (slotLabel || ''),
           html: htmlConfirm
         })
       })
@@ -166,4 +166,5 @@ export default async function handler(req, res) {
   res.status(200).json({ success: true, eventId, meetLink, gcalError })
 }
 
-// oauth updated: 575457646854 - 2026-06-01T21:39:53.804Z
+
+// oauth final: 2026-06-01T22:00:57.374Z
