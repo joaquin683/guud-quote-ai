@@ -2,33 +2,27 @@
 import { google } from 'googleapis';
 
 export default async function handler(req, res) {
-  const { code } = req.query;
+  if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).end();
   
-  // Si viene el code por GET (callback de Google), hacer el exchange
-  if (code) {
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_OAUTH_CLIENT_ID,
-      process.env.GOOGLE_OAUTH_CLIENT_SECRET,
-      'https://guud-quote-ai.vercel.app/api/get-refresh-token'
-    );
-    try {
-      const { tokens } = await oauth2Client.getToken(code);
-      return res.status(200).send('<h1>REFRESH TOKEN:</h1><p style="word-break:break-all;font-size:20px;color:green">' + tokens.refresh_token + '</p><p>Copia este valor</p>');
-    } catch(e) {
-      return res.status(500).send('Error: ' + e.message);
-    }
+  const code = req.method === 'GET' ? req.query.code : req.body?.code;
+  
+  if (!code) {
+    return res.status(400).json({ error: 'code param required' });
   }
-  
-  // Si no hay code, generar URL de autorización
+
   const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_OAUTH_CLIENT_ID,
     process.env.GOOGLE_OAUTH_CLIENT_SECRET,
-    'https://guud-quote-ai.vercel.app/api/get-refresh-token'
+    'https://developers.google.com/oauthplayground'
   );
-  const authUrl = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: ['https://www.googleapis.com/auth/calendar'],
-    prompt: 'consent'
-  });
-  return res.redirect(authUrl);
+
+  try {
+    const { tokens } = await oauth2Client.getToken(code);
+    return res.status(200).json({ 
+      refresh_token: tokens.refresh_token,
+      ok: true
+    });
+  } catch(e) {
+    return res.status(500).json({ error: e.message, code_used: code.slice(0,20) });
+  }
 }
