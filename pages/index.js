@@ -61,169 +61,151 @@ const WELCOME_MSG = '¡Hola! ¿Listo para cotizar tu próximo proyecto creativo 
 function guudDownloadPDF(q) {
   if (typeof window === 'undefined' || !q) return
   var fmt = function(n) { return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n||0) }
-  var script = document.createElement('script')
-  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
-  script.onload = function() {
+  var load = document.createElement('script')
+  load.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  load.onload = function() {
     var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' })
     var W = 210, H = 297
-    var pad = 16  // padding interno de la tarjeta
-    var cardX = 16, cardW = W - 32  // tarjeta con margen lateral
-    var y = 16
-    var accR = 232, accG = 255, accB = 0   // #E8FF00
-    var bgR  =  14, bgG  =  14, bgB  =  14 // #0E0E0E
-    var bg1R =  17, bg1G =  17, bg1B  =  17 // #111
-    var t1R  = 242, t1G  = 240, t1B  = 232  // #F2F0E8
-    var t2R  = 160, t2G  = 158, t2B  = 150  // muted
-    var t3R  =  80, t3G  =   80, t3B =  76  // dimmed
-    var b1R  =  40, b1G  =  40, b1B  =  40  // border
+    var lm = 18, rm = 18   // left/right margin
+    var cw = W - lm - rm   // content width = 174mm
+    var y = 0
 
-    // ── Fondo página ──
-    doc.setFillColor(8, 8, 8)
-    doc.rect(0, 0, W, H, 'F')
+    // ── helpers ──────────────────────────────────────────────────────────
+    var acc  = [232,255,0]
+    var bg0  = [8,8,8]
+    var bg1  = [14,14,14]
+    var bg2  = [20,20,20]
+    var bord = [38,38,38]
+    var t1   = [242,240,232]
+    var t2   = [140,138,132]
+    var t3   = [72,70,68]
 
-    // ── Header (logo strip) ──
-    doc.setFillColor(bg1R, bg1G, bg1B)
-    doc.rect(0, 0, W, 14, 'F')
-    doc.setDrawColor(b1R, b1G, b1B)
-    doc.line(0, 14, W, 14)
-    // Logo GÜÜD amarillo
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(11)
-    doc.setTextColor(accR, accG, accB)
-    doc.text('GÜÜD', pad, 9)
-    // Sub-label
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(7)
-    doc.setTextColor(t3R, t3G, t3B)
-    doc.text('GLOBAL CREATIVE HÜB', W - pad, 9, { align: 'right' })
-    y = 22
+    function fill(r,g,b) { doc.setFillColor(r,g,b) }
+    function stroke(r,g,b) { doc.setDrawColor(r,g,b) }
+    function color(r,g,b) { doc.setTextColor(r,g,b) }
+    function bold(sz) { doc.setFont('helvetica','bold'); doc.setFontSize(sz) }
+    function reg(sz)  { doc.setFont('helvetica','normal'); doc.setFontSize(sz) }
+    function it(sz)   { doc.setFont('helvetica','italic'); doc.setFontSize(sz) }
 
-    // ── Card container ──
-    // Borde izquierdo amarillo (acento)
-    doc.setFillColor(accR, accG, accB)
-    doc.rect(cardX, y, 1.5, 8, 'F')
+    // ── PAGE background ──────────────────────────────────────────────────
+    fill(...bg0); doc.rect(0,0,W,H,'F')
 
-    // Tag "Estimación · GÜÜD Company"
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(7)
-    doc.setTextColor(accR, accG, accB)
-    doc.text('ESTIMACIÓN  ·  GÜÜD COMPANY', cardX + 6, y + 5)
-    y += 12
+    // ── HEADER BAR ───────────────────────────────────────────────────────
+    fill(...bg2); doc.rect(0,0,W,16,'F')
+    stroke(...bord); doc.setLineWidth(0.25); doc.line(0,16,W,16)
+    // Logo GÜÜD bold amarillo
+    bold(12); color(...acc); doc.text('GÜÜD',lm,10.5)
+    // Sub label derecha
+    reg(7); color(...t3); doc.text('GLOBAL CREATIVE HÜB', W-rm, 10.5,{align:'right'})
+    y = 24
 
-    // Nombre del proyecto
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(18)
-    doc.setTextColor(t1R, t1G, t1B)
-    var titleLines = doc.splitTextToSize(String(q.proyecto || ''), cardW - 8)
-    doc.text(titleLines, cardX, y)
-    y += titleLines.length * 7.5 + 3
+    // ── CARD top accent line (borde amarillo izq como en la UI) ──────────
+    fill(...acc); doc.rect(lm, y, 1.2, 6, 'F')
 
-    // Servicio
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(10)
-    doc.setTextColor(t2R, t2G, t2B)
-    doc.text(String(q.servicio || ''), cardX, y)
-    y += 10
+    // TAG "ESTIMACIÓN · GÜÜD COMPANY"
+    doc.setFont('helvetica','bold'); doc.setFontSize(6.5)
+    // letra espaciada
+    color(...acc)
+    doc.text('ESTIMACIÓN  ·  GÜÜD COMPANY', lm+5, y+4.2)
+    y += 11
+
+    // ── TÍTULO proyecto ──────────────────────────────────────────────────
+    bold(17); color(...t1)
+    var titleLines = doc.splitTextToSize(String(q.proyecto||'Sin nombre'), cw)
+    doc.text(titleLines, lm, y)
+    y += titleLines.length * 7 + 2
+
+    // Subtítulo servicio
+    reg(9.5); color(...t2)
+    doc.text(String(q.servicio||''), lm, y)
+    y += 9
 
     // Separador
-    doc.setDrawColor(b1R, b1G, b1B)
-    doc.line(cardX, y, cardX + cardW, y)
-    y += 8
+    stroke(...bord); doc.setLineWidth(0.2); doc.line(lm,y,lm+cw,y)
+    y += 7
 
-    // ── Filas de datos ──
+    // ── FILAS Entregables / Tiempo ───────────────────────────────────────
     var rows = [
-      ['Entregables', String(q.entregables || '')],
-      ['Tiempo estimado', String(q.tiempo || '')],
+      ['Entregables', String(q.entregables||'')],
+      ['Tiempo estimado', String(q.tiempo||'')],
     ]
-    doc.setFontSize(10)
     rows.forEach(function(row) {
-      doc.setFont('helvetica', 'normal')
-      doc.setTextColor(t2R, t2G, t2B)
-      doc.text(row[0], cardX, y)
-      doc.setFont('helvetica', 'bold')
-      doc.setTextColor(t1R, t1G, t1B)
-      var valLines = doc.splitTextToSize(row[1], cardW - 65)
-      doc.text(valLines, cardX + 62, y)
-      y += Math.max(valLines.length * 6, 7) + 5
-      doc.setDrawColor(b1R, b1G, b1B)
-      doc.line(cardX, y - 2, cardX + cardW, y - 2)
+      reg(8.5); color(...t2)
+      doc.text(row[0], lm, y)
+      bold(8.5); color(...t1)
+      var vl = doc.splitTextToSize(row[1], cw - 52)
+      doc.text(vl, lm+cw, y, {align:'right'})
+      var rowH = Math.max(vl.length * 5.2, 6)
+      y += rowH + 4
+      stroke(...bord); doc.setLineWidth(0.15); doc.line(lm,y-1,lm+cw,y-1)
+      y += 3
     })
-    y += 4
+    y += 2
 
-    // ── Sección Asesoría GÜÜD ──
+    // ── ASESORÍA GÜÜD ────────────────────────────────────────────────────
     if (q.recomendacion) {
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(7.5)
-      doc.setTextColor(accR, accG, accB)
-      doc.text('ASESORÍA GÜÜD', cardX, y)
-      y += 6
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(10)
-      doc.setTextColor(t1R, t1G, t1B)
-      var recLines = doc.splitTextToSize(String(q.recomendacion), cardW - 4)
-      doc.text(recLines, cardX, y)
-      y += recLines.length * 5.5 + 8
-      doc.setDrawColor(b1R, b1G, b1B)
-      doc.line(cardX, y - 4, cardX + cardW, y - 4)
-      y += 2
+      // Fondo sutil
+      fill(18,18,18); doc.rect(lm, y-2, cw, 4, 'F')
+      bold(6.5); color(...acc)
+      doc.text('ASESORÍA GÜÜD', lm, y+2)
+      y += 7
+      reg(8.5); color(...t1)
+      var recL = doc.splitTextToSize(String(q.recomendacion), cw)
+      // Fondo bloque asesoría
+      fill(16,16,16)
+      doc.rect(lm, y-3, cw, recL.length * 5 + 8, 'F')
+      // Borde izq amarillo fino
+      fill(...acc); doc.rect(lm, y-3, 1, recL.length * 5 + 8, 'F')
+      reg(8.5); color(...t1)
+      doc.text(recL, lm+5, y+1)
+      y += recL.length * 5 + 9
+      stroke(...bord); doc.setLineWidth(0.2); doc.line(lm,y,lm+cw,y)
+      y += 8
     }
 
-    // ── Bloque precio ──
-    var priceH = 20
-    doc.setFillColor(bg1R, bg1G, bg1B)
-    doc.roundedRect(cardX, y, cardW, priceH, 3, 3, 'F')
-    doc.setDrawColor(accR, accG, accB)
-    doc.setLineWidth(0.3)
-    doc.roundedRect(cardX, y, cardW, priceH, 3, 3, 'S')
-    doc.setLineWidth(0.2)
+    // ── PRECIO ───────────────────────────────────────────────────────────
+    // Fila precio sin fondo pesado — igual que la card
+    reg(8.5); color(...t2); doc.text('Precio referencial', lm, y+1)
     if (q.min === 0 && q.max === 0) {
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(9)
-      doc.setTextColor(accR, accG, accB)
-      doc.text('Depende de la idea', cardX + cardW/2, y + 12, { align: 'center' })
+      bold(11); color(...acc); doc.text('Depende de la idea', lm+cw, y+1, {align:'right'})
     } else {
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(8)
-      doc.setTextColor(t2R, t2G, t2B)
-      doc.text('Precio referencial', cardX + 8, y + 7)
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(16)
-      doc.setTextColor(accR, accG, accB)
-      doc.text('Desde ' + fmt(q.min), cardX + 8, y + 15)
+      bold(14); color(...acc); doc.text('Desde '+fmt(q.min), lm+cw, y+1, {align:'right'})
     }
-    y += priceH + 6
+    y += 12
+    stroke(...bord); doc.setLineWidth(0.2); doc.line(lm,y,lm+cw,y)
+    y += 7
 
-    // Nota disclaimer
-    doc.setFont('helvetica', 'italic')
-    doc.setFontSize(7.5)
-    doc.setTextColor(t3R, t3G, t3B)
-    doc.text('Precio referencial. El valor definitivo se confirma en la reunión de proyecto.', cardX, y)
-    y += 8
+    // Nota pequeña
+    it(7); color(...t3)
+    doc.text('Precio referencial. El valor definitivo se confirma en la reunión de proyecto.', lm, y)
+    y += 9
 
-    // ── Botón CTA (visual only) ──
-    var btnW = cardW, btnH = 10
-    doc.setFillColor(accR, accG, accB)
-    doc.roundedRect(cardX, y, btnW, btnH, 2, 2, 'F')
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(8)
-    doc.setTextColor(8, 8, 8)
-    doc.text('Agendar reunión con GÜÜD', cardX + btnW/2, y + 6.5, { align: 'center' })
-    y += btnH + 10
+    // ── BOTÓN "VER CREDENCIALES" ──────────────────────────────────────────
+    var btnH = 10, btnY = y
+    fill(...acc)
+    doc.roundedRect(lm, btnY, cw, btnH, 2, 2, 'F')
+    bold(8); color(...bg0)
+    doc.text('VER CREDENCIALES  →  hub.guudcompany.cl', lm+cw/2, btnY+6.5, {align:'center'})
+    y += btnH + 8
 
-    // ── Footer ──
-    doc.setDrawColor(b1R, b1G, b1B)
-    doc.line(0, H - 12, W, H - 12)
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(7)
-    doc.setTextColor(t3R, t3G, t3B)
-    doc.text('GÜÜD Company  ·  Global Creative HÜB', pad, H - 6)
-    doc.text('hub.guudcompany.cl', W - pad, H - 6, { align: 'right' })
+    // Nota URL pequeña (solo referencia)
+    reg(7); color(...t3)
+    doc.text('Visita hub.guudcompany.cl para ver nuestros proyectos y trabajos anteriores', lm, y)
 
-    var slug = (q.proyecto || 'cotizacion').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30)
-    doc.save('cotizacion-guud-' + slug + '.pdf')
+    // ── FOOTER ───────────────────────────────────────────────────────────
+    stroke(...bord); doc.setLineWidth(0.2); doc.line(0, H-12, W, H-12)
+    fill(...bg2); doc.rect(0, H-12, W, 12, 'F')
+    reg(7); color(...t3)
+    doc.text('GÜÜD Company  ·  Global Creative HÜB', lm, H-5)
+    doc.text('hub.guudcompany.cl', W-rm, H-5, {align:'right'})
+
+    // ── SAVE ─────────────────────────────────────────────────────────────
+    var slug = (q.proyecto||'cotizacion').toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,30)
+    doc.save('cotizacion-guud-'+slug+'.pdf')
   }
-  document.head.appendChild(script)
+  document.head.appendChild(load)
 }
+
 
 export default function Home() {
   const [fase, setFase]             = useState('inicio')
