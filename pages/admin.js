@@ -171,6 +171,8 @@ function AdminPanel({ onLogout }) {
                     <div style={{ fontSize: 12, color: '#484644', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                       {p.nombre_contacto && <span>👤 {p.nombre_contacto}</span>}
                       {p.email_contacto && <span>✉ {p.email_contacto}</span>}
+                      {p.empresa && <span>🏢 {p.empresa}</span>}
+                      {p.telefono && <span>📞 {p.telefono}</span>}
                       {p.agente_usado && <span>🤖 {p.agente_usado}</span>}
                       {p.creado_en && <span>🕐 {fmtDate(p.creado_en)}</span>}
                     </div>
