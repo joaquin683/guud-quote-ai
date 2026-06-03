@@ -1,34 +1,58 @@
-export default async function handler(req, res) {
-  const REPO = 'joaquin683/guud-quote-ai'
-  const FILE = 'data/tarifario.json'
-  const TOKEN = process.env.GITHUB_TOKEN
-  const headers = { 'Authorization': 'token ' + TOKEN, 'Content-Type': 'application/json' }
+// pages/api/tarifario.js — REEMPLAZO COMPLETO
+//
+// Fix: el GET ya no depende de GITHUB_TOKEN. Intenta leer desde GitHub
+// (para reflejar ediciones recientes) y si falla — token ausente, 401,
+// rate limit, lo que sea — cae a la copia local empaquetada en el build,
+// así el tarifario NUNCA aparece vacío.
 
-  // Función helper para leer el archivo de GitHub
-  async function readFile() {
-    const r = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, { headers })
-    const meta = await r.json()
-    if (!meta.content) throw new Error('No content')
-    const bin = Buffer.from(meta.content.replace(/\n/g,''), 'base64').toString('utf-8')
-    return { data: JSON.parse(bin), sha: meta.sha }
+import localTarifario from '../../data/tarifario.json'
+
+const REPO  = 'joaquin683/guud-quote-ai'
+const FILE  = 'data/tarifario.json'
+const TOKEN = process.env.GITHUB_TOKEN
+
+function ghHeaders() {
+  const h = {
+    'Accept': 'application/vnd.github.v3+json',
+    'User-Agent': 'guud-tarifario',
   }
+  if (TOKEN) h['Authorization'] = 'token ' + TOKEN   // solo si existe
+  return h
+}
 
+async function readFromGitHub() {
+  const r = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, { headers: ghHeaders() })
+  if (!r.ok) throw new Error('GitHub GET ' + r.status)
+  const meta = await r.json()
+  if (!meta.content) throw new Error('No content')
+  const bin = Buffer.from(meta.content.replace(/\n/g, ''), 'base64').toString('utf-8')
+  return { data: JSON.parse(bin), sha: meta.sha }
+}
+
+export default async function handler(req, res) {
+  // ---------- LECTURA (display) ----------
   if (req.method === 'GET') {
     try {
-      const { data } = await readFile()
+      const { data } = await readFromGitHub()
       return res.status(200).json(data)
-    } catch(e) {
-      return res.status(500).json({ error: e.message })
+    } catch (e1) {
+      // Fallback infalible: la copia local del repo
+      try {
+        return res.status(200).json(localTarifario)
+      } catch (e2) {
+        return res.status(500).json({ error: e1.message + ' / ' + e2.message })
+      }
     }
   }
 
+  // ---------- EDICIÓN (igual que antes; requiere token) ----------
   if (req.method === 'PUT') {
     if (!TOKEN) return res.status(500).json({ error: 'GITHUB_TOKEN not set' })
     const { id, precio_min, precio_max, descripcion, activo } = req.body
     if (!id) return res.status(400).json({ error: 'id requerido' })
 
     try {
-      const { data, sha } = await readFile()
+      const { data, sha } = await readFromGitHub()
       const idx = data.findIndex(s => s.id === String(id))
       if (idx === -1) return res.status(404).json({ error: 'Servicio no encontrado' })
 
@@ -36,13 +60,14 @@ export default async function handler(req, res) {
 
       const newContent = Buffer.from(JSON.stringify(data, null, 2)).toString('base64')
       const r = await fetch('https://api.github.com/repos/' + REPO + '/contents/' + FILE, {
-        method: 'PUT', headers,
-        body: JSON.stringify({ message: 'update: tarifario ' + data[idx].servicio, content: newContent, sha })
+        method: 'PUT',
+        headers: { ...ghHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'update: tarifario ' + data[idx].nombre, content: newContent, sha }),
       })
       const result = await r.json()
-      if (!result.commit) return res.status(500).json({ error: JSON.stringify(result).slice(0,100) })
+      if (!result.commit) return res.status(500).json({ error: JSON.stringify(result).slice(0, 100) })
       return res.status(200).json(data[idx])
-    } catch(e) {
+    } catch (e) {
       return res.status(500).json({ error: e.message })
     }
   }
