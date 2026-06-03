@@ -178,23 +178,27 @@ export default function Home() {
     }
   }, [hasStartedChat])
 
-  // Fix mobile keyboard cross-platform
-  // Android: 100dvh shrinks automatically when keyboard opens ✓
-  // iOS Safari: dvh doesn't shrink → use visualViewport to set explicit height
+  // Fix mobile keyboard — works on iOS Safari + Android Chrome (Samsung S21 etc)
+  // visualViewport.height = exact visible area above keyboard on ALL mobile browsers
   useEffect(() => {
     if (typeof window === 'undefined') return
     const appEl = document.getElementById('guud-app')
     if (!appEl) return
     const vv = window.visualViewport
     if (!vv) return
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-    if (!isIOS) return // Android handles it via dvh
-    const onResize = () => {
+    const apply = () => {
+      // Set explicit height = visible viewport (excludes keyboard on all browsers)
       appEl.style.height = vv.height + 'px'
+      // Also pin to top of visual viewport (handles scroll offsets on Android)
+      appEl.style.top = vv.offsetTop + 'px'
     }
-    onResize()
-    vv.addEventListener('resize', onResize)
-    return () => vv.removeEventListener('resize', onResize)
+    apply()
+    vv.addEventListener('resize', apply)
+    vv.addEventListener('scroll', apply)
+    return () => {
+      vv.removeEventListener('resize', apply)
+      vv.removeEventListener('scroll', apply)
+    }
   }, [])
   const [waveActive, setWaveActive] = useState(false)
   const [agendando, setAgendando]   = useState(false)
@@ -1628,7 +1632,7 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
 }
 
 const S = {
-  app: { display: 'flex', flexDirection: 'column', height: '100dvh', position: 'relative', zIndex: 2, overflow: 'hidden' },
+  app: { display: 'flex', flexDirection: 'column', height: '100dvh', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 2, overflow: 'hidden' },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' }, inner: { display: 'flex', flexDirection: 'column', flex: 1, maxWidth: 720, margin: '0 auto', width: '100%', overflow: 'hidden' },
   hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative' }, langSelector: { position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 4 },
   logoWrap: { display: 'flex', alignItems: 'center' },
