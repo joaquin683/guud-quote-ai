@@ -1,4 +1,5 @@
 import { google } from 'googleapis'
+import { supabase } from '../../../lib/supabase'
 
 function getOAuthClient() {
   const oauth2Client = new google.auth.OAuth2(
@@ -9,12 +10,31 @@ function getOAuthClient() {
   oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_OAUTH_REFRESH_TOKEN })
   return oauth2Client
 }
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { nombre: n, email: e, slot_iso, proyecto, servicio, entregables, tiempo, asesoria, precio } = req.body
+  const { nombre: n, email: e, slot_iso, proyecto, servicio, entregables, tiempo, asesoria, precio, empresa, telefono, proyecto_id } = req.body
   if (!n || !e || !slot_iso) return res.status(400).json({ error: 'faltan campos' })
+
+  // Guardar/enriquecer el lead en Supabase (para que aparezca en el admin)
+  try {
+    const lead = {
+      nombre_contacto: n,
+      email_contacto: e,
+      empresa: empresa || null,
+      telefono: telefono || null,
+      nombre_proyecto: proyecto || null,
+      descripcion_cliente: servicio || null,
+      estado: 'agendado',
+    }
+    if (proyecto_id) {
+      await supabase.from('proyectos').update(lead).eq('id', proyecto_id)
+    } else {
+      await supabase.from('proyectos').insert([lead])
+    }
+  } catch (dbErr) {
+    console.error('Supabase lead error:', dbErr.message)
+  }
 
   let eventId = null
   let meetLink = null
