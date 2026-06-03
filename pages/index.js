@@ -178,23 +178,23 @@ export default function Home() {
     }
   }, [hasStartedChat])
 
-  // Fix mobile keyboard: adjust bottom offset using visualViewport
+  // Fix mobile keyboard cross-platform
+  // Android: 100dvh shrinks automatically when keyboard opens ✓
+  // iOS Safari: dvh doesn't shrink → use visualViewport to set explicit height
   useEffect(() => {
     if (typeof window === 'undefined') return
     const appEl = document.getElementById('guud-app')
     if (!appEl) return
     const vv = window.visualViewport
     if (!vv) return
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    if (!isIOS) return // Android handles it via dvh
     const onResize = () => {
-      const offset = window.innerHeight - vv.height - vv.offsetTop
-      appEl.style.bottom = Math.max(0, offset) + 'px'
+      appEl.style.height = vv.height + 'px'
     }
+    onResize()
     vv.addEventListener('resize', onResize)
-    vv.addEventListener('scroll', onResize)
-    return () => {
-      vv.removeEventListener('resize', onResize)
-      vv.removeEventListener('scroll', onResize)
-    }
+    return () => vv.removeEventListener('resize', onResize)
   }, [])
   const [waveActive, setWaveActive] = useState(false)
   const [agendando, setAgendando]   = useState(false)
@@ -1628,7 +1628,7 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
 }
 
 const S = {
-  app: { display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2, transition: 'all .4s ease', overflow: 'hidden' },
+  app: { display: 'flex', flexDirection: 'column', height: '100dvh', position: 'relative', zIndex: 2, overflow: 'hidden' },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' }, inner: { display: 'flex', flexDirection: 'column', flex: 1, maxWidth: 720, margin: '0 auto', width: '100%', overflow: 'hidden' },
   hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative' }, langSelector: { position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 4 },
   logoWrap: { display: 'flex', alignItems: 'center' },
