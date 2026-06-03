@@ -479,7 +479,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>GÜÜD Quote AI — Global Creative HÜB</title>
+        <title>GÜÜD COMPANY</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
         <meta name="description" content="¡Hola! ¿Listo para cotizar tu próximo proyecto creativo? GÜÜD Company — Global Creative HÜB." />
       </Head>
