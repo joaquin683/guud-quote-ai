@@ -399,7 +399,7 @@ export default function Home() {
     <>
       <Head>
         <title>GÜÜD Quote AI — Global Creative HÜB</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, interactive-widget=resizes-content" />
         <meta name="description" content="¡Hola! ¿Listo para cotizar tu próximo proyecto creativo? GÜÜD Company — Global Creative HÜB." />
       </Head>
 
@@ -1609,7 +1609,7 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
 }
 
 const S = {
-  app: { display: 'flex', flexDirection: 'column', height: '100dvh', position: 'relative', zIndex: 2, transition: 'all .4s ease' },
+  app: { display: 'flex', flexDirection: 'column', height: '100svh', minHeight: '-webkit-fill-available', position: 'relative', zIndex: 2, transition: 'all .4s ease', overflow: 'hidden' },
   amb: { position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: 'radial-gradient(ellipse 500px 250px at 50% -60px, rgba(232,255,0,0.04), transparent)' }, inner: { display: 'flex', flexDirection: 'column', flex: 1, maxWidth: 720, margin: '0 auto', width: '100%', overflow: 'hidden' },
   hdr: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 28px', borderBottom: 'none', flexShrink: 0, background: '#080808', width: '100%', position: 'relative' }, langSelector: { position: 'absolute', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 4 },
   logoWrap: { display: 'flex', alignItems: 'center' },
@@ -1653,7 +1653,7 @@ const S = {
   dot: { width: 5, height: 5, borderRadius: '50%', background: 'var(--acc)', opacity: .3, display: 'inline-block', animation: 'dot 1.1s ease-in-out infinite' },
   chips: { padding: '8px 20px 0', display: 'flex', flexWrap: 'wrap', gap: 8, flexShrink: 0, justifyContent: 'center', maxWidth: 780, margin: '0 auto', width: '100%' },
   chip: { padding: '7px 13px', borderRadius: 20, border: '0.5px solid var(--b2)', background: 'var(--bg2)', fontSize: 12, color: 'var(--t2)', cursor: 'pointer', transition: 'all .15s', fontFamily: 'DM Sans, sans-serif' },
-  inputArea: { padding: '8px 20px 18px', flexShrink: 0 },
+  inputArea: { padding: '8px 20px max(18px, env(safe-area-inset-bottom, 18px))', flexShrink: 0 },
   inputBox: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg3)', border: '0.5px solid var(--b2)', borderRadius: 22, padding: '0 12px', minHeight: 54, position: 'relative' },
   textarea: { flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, lineHeight: '21px', resize: 'none', maxHeight: 80, height: 21, padding: '0', margin: '0', display: 'block' },
   inputFooter: { fontSize: 10, color: '#E8FF00', letterSpacing: '0.04em' },
