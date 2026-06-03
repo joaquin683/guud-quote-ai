@@ -464,7 +464,29 @@ export default function Home() {
                 {agenteInfo.label}
               </div>
             )}
-
+            <a
+              href="http://www.guudcompany.cl/hub"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                color: '#080808',
+                background: '#E8FF00',
+                padding: '6px 13px',
+                borderRadius: 20,
+                textDecoration: 'none',
+                fontFamily: 'DM Sans, sans-serif',
+                whiteSpace: 'nowrap',
+                transition: 'opacity .2s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '.8'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            >
+              Credenciales
+            </a>
           </div>
         </header>
         <div style={S.inner}>
