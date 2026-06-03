@@ -86,21 +86,20 @@ function AdminPanel({ onLogout }) {
 
 
   const actualizarEstado = async (id, nuevoEstado) => {
-    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    setProyectos(prev => prev.map(p => p.id === id ? {...p, estado: nuevoEstado} : p))
     try {
-      await fetch(SUPABASE_URL + '/rest/v1/proyectos?id=eq.' + id, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': 'Bearer ' + SUPABASE_KEY,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ estado: nuevoEstado })
+      const r = await fetch('/api/update-estado', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, estado: nuevoEstado })
       })
-      setProyectos(prev => prev.map(p => p.id === id ? { ...p, estado: nuevoEstado } : p))
-    } catch(err) { console.error('Error actualizando estado:', err) }
+      const j = await r.json()
+      if (!j.ok) throw new Error(j.error || 'fallo al actualizar')
+    } catch (err) {
+      console.error('Error actualizando estado', err)
+      alert('No se pudo actualizar el estado: ' + (err.message || err))
+      load()
+    }
   }
   return (
     <div style={{ minHeight: '100vh', background: '#080808', color: '#F2F0E8', fontFamily: 'system-ui, sans-serif' }}>
