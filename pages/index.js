@@ -1434,7 +1434,7 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
   const isValidEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
-  const isValidName  = v => v.trim().length >= 2
+  const isValidName = v => !v || v.trim().length >= 2
   const isValidPhone = v => !v || /^[+\d][\d\s\-().]{5,}$/.test(v.trim())
   const validate = f => {
     const e = {}
@@ -1581,7 +1581,7 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
 
       <div style={MS.fields}>
         <div style={{display:'flex',flexDirection:'column',gap:2}}>
-          <input style={{...MS.input,borderColor:touched.nombre&&errors.nombre?'#ff4d4f':undefined}} placeholder={tl.nameField} value={form.nombre}
+          <input style={{...MS.input,borderColor:touched.nombre&&errors.nombre?'#ff4d4f':undefined}} placeholder={tl.nameField + ' (opcional)'} value={form.nombre}
             onChange={e=>{setForm(p=>({...p,nombre:e.target.value}));if(touched.nombre)setErrors(v=>({...v,nombre:isValidName(e.target.value)?undefined:'Ingresa tu nombre'}))}}
             onBlur={()=>{setTouched(p=>({...p,nombre:true}));setErrors(v=>({...v,nombre:isValidName(form.nombre)?undefined:'Ingresa tu nombre (mín. 2 caracteres)'}))}}
           />
