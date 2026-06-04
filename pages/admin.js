@@ -86,7 +86,7 @@ function AdminPanel({ onLogout }) {
 
 
   const actualizarEstado = async (id, nuevoEstado) => {
-    setProyectos(prev => prev.map(p => p.id === id ? {...p, estado: nuevoEstado} : p))
+    setData(prev => prev ? { ...prev, proyectos: prev.proyectos.map(p => p.id === id ? { ...p, estado: nuevoEstado } : p) } : prev)
     try {
       const r = await fetch('/api/update-estado', {
         method: 'POST',
