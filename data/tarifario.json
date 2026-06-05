@@ -360,6 +360,16 @@
     "activo": true
   },
   {
+    "id": "cont-10",
+    "nombre": "Plan de contenido a medida",
+    "descripcion": "Plan mensual armado a medida según objetivos, canales y volumen. Combina piezas, reels, copies y gestión según lo que necesites.",
+    "categoria": "Contenido",
+    "precio_min": 500000,
+    "precio_max": 2000000,
+    "tiempo": "4 semanas",
+    "activo": true
+  },
+  {
     "id": "est-1",
     "nombre": "Diagnóstico de marca",
     "descripcion": "Auditoría express del estado actual de la marca: identidad, comunicación, posicionamiento y benchmark. Entrega informe ejecutivo",
