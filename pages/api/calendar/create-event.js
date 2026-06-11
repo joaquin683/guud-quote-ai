@@ -13,8 +13,9 @@ function getOAuthClient() {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
-  const { nombre: n, email: e, slot_iso, proyecto, servicio, entregables, tiempo, asesoria, precio, empresa, telefono, proyecto_id } = req.body
-  if (!n || !e || !slot_iso) return res.status(400).json({ error: 'faltan campos' })
+  const { nombre: nRaw, email: e, slot_iso, proyecto, servicio, entregables, tiempo, asesoria, precio, empresa, telefono, proyecto_id } = req.body
+  if (!e || !slot_iso) return res.status(400).json({ error: 'faltan campos' })
+  const n = (nRaw && String(nRaw).trim()) ? String(nRaw).trim() : e.split('@')[0]
 
   // Guardar/enriquecer el lead en Supabase (para que aparezca en el admin)
   try {
