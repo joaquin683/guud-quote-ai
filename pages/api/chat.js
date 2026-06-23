@@ -44,7 +44,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
   try {
-    const { agente, historial, lang, meetLink: reunionLink } = req.body
+    const { agente, historial, lang, meetLink: reunionLink, leadEmail } = req.body
 
     const [servicios, talentos] = await Promise.all([getServicios(), getTalentos()])
     const langNames = { es: 'español', en: 'English', pt: 'português (brasileño)' }
@@ -73,6 +73,8 @@ export default async function handler(req, res) {
           precio_estimado_min: quote.min,
           precio_estimado_max: quote.max,
           estado: 'cotizado',
+        email_contacto: (leadEmail && String(leadEmail).trim()) ? String(leadEmail).trim() : null,
+        nombre_contacto: (leadEmail && String(leadEmail).includes('@')) ? String(leadEmail).split('@')[0] : null,
         })
       } catch (_) {}
 
@@ -85,7 +87,7 @@ export default async function handler(req, res) {
         // Detectar email del cliente en el historial
         const allText = historial.map(m => m.content).join(' ')
         const emailMatch = allText.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/)
-        const clientEmail = emailMatch ? emailMatch[0] : null
+        const clientEmail = (leadEmail && String(leadEmail).trim()) ? String(leadEmail).trim() : (emailMatch ? emailMatch[0] : null)
 
         // HTML del email al cliente
         const htmlCliente = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
@@ -157,6 +159,7 @@ export default async function handler(req, res) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: guudEmail,
+              ...(process.env.TOMAS_EMAIL ? { cc: process.env.TOMAS_EMAIL } : {}),
               subject: '[GÜÜD Lead] ' + (quote.proyecto || 'Nueva cotización') + ' — ' + fmt(quote.min),
               html: htmlInterno
             })
