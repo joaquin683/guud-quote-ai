@@ -262,6 +262,12 @@ export default function Home() {
   const [agendando, setAgendando]   = useState(false)
   const [contacto, setContacto]     = useState({ nombre: '', email: '' })
   const [proyectoId, setProyectoId] = useState(null)
+  const [emailOk, setEmailOk] = useState(false)
+  const [gateEmail, setGateEmail] = useState('')
+  const [leadEmail, setLeadEmail] = useState('')
+  const [gateError, setGateError] = useState('')
+  const validGateEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(v).trim())
+  const submitGate = () => { if (!validGateEmail(gateEmail)) { setGateError('Ingresa un email valido (ej: juan@empresa.com)'); return } setLeadEmail(gateEmail.trim()); setEmailOk(true); setGateError('') }
   const [welcomeDone, setWelcomeDone] = useState(false)
   const [intentDetected, setIntentDetected] = useState(null)
 
@@ -371,6 +377,7 @@ export default function Home() {
   const enviar = async (texto) => {
     const msg = texto || input.trim()
     if (!msg || cargando) return
+    if (!emailOk) return
     setInput('')
     if (voiceState === 'listening') stopVoice()
     if (inputRef.current) { inputRef.current.style.height = 'auto'; inputRef.current.focus() }
@@ -399,7 +406,7 @@ export default function Home() {
         setHistorial(hist)
         const r2 = await fetch('/api/chat', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agente: ag, historial: hist, lang }),
+          body: JSON.stringify({ agente: ag, historial: hist, lang, leadEmail }),
         })
         const d2 = await r2.json()
         if (d2.quote) {
@@ -422,7 +429,7 @@ export default function Home() {
       try {
         const r = await fetch('/api/chat', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agente, historial: hist, lang }),
+          body: JSON.stringify({ agente, historial: hist, lang, leadEmail }),
         })
         const d = await r.json()
         if (d.quote) {
@@ -548,7 +555,19 @@ export default function Home() {
           </div>
         </header>
         <div style={S.inner}>
-        {!hasStartedChat && (
+        {!emailOk && (
+          <div style={S.heroCenter}>
+            <div style={S.orbWrap}><div style={S.orb}><video src="/orb.mp4" autoPlay loop muted playsInline style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /></div></div>
+            <h1 style={S.heroTitle}>Dejanos tu correo para cotizar en vivo con el equipo</h1>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#9a9a9a', textAlign: 'center', marginTop: 8, maxWidth: 440 }}>Te enviamos la cotización y novedades a tu email. Sin spam.</p>
+            <div style={{ display: 'flex', gap: 8, width: '100%', maxWidth: 440, marginTop: 22, flexWrap: 'wrap' }}>
+              <input type="email" value={gateEmail} onChange={(e) => { setGateEmail(e.target.value); if (gateError) setGateError('') }} onKeyDown={(e) => { if (e.key === 'Enter') submitGate() }} placeholder="tucorreo@empresa.com" autoFocus style={{ flex: 1, minWidth: 200, padding: '14px 16px', borderRadius: 14, border: gateError ? '1px solid #ff4d4f' : '1px solid #2a2a2a', background: '#0f0f0f', color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: 15, outline: 'none' }} />
+              <button onClick={submitGate} style={{ padding: '14px 22px', borderRadius: 14, border: 'none', background: '#E8FF00', color: '#080808', fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer', whiteSpace: 'nowrap' }}>Empezar a cotizar</button>
+            </div>
+            {gateError && <p style={{ color: '#ff4d4f', fontFamily: 'DM Sans, sans-serif', fontSize: 13, marginTop: 10 }}>{gateError}</p>}
+          </div>
+        )}
+        {emailOk && !hasStartedChat && (
           <div style={S.heroCenter}>
             <div style={S.orbWrap}>
               <div style={S.ring1} />
