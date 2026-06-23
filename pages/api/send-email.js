@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
-  const { to, subject, html } = req.body
+  const { to, subject, html, cc } = req.body
   if (!to || !subject || !html) return res.status(400).json({ error: 'Missing fields' })
 
   try {
@@ -13,6 +13,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: 'GÜÜD Company <' + (process.env.GUUD_EMAIL || 'onboarding@resend.dev') + '>',
         to: [to],
+        ...(cc ? { cc: Array.isArray(cc) ? cc : [cc] } : {}),
         subject,
         html,
       })
