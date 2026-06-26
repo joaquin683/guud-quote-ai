@@ -9,7 +9,7 @@ const AGENT_LABELS = {
   branding:   { label: 'Especialista Branding',  color: '#E8FF00' },
   web:        { label: 'Especialista Web',        color: '#E8FF00' },
   campana:    { label: 'Especialista Campaña',    color: '#E8FF00' },
-  contenido:  { label: 'Especialista Contenido',  color: '#E8FF00' },
+  contenido:  { label: 'Especialista Contenido',  color: '#E8FF00' }
   estrategia: { label: 'Consultor Estratégico',   color: '#E8FF00' },
   btl:        { label: 'Especialista BTL',           color: '#E8FF00' },
   ads:        { label: 'Especialista Ads',           color: '#E8FF00' },
@@ -558,8 +558,8 @@ export default function Home() {
         {!emailOk && (
           <div style={S.heroCenter}>
             <div style={S.orbWrap}><div style={S.orb}><video src="/orb.mp4" autoPlay loop muted playsInline style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /></div></div>
-            <h1 style={S.heroTitle}>Dejanos tu correo para cotizar en vivo con el equipo</h1>
-            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#9a9a9a', textAlign: 'center', marginTop: 8, maxWidth: 440 }}>Te enviamos la cotización y novedades a tu email. Sin spam.</p>
+            <h1 style={S.heroTitle}>Cotiza en vivo con el equipo GÜÜD.</h1>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#9a9a9a', textAlign: 'center', marginTop: 8, maxWidth: 440 }}>Solo necesitas tu correo para empezar.</p>
             <div style={{ display: 'flex', gap: 8, width: '100%', maxWidth: 440, marginTop: 22, flexWrap: 'wrap' }}>
               <input type="email" value={gateEmail} onChange={(e) => { setGateEmail(e.target.value); if (gateError) setGateError('') }} onKeyDown={(e) => { if (e.key === 'Enter') submitGate() }} placeholder="tucorreo@empresa.com" autoFocus style={{ flex: 1, minWidth: 200, padding: '14px 16px', borderRadius: 14, border: gateError ? '1px solid #ff4d4f' : '1px solid #2a2a2a', background: '#0f0f0f', color: '#fff', fontFamily: 'DM Sans, sans-serif', fontSize: 15, outline: 'none' }} />
               <button onClick={submitGate} style={{ padding: '14px 22px', borderRadius: 14, border: 'none', background: '#E8FF00', color: '#080808', fontFamily: 'DM Sans, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer', whiteSpace: 'nowrap' }}>Empezar a cotizar</button>
