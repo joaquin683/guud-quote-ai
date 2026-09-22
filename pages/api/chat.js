@@ -52,7 +52,7 @@ export default async function handler(req, res) {
     const systemPrompt = buildAgentPrompt(agente, servicios, talentos, historial) + langInstruction
 
     const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 2048,
       system: systemPrompt,
       messages: historial,
