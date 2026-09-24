@@ -76,7 +76,8 @@ function AdminPanel({ onLogout }) {
 
   const proyectos = (data?.proyectos || []).filter(p =>
     !busqueda || (p.nombre_proyecto || '').toLowerCase().includes(busqueda.toLowerCase()) ||
-    (p.nombre_contacto || '').toLowerCase().includes(busqueda.toLowerCase())
+    (p.nombre_contacto || '').toLowerCase().includes(busqueda.toLowerCase()) ||
+    (p.email_contacto || '').toLowerCase().includes(busqueda.toLowerCase())
   )
 
   const badge = (estado) => {
@@ -168,9 +169,15 @@ function AdminPanel({ onLogout }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 600, color: '#F2F0E8', marginBottom: 4 }}>{p.nombre_proyecto || '(sin nombre)'}</div>
-                    <div style={{ fontSize: 12, color: '#484644', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    <div style={{ marginBottom: 6 }}>
+                      {p.email_contacto ? (
+                        <a href={'mailto:' + p.email_contacto} style={{ fontSize: 13, fontWeight: 500, color: '#E8FF00', textDecoration: 'none' }}>✉ {p.email_contacto}</a>
+                      ) : (
+                        <span style={{ fontSize: 12, color: '#E24B4A' }}>Sin email</span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#8a8780', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                       {p.nombre_contacto && <span>👤 {p.nombre_contacto}</span>}
-                      {p.email_contacto && <span>✉ {p.email_contacto}</span>}
                       {p.empresa && <span>🏢 {p.empresa}</span>}
                       {p.telefono && <span>📞 {p.telefono}</span>}
                       {p.agente_usado && <span>🤖 {p.agente_usado}</span>}
