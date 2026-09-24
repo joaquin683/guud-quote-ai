@@ -62,11 +62,12 @@ export default async function handler(req, res) {
     reply = reply.replace(/```json/gi, '').replace(/```/gi, '').trim()
 
     let quote = null
+let proyectoId = null
     const quoteMatch = reply.match(/{[\s\S]*?"QUOTE"\s*:\s*true[\s\S]*?}/)
     if (quoteMatch) {
       try {
         quote = JSON.parse(quoteMatch[0])
-        await guardarProyecto({
+        const saved = await guardarProyecto({
           nombre_proyecto: quote.proyecto,
           descripcion_cliente: historial[0]?.content || '',
           agente_usado: agente,
@@ -76,6 +77,7 @@ export default async function handler(req, res) {
         email_contacto: (leadEmail && String(leadEmail).trim()) ? String(leadEmail).trim() : null,
         nombre_contacto: (leadEmail && String(leadEmail).includes('@')) ? String(leadEmail).split('@')[0] : null,
         })
+proyectoId = saved?.id || null
       } catch (_) {}
 
       // Enviar emails de seguimiento (fire and forget)
@@ -173,7 +175,7 @@ export default async function handler(req, res) {
     }
 
     const finalReply = quote ? null : reply.replace(/{[\s\S]*?QUOTE[\s\S]*?}/g, '').trim() || reply.trim()
-    res.status(200).json({ reply: finalReply, quote })
+    res.status(200).json({ reply: finalReply, quote, proyectoId })
 
   } catch (e) {
     console.error('Chat error:', e)
