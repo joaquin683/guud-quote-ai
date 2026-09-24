@@ -410,7 +410,8 @@ export default function Home() {
           body: JSON.stringify({ agente: ag, historial: hist, lang, leadEmail }),
         })
         const d2 = await r2.json()
-        if (d2.quote) {
+        if (d2.proyectoId) setProyectoId(d2.proyectoId)
+      if (d2.quote) {
           analytics.quoteGenerated(agente, d2.quote.min, d2.quote.proyecto)
           setFase('cotizado')
           addMsg(null, 'ai', { type: 'quote', quote: d2.quote })
@@ -433,7 +434,8 @@ export default function Home() {
           body: JSON.stringify({ agente, historial: hist, lang, leadEmail }),
         })
         const d = await r.json()
-        if (d.quote) {
+        if (d.proyectoId) setProyectoId(d.proyectoId)
+      if (d.quote) {
           setFase('cotizado')
           addMsg(null, 'ai', { type: 'quote', quote: d.quote })
         } else {
@@ -673,9 +675,10 @@ export default function Home() {
                 <MeetingScheduler
                   quote={mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote}
                   proyectoId={proyectoId}
+                  leadEmail={leadEmail}
                   t={t}
                   onReset={() => { setAgendando(false); resetSession(); }}
-                  onConfirmed={({ nombre, email, meetLink }) => {
+                  onConfirmed={({ nombre, email, meetLink, slotDate, slotTime }) => {
                     addMsg(null, 'ai', { type: 'confirmado', contacto: { nombre, email }, meetLink, slotDate, slotTime })
                     analytics.meetingScheduled(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min)
                     setFase('confirmado')
@@ -1446,11 +1449,11 @@ function downloadQuotePDF(quote) {
 }
 
 // ─── MeetingScheduler component ──────────────────────────────────────
-function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp }) {
+function MeetingScheduler({ quote, proyectoId, leadEmail = '', onConfirmed, onReset, t: tProp }) {
   const soundPlayed = useRef(false)
   const tl = tProp || { scheduleTitle: 'Agenda una reunión con GÜÜD', scheduleSub: 'Elige un horario.', nameField: 'Tu nombre *', emailField: 'Tu email *', companyField: 'Empresa', phoneField: 'Teléfono', selectDay: 'Selecciona un día', selectTime: 'Horarios', confirmBtn: 'Confirmar reunión', confirming: 'Agendando…', successTitle: 'Reunión confirmada', successMsg: 'Tendrás una reunión', successEmail: 'Te enviamos la invitación a', successDetails: 'con todos los detalles.', successBye: 'Nos vemos.', meetBtn: 'Unirse a Google Meet', newQuote: 'Iniciar nueva cotización', errorMsg: 'No pudimos agendar.', retryBtn: 'Volver a intentar', loadingSlots: 'Cargando…', noSlots: 'Sin disponibilidad.' }
   const [step, setStep] = useState('idle') // idle | confirming | success | error
-  const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '' })
+  const [form, setForm] = useState({ nombre: '', email: leadEmail || '', empresa: '', telefono: '' })
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
   const isValidEmail = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim())
@@ -1607,6 +1610,11 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
           />
           {touched.nombre&&errors.nombre&&<span style={{fontSize:11,color:'#ff4d4f',paddingLeft:4,marginTop:2}}>{errors.nombre}</span>}
         </div>
+        {leadEmail && isValidEmail(leadEmail) ? (
+          <div style={{fontSize:12,color:'var(--t2)',padding:'2px 4px'}}>
+            {tl.inviteTo || 'Te enviaremos la invitación a'} <strong style={{color:'var(--t1)'}}>{leadEmail}</strong>
+          </div>
+        ) : (
         <div style={{display:'flex',flexDirection:'column',gap:2}}>
           <input style={{...MS.input,borderColor:touched.email&&errors.email?'#ff4d4f':undefined}} placeholder={tl.emailField} type="email" value={form.email}
             onChange={e=>{setForm(p=>({...p,email:e.target.value}));if(touched.email)setErrors(v=>({...v,email:isValidEmail(e.target.value)?undefined:'Email inválido'}))}}
@@ -1614,6 +1622,7 @@ function MeetingScheduler({ quote, proyectoId, onConfirmed, onReset, t: tProp })
           />
           {touched.email&&errors.email&&<span style={{fontSize:11,color:'#ff4d4f',paddingLeft:4,marginTop:2}}>{errors.email}</span>}
         </div>
+        )}
         <input style={MS.input} placeholder={tl.companyField} value={form.empresa} onChange={e=>setForm(p=>({...p,empresa:e.target.value}))} />
         <div style={{display:'flex',flexDirection:'column',gap:2}}>
           <input style={{...MS.input,borderColor:touched.telefono&&errors.telefono?'#ff4d4f':undefined}} placeholder={tl.phoneField} value={form.telefono}
