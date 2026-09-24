@@ -185,12 +185,13 @@ function guudDownloadPDF(q) {
     fill(...acc)
     doc.roundedRect(lm, btnY, cw, btnH, 2, 2, 'F')
     bold(8); color(...bg0)
-    doc.text('VER CREDENCIALES  →  hub.guudcompany.cl', lm+cw/2, btnY+6.5, {align:'center'})
+    doc.text('VER CREDENCIALES  →  guudcompany.cl', lm+cw/2, btnY+6.5, {align:'center'})
+    doc.link(lm, btnY, cw, btnH, { url: 'https://www.guudcompany.cl/' })
     y += btnH + 8
 
     // Nota URL pequeña (solo referencia)
     reg(7); color(...t3)
-    doc.text('Visita hub.guudcompany.cl para ver nuestros proyectos y trabajos anteriores', lm, y)
+    doc.text('Visita guudcompany.cl para ver nuestros proyectos y trabajos anteriores', lm, y)
 
     // ── FOOTER ───────────────────────────────────────────────────────────
     stroke(...bord); doc.setLineWidth(0.2); doc.line(0, H-12, W, H-12)
@@ -530,7 +531,7 @@ export default function Home() {
               </div>
             )}
             <a
-              href="http://www.guudcompany.cl/hub"
+              href="https://www.guudcompany.cl/"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -1121,7 +1122,7 @@ function getCredentialsUrl(agente, industria = null) {
 
 // ─── RelatedCredentialsBlock component ───────────────────────────────
 function RelatedCredentialsBlock({ agente, projectType }) {
-  const url = 'https://www.guudcompany.cl/hub'
+  const url = 'https://www.guudcompany.cl/'
   const labels = {
     branding:   'branding e identidad visual',
     web:        'web y digital',
