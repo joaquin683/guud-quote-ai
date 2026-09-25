@@ -27,9 +27,12 @@ export default async function handler(req, res) {
       nombre_proyecto: proyecto || null,
       descripcion_cliente: servicio || null,
       estado: 'agendado',
+      reunion_agendada: true,
     }
     if (proyecto_id) {
-      await supabase.from('proyectos').update(lead).eq('id', proyecto_id)
+      // No pisar el brief original ni el nombre del proyecto que generó la IA
+      const { nombre_proyecto, descripcion_cliente, ...updates } = lead
+      await supabase.from('proyectos').update(updates).eq('id', proyecto_id)
     } else {
       await supabase.from('proyectos').insert([lead])
     }
