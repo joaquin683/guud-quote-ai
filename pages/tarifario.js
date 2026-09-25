@@ -10,6 +10,12 @@ const EMPTY = { id:'', nombre:'', categoria:'Branding', descripcion:'', precio_m
 export default function Tarifario() {
   const [auth, setAuth] = useState(false)
   const [pin, setPin] = useState('')
+  const checkPin = async () => {
+    try {
+      const r = await fetch('/api/admin?limit=1', { headers: { 'x-admin-pin': pin } })
+      if (r.ok) setAuth(true)
+    } catch (_) {}
+  }
   const [servicios, setServicios] = useState([])
   const [filtro, setFiltro] = useState('Todos')
   const [soloActivos, setSoloActivos] = useState(false)
@@ -38,7 +44,7 @@ export default function Tarifario() {
   const guardar = async (items) => {
     const r = await fetch('/api/tarifario', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-admin-pin': pin },
       body: JSON.stringify(items)
     })
     return r.ok
@@ -107,11 +113,11 @@ export default function Tarifario() {
         <input
           type="password" placeholder="contrasena"
           value={pin} onChange={e=>setPin(e.target.value)}
-          onKeyDown={e=>e.key==='Enter'&&pin==='estamosguud'&&setAuth(true)}
+          onKeyDown={e=>e.key==='Enter'&&checkPin()}
           style={{width:'100%',padding:'10px 14px',borderRadius:8,border:'1px solid rgba(255,255,255,.15)',
             background:'rgba(255,255,255,.05)',color:'#fff',fontSize:14,marginBottom:12,boxSizing:'border-box'}}
         />
-        <button onClick={()=>pin==='estamosguud'&&setAuth(true)}
+        <button onClick={()=>checkPin()}
           style={{width:'100%',padding:'11px',borderRadius:8,border:'none',background:'#E8FF00',
             color:'#000',fontWeight:700,fontSize:14,cursor:'pointer'}}>Entrar</button>
         <Link href="/admin" style={{display:'block',marginTop:16,color:'rgba(255,255,255,.3)',fontSize:12,textDecoration:'none'}}>
