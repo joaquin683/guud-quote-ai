@@ -1,4 +1,8 @@
 export default async function handler(req, res) {
+  const __pin = req.headers['x-admin-pin']
+  const __exp = process.env.ADMIN_PIN || process.env.NEXT_PUBLIC_ADMIN_PIN
+  if (!__exp || __pin !== __exp) return res.status(401).json({ error: 'No autorizado' })
+
   const results = {}
   results.hasEmail = !!process.env.GOOGLE_CLIENT_EMAIL
   results.hasKey = !!process.env.GOOGLE_PRIVATE_KEY
