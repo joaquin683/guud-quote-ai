@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
 
+// PIN validado en el servidor; se guarda solo en memoria mientras la pestaña está abierta
+let adminPin = ''
+const adminHeaders = () => ({ 'x-admin-pin': adminPin })
+
 const fmt = n => new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }).format(n)
 const fmtDate = d => new Date(d).toLocaleString('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 const ESTADOS = {
@@ -19,14 +23,13 @@ export default function Admin() {
   const [pin, setPin] = useState('')
   const [pinError, setPinError] = useState(false)
 
-  const handlePin = () => {
-    if (pin === (process.env.NEXT_PUBLIC_ADMIN_PIN || 'estamosguud')) {
-      setAuthed(true)
-      setPinError(false)
-    } else {
-      setPinError(true)
-      setPin('')
-    }
+  const handlePin = async () => {
+    try {
+      const r = await fetch('/api/admin', { headers: { 'x-admin-pin': pin } })
+      if (r.ok) { adminPin = pin; setAuthed(true); setPinError(false); return }
+    } catch (_) {}
+    setPinError(true)
+    setPin('')
   }
 
   if (!authed) return (
@@ -69,7 +72,7 @@ function AdminPanel({ onLogout }) {
     const p = new URLSearchParams()
     if (filtroEstado) p.set('estado', filtroEstado)
     if (filtroAgente) p.set('agente', filtroAgente)
-    fetch('/api/admin?' + p.toString()).then(r => r.json()).then(setData)
+    fetch('/api/admin?' + p.toString(), { headers: adminHeaders() }).then(r => r.json()).then(setData)
   }
 
   useEffect(() => { load() }, [filtroEstado, filtroAgente])
@@ -91,7 +94,7 @@ function AdminPanel({ onLogout }) {
     try {
       const r = await fetch('/api/update-estado', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...adminHeaders() },
         body: JSON.stringify({ id, estado: nuevoEstado })
       })
       const j = await r.json()
