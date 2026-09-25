@@ -39,6 +39,10 @@ const SERVICIOS = [
 ]
 
 export default async function handler(req, res) {
+  const __pin = req.headers['x-admin-pin']
+  const __exp = process.env.ADMIN_PIN || process.env.NEXT_PUBLIC_ADMIN_PIN
+  if (!__exp || __pin !== __exp) return res.status(401).json({ error: 'No autorizado' })
+
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   try {
