@@ -47,6 +47,9 @@ export default async function handler(req, res) {
 
   // ---------- EDICIÓN (igual que antes; requiere token) ----------
   if (req.method === 'PUT') {
+    const __pin = req.headers['x-admin-pin']
+    const __exp = process.env.ADMIN_PIN || process.env.NEXT_PUBLIC_ADMIN_PIN
+    if (!__exp || __pin !== __exp) return res.status(401).json({ error: 'No autorizado' })
     if (!TOKEN) return res.status(500).json({ error: 'GITHUB_TOKEN not set' })
     const { id, precio_min, precio_max, descripcion, activo } = req.body
     if (!id) return res.status(400).json({ error: 'id requerido' })
