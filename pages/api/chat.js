@@ -145,7 +145,7 @@ proyectoId = saved?.id || null
         if (clientEmail) {
           emailCalls.push(fetch(baseUrl + '/api/send-email', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.RESEND_API_KEY || '' },
             body: JSON.stringify({
               to: clientEmail,
               subject: 'Tu cotización de ' + (quote.servicio || 'GÜÜD') + ' está lista',
@@ -158,7 +158,7 @@ proyectoId = saved?.id || null
         if (guudEmail) {
           emailCalls.push(fetch(baseUrl + '/api/send-email', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.RESEND_API_KEY || '' },
             body: JSON.stringify({
               to: guudEmail,
               ...(process.env.TOMAS_EMAIL ? { cc: process.env.TOMAS_EMAIL } : {}),
