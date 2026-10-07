@@ -409,19 +409,21 @@ export default function Home() {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ agente: ag, historial: hist, lang, leadEmail }),
         })
-        const d2 = await r2.json()
+        const d2 = await r2.json().catch(() => ({}))
+        if (!r2.ok || (!d2.quote && !d2.reply)) { const err = new Error(d2.error || 'chat'); err.rate = r2.status === 429; throw err }
         if (d2.proyectoId) setProyectoId(d2.proyectoId)
       if (d2.quote) {
-          analytics.quoteGenerated(agente, d2.quote.min, d2.quote.proyecto)
+          analytics.quoteGenerated(ag, d2.quote.min, d2.quote.proyecto)
           setFase('cotizado')
           addMsg(null, 'ai', { type: 'quote', quote: d2.quote })
+          setHistorial(p => [...p, { role: 'assistant', content: quoteParaHistorial(d2.quote) }])
         } else {
           addMsg(d2.reply, 'ai')
           setHistorial(p => [...p, { role: 'assistant', content: d2.reply }])
           setFase('chat')
         }
       } catch (e) {
-        addMsg('Error de conexión. Recarga e intenta de nuevo.', 'ai')
+        addMsg(e && e.rate ? MSG_LIMITE : 'Error de conexión. Recarga e intenta de nuevo.', 'ai')
         setFase('inicio')
       }
       setCargando(false); setWaveActive(false)
@@ -433,16 +435,23 @@ export default function Home() {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ agente, historial: hist, lang, leadEmail }),
         })
-        const d = await r.json()
+        const d = await r.json().catch(() => ({}))
+        if (!r.ok || (!d.quote && !d.reply)) { const err = new Error(d.error || 'chat'); err.rate = r.status === 429; throw err }
         if (d.proyectoId) setProyectoId(d.proyectoId)
       if (d.quote) {
+          analytics.quoteGenerated(agente, d.quote.min, d.quote.proyecto)
           setFase('cotizado')
           addMsg(null, 'ai', { type: 'quote', quote: d.quote })
+          setHistorial(p => [...p, { role: 'assistant', content: quoteParaHistorial(d.quote) }])
         } else {
           addMsg(d.reply, 'ai')
           setHistorial(p => [...p, { role: 'assistant', content: d.reply }])
         }
-      } catch (e) { addMsg('Error de conexión.', 'ai') }
+      } catch (e) {
+        // No dejar el historial con un mensaje de usuario sin respuesta (rompe la conversacion)
+        setHistorial(historial)
+        addMsg(e && e.rate ? MSG_LIMITE : 'Error de conexión. Intenta enviar tu mensaje de nuevo.', 'ai')
+      }
       setCargando(false); setWaveActive(false)
     }
   }
@@ -648,7 +657,7 @@ export default function Home() {
                 onDownloadPDF={m.extra.quote ? () => guudDownloadPDF(m.extra.quote) : null}
                 />
               ) : m.extra?.type === 'confirmado' ? (
-                <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} />
+                <ConfirmCard contacto={m.extra.contacto} meetLink={m.extra.meetLink} slotDate={m.extra.slotDate} slotTime={m.extra.slotTime} pendiente={m.extra.pendiente} />
               ) : (
                 <div style={{ ...S.bub, ...(m.rol === 'user' ? S.bubUser : S.bubAi) }}>
                   {m.texto}
@@ -678,8 +687,8 @@ export default function Home() {
                   leadEmail={leadEmail}
                   t={t}
                   onReset={() => { setAgendando(false); resetSession(); }}
-                  onConfirmed={({ nombre, email, meetLink, slotDate, slotTime }) => {
-                    addMsg(null, 'ai', { type: 'confirmado', contacto: { nombre, email }, meetLink, slotDate, slotTime })
+                  onConfirmed={({ nombre, email, meetLink, slotDate, slotTime, pendiente }) => {
+                    addMsg(null, 'ai', { type: 'confirmado', contacto: { nombre, email }, meetLink, slotDate, slotTime, pendiente })
                     analytics.meetingScheduled(agente, mensajes.findLast(m => m.extra?.type === 'quote')?.extra?.quote?.min)
                     setFase('confirmado')
                     setAgendando(false)
@@ -1526,9 +1535,10 @@ function MeetingScheduler({ quote, proyectoId, leadEmail = '', onConfirmed, onRe
     const slotDate = selectedDate ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }) : ''
     const slotTime = selectedSlot?.time || ''
 
-    // Fire and forget — always show success regardless of API response
+    // Esperamos la respuesta: si Calendar falla, no mostramos una confirmacion falsa
+    let data = null
     try {
-      fetch('/api/calendar/create-event', {
+      const r = await fetch('/api/calendar/create-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1542,14 +1552,17 @@ function MeetingScheduler({ quote, proyectoId, leadEmail = '', onConfirmed, onRe
           tiempo: quote?.tiempo,
           asesoria: quote?.recomendacion,
         })
-      }).then(r => r.json()).then(data => {
-        if (data?.meetLink) setMeetLink(data.meetLink)
-      }).catch(() => {})
-    } catch (_) {}
+      })
+      data = await r.json().catch(() => null)
+      if (!r.ok) data = { ...(data || {}), gcalError: 'http ' + r.status }
+    } catch (_) {
+      data = { gcalError: 'network' }
+    }
+    if (data?.meetLink) setMeetLink(data.meetLink)
+    const pendiente = !data || !!data.gcalError || !data.eventId
 
-    // Always show success immediately
     setStep('success')
-    onConfirmed?.({ nombre: form.nombre, email: form.email, meetLink: '', slotDate, slotTime })
+    onConfirmed?.({ nombre: form.nombre, email: form.email, meetLink: data?.meetLink || '', slotDate, slotTime, pendiente })
   }
 
   const fmtDate = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -1708,7 +1721,15 @@ const MS = {
 }
 
 
-function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
+const MSG_LIMITE = 'Llegaste al límite de mensajes por ahora. Intenta de nuevo en unos minutos.'
+
+// La cotizacion entregada se guarda en el historial para que el agente pueda ajustar alcance sobre ella
+function quoteParaHistorial(q) {
+  const { proyecto, servicio, min, max, entregables, tiempo, recomendacion } = q || {}
+  return 'Cotización entregada: ' + JSON.stringify({ proyecto, servicio, QUOTE: true, min, max, entregables, tiempo, recomendacion })
+}
+
+function ConfirmCard({ contacto, meetLink, slotTime, slotDate, pendiente }) {
   return (
     <div style={{ flex: 1, minWidth: 0, animation: 'up .35s ease' }}>
       <div style={S.ccard}>
@@ -1718,14 +1739,17 @@ function ConfirmCard({ contacto, meetLink, slotTime, slotDate }) {
           </svg>
         </div>
         <div style={{ fontFamily: 'Unbounded, sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 6 }}>
-          ¡Reunión confirmada!
+          {pendiente ? 'Solicitud recibida' : '¡Reunión confirmada!'}
         </div>
         <div style={{ fontSize: 13, color: 'var(--t2)', lineHeight: 1.7, textAlign: 'center', marginBottom: 4 }}>
           Un Director Creativo Ejecutivo de GÜÜD Company tendrá una reunión contigo
           {slotDate && slotTime ? <span> el <strong style={{color:'var(--t1)'}}>{slotDate}</strong> a las <strong style={{color:'var(--t1)'}}>{slotTime}</strong></span> : ''}.
           <br/><br/>
-          Te enviamos la invitación a <strong style={{color:'var(--t1)'}}>{contacto.email}</strong> con todos los detalles.
+          {pendiente
+            ? <span>Te confirmaremos la invitación a <strong style={{color:'var(--t1)'}}>{contacto.email}</strong> en las próximas horas.</span>
+            : <span>Te enviamos la invitación a <strong style={{color:'var(--t1)'}}>{contacto.email}</strong> con todos los detalles.</span>}
           <br/>
+          {meetLink && !pendiente ? <span><a href={meetLink} target="_blank" rel="noopener noreferrer" style={{color:'#E8FF00'}}>Link de Google Meet</a><br/></span> : null}
           <span style={{color:'var(--t3)'}}>¡Nos vemos!</span>
         </div>
         <div style={S.jlCard}>
