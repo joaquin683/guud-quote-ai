@@ -67,6 +67,7 @@ function AdminPanel({ onLogout }) {
   const [filtroEstado, setFiltroEstado] = useState('')
   const [filtroAgente, setFiltroAgente] = useState('')
   const [busqueda, setBusqueda] = useState('')
+  const [soloReales, setSoloReales] = useState(true)
 
   const load = () => {
     const p = new URLSearchParams()
@@ -77,11 +78,21 @@ function AdminPanel({ onLogout }) {
 
   useEffect(() => { load() }, [filtroEstado, filtroAgente])
 
-  const proyectos = (data?.proyectos || []).filter(p =>
+  const proyectos = (data?.proyectos || []).filter(p => !soloReales || p.email_contacto).filter(p =>
     !busqueda || (p.nombre_proyecto || '').toLowerCase().includes(busqueda.toLowerCase()) ||
     (p.nombre_contacto || '').toLowerCase().includes(busqueda.toLowerCase()) ||
     (p.email_contacto || '').toLowerCase().includes(busqueda.toLowerCase())
   )
+
+  // Métricas calculadas sobre la lista visible (respeta filtros y 'solo con email')
+  const semana = Date.now() - 7 * 24 * 3600 * 1000
+  const conPrecio = proyectos.filter(p => p.precio_estimado_min)
+  const metricas = data ? {
+    total: proyectos.length,
+    agendadas: proyectos.filter(p => p.reunion_agendada === true || p.estado === 'agendado').length,
+    precio_promedio: conPrecio.length ? Math.round(conPrecio.reduce((acc, p) => acc + p.precio_estimado_min, 0) / conPrecio.length) : 0,
+    esta_semana: proyectos.filter(p => p.creado_en && new Date(p.creado_en).getTime() > semana).length,
+  } : null
 
   const badge = (estado) => {
     const e = ESTADOS[estado] || { label: estado, color: '#888', bg: 'rgba(136,136,136,0.1)' }
@@ -127,13 +138,13 @@ function AdminPanel({ onLogout }) {
       </div>
 
       <div style={{ padding: '24px 32px' }}>
-        {data?.metricas && (
+        {metricas && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
             {[
-              { label: 'Total cotizaciones', val: data.metricas.total },
-              { label: 'Reuniones agendadas', val: data.metricas.agendadas },
-              { label: 'Precio promedio', val: data.metricas.precio_promedio ? fmt(data.metricas.precio_promedio) : '—' },
-              { label: 'Esta semana', val: data.metricas.esta_semana },
+              { label: 'Total cotizaciones', val: metricas.total },
+              { label: 'Reuniones agendadas', val: metricas.agendadas },
+              { label: 'Precio promedio', val: metricas.precio_promedio ? fmt(metricas.precio_promedio) : '—' },
+              { label: 'Esta semana', val: metricas.esta_semana },
             ].map(m => (
               <div key={m.label} style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 10, padding: '16px 18px' }}>
                 <div style={{ fontSize: 11, color: '#484644', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.label}</div>
@@ -150,6 +161,7 @@ function AdminPanel({ onLogout }) {
             onChange={e => setBusqueda(e.target.value)}
             style={{ flex: 1, minWidth: 200, background: '#111', border: '1px solid #1f1f1f', borderRadius: 8, padding: '8px 14px', color: '#F2F0E8', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
           />
+          <button onClick={() => setSoloReales(x => !x)} title="Oculta pruebas y leads sin email" style={{ background: soloReales ? '#E8FF00' : '#111', color: soloReales ? '#080808' : '#8a8780', border: '1px solid ' + (soloReales ? '#E8FF00' : '#1f1f1f'), borderRadius: 8, padding: '8px 12px', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>{soloReales ? 'Solo con email' : 'Todos los leads'}</button>
           <select value={filtroEstado} onChange={e => setFiltroEstado(e.target.value)} style={{ background: '#111', border: '1px solid #1f1f1f', borderRadius: 8, padding: '8px 12px', color: '#F2F0E8', fontSize: 13, fontFamily: 'inherit' }}>
             <option value="">Todos los estados</option>
             {Object.entries(ESTADOS).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
