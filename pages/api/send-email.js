@@ -1,4 +1,8 @@
 export default async function handler(req, res) {
+  // Solo llamadas internas del servidor (chat, agendador). Bloquea uso como relay de spam.
+  if (!process.env.RESEND_API_KEY || req.headers['x-internal-key'] !== process.env.RESEND_API_KEY) {
+    return res.status(401).json({ error: 'No autorizado' })
+  }
   if (req.method !== 'POST') return res.status(405).end()
   const { to, subject, html, cc } = req.body
   if (!to || !subject || !html) return res.status(400).json({ error: 'Missing fields' })
