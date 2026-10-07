@@ -175,7 +175,7 @@ export default async function handler(req, res) {
 
       await fetch(baseUrl + '/api/send-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.RESEND_API_KEY || '' },
         body: JSON.stringify({
           to: e,
           subject: 'Reunión confirmada con GÜÜD — ' + (slotLabel || ''),
