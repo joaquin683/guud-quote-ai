@@ -41,7 +41,7 @@ let proyectoId = null
     const quoteMatch = reply.match(/{[\s\S]*?"QUOTE"\s*:\s*true[\s\S]*?}/)
     if (quoteMatch) {
       try {
-        quote = JSON.parse(quoteMatch[0])
+        quote = validarQuote(JSON.parse(quoteMatch[0]), agente, servicios)
         const saved = await guardarProyecto({
           nombre_proyecto: quote.proyecto,
           descripcion_cliente: historial[0]?.content || '',
@@ -57,9 +57,10 @@ proyectoId = saved?.id || null
 
       // Enviar emails de seguimiento (fire and forget)
       try {
+        const esc = v => String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
         const fmt = n => new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n||0)
         const guudEmail = process.env.GUUD_EMAIL
-        const baseUrl = process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'https://guud-quote-ai.vercel.app'
+        const baseUrl = process.env.PUBLIC_BASE_URL || 'https://hub.guudcompany.cl'
 
         // Detectar email del cliente en el historial
         const allText = historial.map(m => m.content).join(' ')
@@ -89,11 +90,11 @@ proyectoId = saved?.id || null
         <div class="card">
           <div class="header"><div><div class="logo">GÜÜD</div><div class="sub">Global Creative Hub</div></div></div>
           <div class="body">
-            <h1>${quote.proyecto || 'Tu cotización'}</h1>
-            <div class="servicio">${quote.servicio || ''}</div>
-            <div class="row"><span class="label">Entregables</span><span class="val">${quote.entregables || ''}</span></div>
-            <div class="row"><span class="label">Tiempo estimado</span><span class="val">${quote.tiempo || ''}</span></div>
-            ${quote.recomendacion ? '<div class="row"><span class="label">Recomendación</span><span class="val">' + quote.recomendacion + '</span></div>' : ''}
+            <h1>${esc(quote.proyecto || 'Tu cotización')}</h1>
+            <div class="servicio">${esc(quote.servicio || '')}</div>
+            <div class="row"><span class="label">Entregables</span><span class="val">${esc(quote.entregables || '')}</span></div>
+            <div class="row"><span class="label">Tiempo estimado</span><span class="val">${esc(quote.tiempo || '')}</span></div>
+            ${quote.recomendacion ? '<div class="row"><span class="label">Recomendación</span><span class="val">' + esc(quote.recomendacion) + '</span></div>' : ''}
             <div class="price-block">
               <div class="price-label">Precio referencial</div>
               <div class="price-val">Desde ${fmt(quote.min)}</div>
@@ -105,13 +106,13 @@ proyectoId = saved?.id || null
         </div></body></html>`
 
         // HTML del email interno a GÜÜD
-        const htmlInterno = `<h2>Nueva cotización — ${quote.proyecto}</h2>
-        <p><strong>Servicio:</strong> ${quote.servicio}<br>
+        const htmlInterno = `<h2>Nueva cotización — ${esc(quote.proyecto)}</h2>
+        <p><strong>Servicio:</strong> ${esc(quote.servicio)}<br>
         <strong>Agente:</strong> ${agente}<br>
         <strong>Precio min:</strong> ${fmt(quote.min)}<br>
         <strong>Precio max:</strong> ${fmt(quote.max)}<br>
-        ${clientEmail ? '<strong>Email cliente:</strong> ' + clientEmail + '<br>' : ''}
-        <strong>Entregables:</strong> ${quote.entregables}</p>
+        ${clientEmail ? '<strong>Email cliente:</strong> ' + esc(clientEmail) + '<br>' : ''}
+        <strong>Entregables:</strong> ${esc(quote.entregables)}</p>
         <p><a href="${baseUrl}/admin">Ver en panel admin →</a></p>`
 
         const emailCalls = []
@@ -156,4 +157,24 @@ proyectoId = saved?.id || null
     console.error('Chat error:', e)
     res.status(500).json({ error: e.message })
   }
+}
+
+// Validacion server-side del precio: la IA no puede cotizar bajo el tarifario ni con numeros rotos
+function aEntero(v) {
+  if (typeof v === 'number') return Math.round(v)
+  const n = parseInt(String(v || '').replace(/[^0-9]/g, ''), 10)
+  return isNaN(n) ? 0 : n
+}
+function validarQuote(q, agente, servicios) {
+  if (!q || typeof q !== 'object') return q
+  if (agente === 'guerrilla') return { ...q, min: 0, max: 0 }
+  let min = aEntero(q.min), max = aEntero(q.max)
+  if (max && min > max) { const t = min; min = max; max = t }
+  const delAgente = (servicios || []).filter(s => s.agente === agente && s.precio_min > 0)
+  if (delAgente.length) {
+    const piso = Math.min(...delAgente.map(s => s.precio_min))
+    if (min < piso) { console.warn('validarQuote: min bajo tarifario', agente, min, '->', piso); min = piso }
+  }
+  if (max < min) max = Math.round(min * 1.5)
+  return { ...q, min, max }
 }
