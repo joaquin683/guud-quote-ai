@@ -1,11 +1,17 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { getServicios, getTalentos } from '../../lib/supabase'
 import { buildOrchestratorPrompt } from '../../lib/agentes'
+import { permitir } from '../../lib/rateLimit'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
+
+  // 15 clasificaciones por hora por IP (cada conversacion usa 1)
+  if (!(await permitir(req, 'orq', 15, 3600))) {
+    return res.status(429).json({ error: 'Demasiadas solicitudes. Intenta nuevamente en unos minutos.' })
+  }
 
   try {
     const { mensaje } = req.body
