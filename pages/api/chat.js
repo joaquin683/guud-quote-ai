@@ -54,7 +54,8 @@ export default async function handler(req, res) {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 2048,
-      system: systemPrompt,
+      // Prompt caching: el system prompt es identico en toda la conversacion -> ~90% menos costo de input en turnos 2+
+      system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
       messages: historial,
     })
 
